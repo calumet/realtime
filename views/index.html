@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chat</title>
+        <link rel="shortcut icon" href="/img/favicon.png">
+        <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="/css/main.css">
+    </head>
+    <body>
+        <!-- // LOGIN // -->
+        <div id="login" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">User data</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p><input id="name" class="form-control" type="text" placeholder="Your name"></p>
+                        <p><input id="level" class="form-control" type="text" placeholder="Level"></p>
+                        <p><input id="photoURL" class="form-control" type="text" placeholder="Insert the URL photo"></p>
+                        <p><select id="photo" class="form-control">
+                            <option value="avatar.jpg">Select your photo</option>
+                            <option value="romel.jpg">Romel Pérez's photo</option>
+                            <option value="natalia.jpg">Natalia Contreras's photo</option>
+                            <option value="duvan.jpg">Duvan Vargas's photo</option>
+                            <option value="karen.jpg">Karen Castro's photo</option>
+                        </select></p>
+                        <p><select id="room" class="form-control">
+                            <option value="262456_W9">262456_W9</option>
+                            <option value="262456_G3">262456_G3</option>
+                            <option value="287892_A1">287892_A1</option>
+                            <option value="287892_K4">287892_K4</option>
+                        </select></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="loginBtn" type="button" class="btn btn-sm btn-default" data-dismiss="modal">Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- // MAIN // -->
+        <div id="main" class="none">
+
+            <!-- // USERS // -->
+            <section id="users">
+                <div id="usersTitle" class="block header">Online Users</div>
+                <div id="usersList"></div>
+            </section>
+
+            <!-- // CHAT // -->
+            <section id="chat">
+                <div id="chatTitle" class="header">General Chat</div>
+                <div id="chatRoom" class="block"></div>
+                <form id="toolbar" name="toolbar">
+                    <input class="form-control" type="text" placeholder="Message...">
+                    <button class="none" type="submit">Send</button>
+                </form>
+            </section>
+
+            <!-- // ROOMS // -->
+            <section id="rooms">
+                <div id="roomsTitle" class="header">Rooms</div>
+                <div id="roomsList"></div>
+            </section>
+
+        </div>
+
+
+        <!-- // SCRIPTS // -->
+        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui.js"></script>
+        <script type="text/javascript" src="/js/bootstrap.js"></script>
+        <script type="text/javascript" src="/js/main.js"></script>
+    </body>
+</html>
