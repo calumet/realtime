@@ -1,0 +1,26 @@
+{
+    "2130000": {
+        "code": "2130000",
+        "name": "Romel Francisco Pérez Estrada",
+        "level": "Docente",
+        "photo": "/img/photos/romel.jpg"
+    },
+    "2130001": {
+        "code": "2130001",
+        "name": "Karen Natalia Contreras Castro",
+        "level": "Estudiante",
+        "photo": "/img/photos/natalia.jpg"
+    },
+    "2130002": {
+        "code": "2130002",
+        "name": "Duvan Jamid Vargas Castillo",
+        "level": "Estudiante",
+        "photo": "/img/photos/duvan.jpg"
+    },
+    "2130003": {
+        "code": "2130003",
+        "name": "Karen Alicia Vega López",
+        "level": "Estudiante",
+        "photo": "/img/photos/karen.jpg"
+    }
+}

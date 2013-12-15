@@ -1,0 +1,105 @@
+/*!
+ * PRHONE Applications
+ * Chat | Chat | Design
+ * Romel Pérez, 2013
+ **/
+
+/* ------------------------------------------------------------------------- */
+/* AESTHETICS */
+
+body{}
+
+.none{ display: none; }
+
+.offline{ border-left: 5px solid gray; }
+.unavail{ border-left: 5px solid orange; }
+.avail{ border-left: 5px solid green; }
+
+
+/* ------------------------------------------------------------------------- */
+/* STRUCTURE */
+
+#main{}
+
+#header{
+	height: 40px;
+}
+	#header > *{
+		height: 40px;
+		margin-right: 6px;
+	}
+	#header > *.float-right{
+		text-align: right;
+	}
+	#header #user{
+		font-size: 15px;
+		line-height: 20px;
+	}
+
+#users{
+	float: left;
+}
+	.header{
+		font-size: 15px;
+		line-height: 22px;
+		font-weight: bold;
+	}
+	.header div{
+		margin-left: 3px;
+	}
+	#chatTitle, #roomsTitle{
+		border-left-width: 0 !important;
+	}
+	#usersList, #roomsList{
+		font-size: 14px;
+		line-height: 20px;
+		overflow-y: auto;
+	}
+	#usersList > div, #roomsList > div{
+		padding: 2px 4px;
+		height: 40px;
+		overflow: hidden;
+		border-bottom: 1px solid #CCC;
+		cursor: pointer;
+	}
+	#usersList > div:hover, #roomsList > div:hover{
+		background: #EEE;
+	}
+	#usersList > div img{
+		height: 40px;
+		margin-right: 4px;
+		float: left;
+		border-left-width: 3px;
+	}
+
+#chat{
+	float: left;
+	border-left: 1px solid #CCC;
+}
+	#chatRoom .chatRoom{
+		width: 100%;
+		height: 100%;
+		overflow: auto;
+	}
+	#chatRoom .chatRoom div{
+		padding: 2px 5px;
+		font-size: 13px;
+		line-height: 16px;
+	}
+	#message{
+    	width: 100%;
+	    height: 30px;
+	    margin: 0;
+    	padding: 4px 6px;
+    	border-radius: 0;
+    	border-left-width: 0;
+    	border-right-width: 0;
+	}
+
+#rooms{
+	float: left;
+	border-left: 1px solid #CCC;
+}
+	#roomsList > div.active{
+		font-style: italic;
+	}

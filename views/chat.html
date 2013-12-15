@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chat</title>
+        <link rel="shortcut icon" href="/img/favicon.png">
+        <link type="text/css" rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
+        <link rel="stylesheet" type="text/css" href="/css/chat.css">
+    </head>
+    <body>
+        <!-- // MAIN // -->
+        <div id="main">
+
+            <!-- // HEADER // -->
+            <header id="header" class="block negro">
+                <img id="photo" class="part float-left offline" src="/img/photos/avatar.jpg">
+                <div id="user" class="part float-left">
+                    Student Name<br>
+                    Student - Code
+                </div>
+                <div id="subject" class="part float-right">
+                    Subject Name<br>
+                    Teacher Name
+                </div>
+                <div class="part float-right">
+                    <button id="roomCreate" class="boton negro">Nueva Sala</button>
+                </div>
+            </header>
+
+            <!-- // USERS // -->
+            <section id="users">
+                <div id="usersTitle" class="block header normal"><div>Usuarios Online</div></div>
+                <div id="usersList"></div>
+            </section>
+
+            <!-- // CHAT // -->
+            <section id="chat">
+                <div id="chatTitle" class="normal header"><div>Chat General</div></div>
+                <div id="chatRoom" class="block"></div>
+                <form id="toolbar" class="block" name="toolbar">
+                    <input id="message" type="text" placeholder="Escribe un mensaje...">
+                    <button class="hidden" type="submit">Send</button>
+                </form>
+            </section>
+
+            <!-- // ROOMS // -->
+            <section id="rooms">
+                <div id="roomsTitle" class="block header normal"><div>Salas</div></div>
+                <div id="roomsList"></div>
+            </section>
+
+        </div>
+
+
+        <!-- // SCRIPTS // -->
+        <script type="text/javascript" src="http://192.168.1.18:3000/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="/js/jquery.min.js"></script>
+        <script type="text/javascript" src="http://cormoran.uis.edu.co/eisi/Scripts/Estandar/Elise.js"></script>
+        <script type="text/javascript">
+        // JSP writes the user id and chat room id, not Expressjs
+        var data = {
+            code: '{{code}}',
+            room: '{{room}}'
+        };
+        </script>
+        <script type="text/javascript" src="/js/chat.js"></script>
+    </body>
+</html>

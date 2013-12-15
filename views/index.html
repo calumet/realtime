@@ -5,77 +5,54 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chat</title>
         <link rel="shortcut icon" href="/img/favicon.png">
-        <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
-        <link rel="stylesheet" type="text/css" href="/css/bootstrap.css">
-        <link rel="stylesheet" type="text/css" href="/css/main.css">
+        <link type="text/css" rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
+        <style type="text/css">
+        
+            body{
+                margin: 20px;
+            }
+
+        </style>
     </head>
     <body>
-        <!-- // LOGIN // -->
-        <div id="login" class="modal fade">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">User data</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p><input id="name" class="form-control" type="text" placeholder="Your name"></p>
-                        <p><input id="level" class="form-control" type="text" placeholder="Level"></p>
-                        <p><input id="photoURL" class="form-control" type="text" placeholder="Insert the URL photo"></p>
-                        <p><select id="photo" class="form-control">
-                            <option value="avatar.jpg">Select your photo</option>
-                            <option value="romel.jpg">Romel Pérez's photo</option>
-                            <option value="natalia.jpg">Natalia Contreras's photo</option>
-                            <option value="duvan.jpg">Duvan Vargas's photo</option>
-                            <option value="karen.jpg">Karen Castro's photo</option>
-                        </select></p>
-                        <p><select id="room" class="form-control">
-                            <option value="262456_W9">262456_W9</option>
-                            <option value="262456_G3">262456_G3</option>
-                            <option value="287892_A1">287892_A1</option>
-                            <option value="287892_K4">287892_K4</option>
-                        </select></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button id="loginBtn" type="button" class="btn btn-sm btn-default" data-dismiss="modal">Login</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- // MAIN // -->
-        <div id="main" class="none">
-
-            <!-- // USERS // -->
-            <section id="users">
-                <div id="usersTitle" class="block header">Online Users</div>
-                <div id="usersList"></div>
-            </section>
-
-            <!-- // CHAT // -->
-            <section id="chat">
-                <div id="chatTitle" class="header">General Chat</div>
-                <div id="chatRoom" class="block"></div>
-                <form id="toolbar" name="toolbar">
-                    <input class="form-control" type="text" placeholder="Message...">
-                    <button class="none" type="submit">Send</button>
-                </form>
-            </section>
-
-            <!-- // ROOMS // -->
-            <section id="rooms">
-                <div id="roomsTitle" class="header">Rooms</div>
-                <div id="roomsList"></div>
-            </section>
-
-        </div>
-
+        <h1>Aula Chat</h1>
+        <p>Salas de clase disponibles:</p>
+        <p><select id="rooms">
+            <option value="262456_W9">262456_W9</option>
+            <option value="262456_G3">262456_G3</option>
+            <option value="287892_A1">287892_A1</option>
+            <option value="287892_K4">287892_K4</option>
+        </select></p>
+        <p>Usuarios disponibles:</p>
+        <ul>
+            <li><a data-code="2130000" href="/aula">Romel Pérez</a></li>
+            <li><a data-code="2130001" href="/aula">Natalia Contreras</a></li>
+            <li><a data-code="2130002" href="/aula">Duvan Vargas</a></li>
+            <li><a data-code="2130003" href="/aula">Karen Vega</a></li>
+        </ul>
 
         <!-- // SCRIPTS // -->
-        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
         <script type="text/javascript" src="/js/jquery.min.js"></script>
-        <script type="text/javascript" src="/js/jquery-ui.js"></script>
-        <script type="text/javascript" src="/js/bootstrap.js"></script>
-        <script type="text/javascript" src="/js/main.js"></script>
+        <script type="text/javascript" src="http://cormoran.uis.edu.co/eisi/Scripts/Estandar/Elise.js"></script>
+        <script type="text/javascript">
+
+            $(document).ready(function(){
+
+                $('#rooms').select2({
+                    width: "200px",
+                    minimumResultsForSearch: -1
+                });
+
+                $('a').on('click', function(e){
+                    e.preventDefault();
+
+                    var code = $(this).data('code');
+                    var room = $('#rooms').select2('val');
+                    window.location.href = '/aula?code=' + code + '&room=' + room;
+                });
+
+            });
+
+        </script>
     </body>
 </html>
