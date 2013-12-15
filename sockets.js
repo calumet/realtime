@@ -4,6 +4,8 @@
  * Romel Pérez, 2013
  **/
 
+// socket.broadcast.to(data.room).emit('userSynced', socket.id);
+
 // ------------------------------------------------------------------------- //
 // PROCCESSES //
 
@@ -11,28 +13,30 @@ var app = {
 
 	users: {
 		cache: {},
-		add: function(data){
+		add: function (data) {
 			this.cache[data.id] = {
 				id: data.id,
-				name: data.name,
-				level: data.level,
-				photo: data.photo,
-				color: app.color.get()
+				room: data.room,  // Main room
+				user: {
+					code: data.user.code,
+					name: data.user.name,
+					level: data.user.level,
+					photo: data.user.photo
+				}
 			};
 		},
-		remove: function(id){
+		remove: function (id) {
 			delete this.cache[id];
+		},
+		byRoom: function (room, except) {
+			var o, users = {};
+			for(o in app.users.cache){
+				if(app.users.cache[o].room === room  &&  app.users.cache[o].id !== except){
+					users[o] = app.users.cache[o];
+				}
+			}
+			return users;
 		}
-	},
-
-	color: {
-
-		colors: [ 'gray', 'brown', 'blue', 'red', 'purple', 'violet', 'green', 'yellow', 'cyan', 'orange' ],
-		get: function(){
-			var color = this.colors.pop();
-			return color ? color : 'black';
-		}	
-
 	}
 
 };
@@ -46,13 +50,7 @@ exports.listen = function (io) {
 	io.sockets.on('connection', function (socket) {
 
 		// READYRUN :: Connection
-		socket.emit('connected', {
-			id: 'server',
-			room: 'General',
-			name: 'Server',
-			text: 'Connected. Loading data...',
-			color: 'gray'
-		});
+		socket.emit('connected');
 
 
 		// ------------------------------------------------------------- //
@@ -63,47 +61,51 @@ exports.listen = function (io) {
 			// Add to list
 			app.users.add({
 				id: socket.id,
-				name: data.name,
-				level: data.level,
-				photo: data.photo,
-				room: data.room
-			});
-
-			// Sync with this
-			socket.emit('sync',
-				{   // Send user data
-					id: socket.id,
-					color: app.users.cache[socket.id].color
-				},
-				{   // Message
-					id: 'server',
-					room: 'General',
-					name: 'Server',
-					text: 'Data loaded!',
-					color: 'gray'
+				room: data.room,
+				user: {
+					code: data.user.code,
+					name: data.user.name,
+					level: data.user.level,
+					photo: data.user.photo
 				}
-			);
+			});
 
 			// Add the general room
 			socket.join(data.room);
 
-			// Update others users in general room
-			socket.broadcast.to(data.room).emit('register', app.users.cache[socket.id]);
+			// Communicate registered state
+			socket.emit('registered', {
+				users: app.users.byRoom(data.room, socket.id)
+			});
+
+			// Communicate to all connected users
+			socket.broadcast.to(data.room).emit('userRegistered', {
+				id: socket.id,
+				user: {
+					code: data.user.code,
+					name: data.user.name,
+					level: data.user.level,
+					photo: data.user.photo
+				}
+			});
 		});
 
+
 		// Unregister User
-		var unregister = function (data) {
+		var unregister = function () {
 			// Remove from list
 			app.users.remove(socket.id);
 			
 			// Update other users connected with this in all its rooms
-			for(var r in io.sockets.manager.roomClients[socket.id])
-				io.sockets.in(r.replace('/','')).emit('unregister', socket.id);
+			for(var r in io.sockets.manager.roomClients[socket.id]){
+				if(r !== ''){
+					io.sockets.in(r.replace('/','')).emit('userUnregistered', socket.id);
+				}
+			}
 		};
-		socket.on('unregister', unregister);  // THIS IS NOT USED, YET //
-
 
 		// Disconnection
+		socket.on('unregister', unregister);
 		socket.on('disconnect', unregister);
 
 
@@ -124,11 +126,12 @@ exports.listen = function (io) {
 		// MESSAGES //
 		
 		// Message
-		socket.on('message', function (data) {
-			var user = app.users.cache[data.id];
-			user.text = data.text;
-			user.room = data.room;
-			io.sockets.in(data.room).emit('message', user);
+		socket.on('msg', function (data) {
+			io.sockets.in(data.room).emit('userMsged', {
+				id: socket.id,
+				room: data.room,
+				text: data.text
+			});
 		});
 
 	});
