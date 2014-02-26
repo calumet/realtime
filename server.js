@@ -4,15 +4,15 @@
  * Romel Pérez, 2013
  **/
 
-var port = 3000;
-
 // ------------------------------------------------------------------------- //
 // SERVER APPLICATION //
 
+var port = 9000;
+
 // Main objects
-var express = require('express');
 var http = require('http');
-var hbs = require('hbs');
+var express = require('express');
+var swig = require('swig');
 var socketio = require('socket.io');
 
 var app = express();
@@ -22,15 +22,17 @@ var io = socketio.listen(server);
 
 // Configuration
 app.set('view engine', 'html');
-app.set('views', './views');
-app.engine('html', hbs.__express);
-app.use(express.static('public'));
+app.set('views', __dirname + '/views');
+app.engine('html', swig.renderFile);
 app.use(express.bodyParser());
+app.use(app.router);
+app.use(express.static(__dirname + '/public'));
 
 
 // Start server
-server.listen(port);
-console.log('Server Listening at port ' + port + '!');
+server.listen(port, function () {
+    console.log('>>> Server listening at port ' + port + '!');
+});
 
 
 // URLs
