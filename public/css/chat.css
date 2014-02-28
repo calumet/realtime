@@ -4,140 +4,136 @@
  * Romel Pérez, 2013
  **/
 
-/* ------------------------------------------------------------------------- */
-/* AESTHETICS */
+ /* ------------------------------------------------------------------------- */
+ /* AESTHETICS */
 
-body{}
+ body{}
 
-.none{ display: none; }
+ .none{ display: none; }
 
-.offline{ border-right: 5px solid gray; }
-.unavail{ border-right: 5px solid orange; }
-.avail{ border-right: 5px solid green; }
+ .offline{ border-right: 5px solid gray; }
+ .unavail{ border-right: 5px solid orange; }
+ .avail{ border-right: 5px solid green; }
 
 
-/* ------------------------------------------------------------------------- */
-/* STRUCTURE */
+ /* ------------------------------------------------------------------------- */
+ /* STRUCTURE */
 
-#main{}
+ #main{}
 
-#header{
+ #header{
     height: 40px;
 }
-    #header > *{
-        height: 40px;
-        margin-right: 6px;
-    }
-    #header > *.float-right{
-        text-align: right;
-    }
-    #header #user{
-        font-size: 15px;
-        line-height: 20px;
-    }
+#header > *{
+    height: 40px;
+    margin-right: 6px;
+}
+#header > *.float-right{
+    text-align: right;
+}
+#header #user{
+    font-size: 15px;
+    line-height: 20px;
+}
 
 #users{
     float: left;
 }
-    .header{
-        font-size: 15px;
-        line-height: 22px;
-        font-weight: bold;
-    }
-    .header div{
-        margin-left: 3px;
-    }
-    #chatTitle, #roomsTitle{
-        border-left-width: 0 !important;
-    }
-    #usersList, #roomsList{
-        font-size: 14px;
-        line-height: 20px;
-        overflow-y: auto;
-    }
-    #usersList > div, #roomsList > div{
-        padding: 2px 4px;
-        height: 40px;
-        overflow: hidden;
-        border-bottom: 1px solid #CCC;
-        cursor: pointer;
-    }
-    #usersList > div:hover, #roomsList > div:hover{
-        background: #EEE;
-    }
-    #usersList > div img{
-        height: 40px;
-        margin-right: 4px;
-        float: left;
-        border-left-width: 3px;
-    }
-    .user{
-        padding-left: 10px;
-    }
+.header{
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: bold;
+}
+.header div{
+    margin-left: 3px;
+}
+#chatTitle, #roomsTitle{
+    border-left-width: 0 !important;
+}
+#usersList, #roomsList{
+    font-size: 14px;
+    line-height: 20px;
+    overflow-y: auto;
+}
+#usersList > div, #roomsList > div{
+    padding: 2px 4px;
+    height: 40px;
+    overflow: hidden;
+    border-bottom: 1px solid #CCC;
+    cursor: pointer;
+}
+#usersList > div:hover, #roomsList > div:hover{
+    background: #EEE;
+}
+#usersList > div img{
+    height: 40px;
+    margin-right: 4px;
+    float: left;
+    border-left-width: 3px;
+}
+.user{
+    padding-left: 10px;
+}
 
 #chat{
     float: left;
     border-left: 1px solid #CCC;
 }
-    #chatRoom .chatRoom{
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-    }
-    #chatRoom .chatRoom div{
-        padding: 2px 5px;
-        font-size: 13px;
-        line-height: 16px;
-    }
-    #message{
-        width: 100%;
-        height: 30px;
-        margin: 0;
-        padding: 4px 6px;
-        border-radius: 0;
-        border-left-width: 0;
-        border-right-width: 0;
-    }
+#chatRoom .chatRoom{
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+#message{
+    width: 100%;
+    height: 30px;
+    margin: 0;
+    padding: 4px 6px;
+    border-radius: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
 
 #rooms{
     float: left;
     border-left: 1px solid #CCC;
 }
-    #roomsList > div.active{
-        font-style: italic;
-    }
+#roomsList > div.active{
+    font-style: italic;
+}
 
 /*-----------------------------------------------------*/
 /*------------Estructura de mensajes-------------------*/
 /*-----------------------------------------------------*/
 
-   .msg{
-        width: auto;
-        display: inline-block;
-        position: relative;
-        padding: 0;
-        -webkit-border-radius: 3px;
-        -moz-border-radius: 3px;
-        -ms-border-radius: 3px;
-        -o-border-radius: 3px;
-        border-radius: 3px;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        position: relative;
-        -webkit-box-sizing: content-box;
-        -moz-box-sizing: content-box;
-        box-sizing: content-box;
-        -webkit-box-shadow: 0px 0px 9px 1px #CCC;
-        -moz-box-shadow: 0px 0px 9px 1px #CCC;
-        box-shadow: 0px 0px 9px 1px #CCC;
-    }
-    .msg.cian{
-     border: 1px solid #9ee8fa;
- }
- .msg.orange{
-     border: 1px solid #FFB371;
- }
- .msg.cian{
+.msg{
+    width: auto;
+    display: inline-block;
+    position: relative;
+    padding: 0;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    position: relative;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    -webkit-box-shadow: 0px 0px 9px 1px #CCC;
+    -moz-box-shadow: 0px 0px 9px 1px #CCC;
+    box-shadow: 0px 0px 9px 1px #CCC;
+}
+.msg.cian{
+   border: 1px solid #9ee8fa;
+}
+.msg.orange{
+   border: 1px solid #FFB371;
+}
+.msg.cian{
     background: #d6f9ff; /* Old browsers */
     background: -moz-linear-gradient(top,  #d6f9ff 0%, #9ee8fa 100%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d6f9ff), color-stop(100%,#9ee8fa)); /* Chrome,Safari4+ */
@@ -149,14 +145,14 @@ body{}
 
 }
 .msg.orange{
- background: #FFEBD7; /* Old browsers */
- background: -moz-linear-gradient(top,  #FFEBD7 0%, #FFB371 100%); /* FF3.6+ */
- background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFEBD7), color-stop(100%,#FFB371)); /* Chrome,Safari4+ */
- background: -webkit-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* Chrome10+,Safari5.1+ */
- background: -o-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* Opera 11.10+ */
- background: -ms-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* IE10+ */
- background: linear-gradient(to bottom,  #FFEBD7 0%,#FFB371 100%); /* W3C */
- filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFEBD7', endColorstr='#FFB371',GradientType=0 ); /* IE6-9 */
+   background: #FFEBD7; /* Old browsers */
+   background: -moz-linear-gradient(top,  #FFEBD7 0%, #FFB371 100%); /* FF3.6+ */
+   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFEBD7), color-stop(100%,#FFB371)); /* Chrome,Safari4+ */
+   background: -webkit-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* Chrome10+,Safari5.1+ */
+   background: -o-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* Opera 11.10+ */
+   background: -ms-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* IE10+ */
+   background: linear-gradient(to bottom,  #FFEBD7 0%,#FFB371 100%); /* W3C */
+   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFEBD7', endColorstr='#FFB371',GradientType=0 ); /* IE6-9 */
 
 }
 .msg {
@@ -246,7 +242,7 @@ body{}
     display: inline-block;
 }
 .msg>.info{
-    padding: 3px 10px;
+    padding: 1px 10px;
     font-size: 0.7em;
 }
 .msg>.content{
@@ -269,7 +265,7 @@ body{}
     border-radius: 2px;
 }
 .msg.pull-right>.info {
-   text-align: right;
+ text-align: right;
 }
 .msg.pull-left>.info>.name {
     margin-right: 100px;
@@ -304,7 +300,7 @@ body{}
     width: auto;
 } 
 .msg>.content>p{
-    margin: 4px 0 4px;
+    margin: 1px 0 1px;
 }
 .msg.cian>.content {
     border-top: 1px solid #d6f9ff;

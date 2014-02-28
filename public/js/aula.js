@@ -10,7 +10,7 @@
 var app = app || {};
 
 app.config = {
-    server: 'http://192.168.65.42:9000'
+    server: 'http://localhost:9000'
 };
 
 app.user = null;  // Return the user data
@@ -51,8 +51,8 @@ $(document).ready(function () {
         eModal({
             title: 'Información del Chat',
             container: 'chatMsg',
-            emodalWidth: 600,
-            emodalContentHeight: 300,
+            emodalWidth: 300,
+            emodalContentHeight: 200,
             buttons: [{
                 btnText: 'Entrar',
                 btnClass: 'emodal_hide',
