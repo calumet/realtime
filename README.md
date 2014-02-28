@@ -1,4 +1,4 @@
-chat v0.1.5
+chat v0.1.9
 ===========
 
 A chat test made with nodejs and socket.io.
