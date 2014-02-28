@@ -6,45 +6,132 @@
         <title>Chat</title>
         <link rel="shortcut icon" href="/img/favicon.png">
         <link type="text/css" rel="stylesheet" href="/css/Elise.css">
+        <link rel="stylesheet" type="text/css" href="/css/chat.css">
         <style type="text/css">
-        
-            body{
-                margin: 20px;
-            }
-
+        body {
+            margin: 20px;
+        }
         </style>
     </head>
     <body>
-        <h1>Aula Chat</h1>
-        <p>Salas de clase disponibles:</p>
-        <p><select id="rooms">
-            <option value="262456_W9">262456_W9</option>
-            <option value="262456_G3">262456_G3</option>
-            <option value="287892_A1">287892_A1</option>
-            <option value="287892_K4">287892_K4</option>
-        </select></p>
-        <p>Usuarios disponibles:</p>
-        <ul>
-            <li><a data-code="2130000" href="/aula">Romel Pérez</a></li>
-            <li><a data-code="2130001" href="/aula">Natalia Contreras</a></li>
-            <li><a data-code="2130002" href="/aula">Duvan Vargas</a></li>
-            <li><a data-code="2130003" href="/aula">Karen Vega</a></li>
-        </ul>
+        <div class="row-fluid">
+            <div class="span8 offset2">
+                <h1>Aula Chat</h1>
+                <p>Salas de clase disponibles:</p>
+                <p>
+                    <select id="rooms">
+                        <option value="262456_W9">262456_W9</option>
+                        <option value="262456_G3">262456_G3</option>
+                        <option value="287892_A1">287892_A1</option>
+                        <option value="287892_K4">287892_K4</option>
+                    </select>
+                </p>
+                <p>Usuarios disponibles:</p>
+                <ul>
+                    <li><a data-code="2130000" href="/aula">Romel Pérez</a></li>
+                    <li><a data-code="2130001" href="/aula">Natalia Contreras</a></li>
+                    <li><a data-code="2130002" href="/aula">Duvan Vargas</a></li>
+                    <li><a data-code="2130003" href="/aula">Karen Vega</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span6 offset3">
+
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="span8 offset2">
+                <h3>Ejemplo de chat</h3>
+                <div class="block">
+                    <div class="msg orange pull-left" style="">
+                        <div class="avatar">
+                            <img class="img-polaroid img-rounded" src="/img/photos/romel.jpg">
+                        </div>
+                        <div class="info">
+                            <span class="name">
+                                <strong class="indent">Romel Pérez</strong>
+                            </span>
+                            <span class="time">hace 12 seg</span>
+                        </div>
+                        <div class="content">
+                            <p>
+                                Hola este es el mensaje de prueba
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="block">
+                    <div class="msg cian pull-right" style="">
+                        <div class="avatar">
+                            <img class="img-polaroid img-rounded" src="/img/photos/duvan.jpg">
+                        </div>
+                        <div class="info">
+                            <span class="name">
+                                <strong class="indent">Duvan Jamid Vargas C</strong>
+                            </span>
+                            <span class="time">hace 12 seg</span>
+                        </div>
+                        <div class="content">
+                            <p>
+                                Hola este es el mensaje de prueba
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="block">
+                    <div class="msg orange pull-left" style="">
+                        <div class="avatar">
+                            <img class="img-polaroid img-rounded" src="/img/photos/romel.jpg">
+                        </div>
+                        <div class="info">
+                            <span class="name">
+                                <strong class="indent">Romel Pérez</strong>
+                            </span>
+                            <span class="time">hace 12 seg</span>
+                        </div>
+                        <div class="content">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="block">
+                    <div class="msg cian pull-right" style="">
+                        <div class="avatar">
+                            <img class="img-polaroid img-rounded" src="/img/photos/duvan.jpg">
+                        </div>
+                        <div class="info">
+                            <span class="name">
+                                <strong class="indent">Duvan Jamid Vargas C</strong>
+                            </span>
+                            <span class="time">hace 12 seg</span>
+                        </div>
+                        <div class="content">
+                            <p>
+                                Hola este es el mensaje de prueba
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
 
 
         <!-- // SCRIPTS // -->
         <script type="text/javascript" src="/js/jquery.min.js"></script>
         <script type="text/javascript" src="/js/Elise.dev.js"></script>
         <script type="text/javascript">
-
-            $(document).ready(function(){
+            $(document).ready(function() {
 
                 $('#rooms').select2({
                     width: "200px",
                     minimumResultsForSearch: -1
                 });
 
-                $('a').on('click', function(e){
+                $('a').on('click', function(e) {
                     e.preventDefault();
 
                     var code = $(this).data('code');
@@ -53,7 +140,6 @@
                 });
 
             });
-
         </script>
     </body>
 </html>

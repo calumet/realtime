@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,16 +54,10 @@
 
 
         <!-- // SCRIPTS // -->
-        <script type="text/javascript" src="http://192.168.65.42:9000/socket.io/socket.io.js"></script>
         <script type="text/javascript" src="/js/jquery.min.js"></script>
         <script type="text/javascript" src="/js/Elise.dev.js"></script>
-        <script type="text/javascript">
-        // JSP writes the user id and chat room id, not Expressjs
-        var data = {
-            code: '{{code}}',
-            room: '{{room}}'
-        };
-        </script>
+        <script type="text/javascript" src="/js/chat.app.js"></script>
+        <script type="text/javascript" src="/js/chat.ui.js"></script>
         <script type="text/javascript" src="/js/chat.js"></script>
     </body>
 </html>

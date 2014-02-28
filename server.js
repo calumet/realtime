@@ -32,6 +32,7 @@ app.use(express.static(__dirname + '/public'));
 // Start server
 server.listen(port, function () {
     console.log('>>> Server listening at port ' + port + '!');
+    console.log('>>> Server running in mode "' + app.settings.env + '"!');
 });
 
 

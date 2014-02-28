@@ -19,7 +19,8 @@ var app = {
                 room: data.room,  // Main room
                 user: {
                     code: data.user.code,
-                    name: data.user.name,
+                    firstName: data.user.firstName,
+                    firstSurname: data.user.firstSurname,
                     level: data.user.level,
                     photo: data.user.photo
                 }
@@ -64,7 +65,8 @@ exports.listen = function (io) {
                 room: data.room,
                 user: {
                     code: data.user.code,
-                    name: data.user.name,
+                    firstName: data.user.firstName,
+                    firstSurname: data.user.firstSurname,
                     level: data.user.level,
                     photo: data.user.photo
                 }
@@ -83,7 +85,8 @@ exports.listen = function (io) {
                 id: socket.id,
                 user: {
                     code: data.user.code,
-                    name: data.user.name,
+                    firstName: data.user.firstName,
+                    firstSurname: data.user.firstSurname,
                     level: data.user.level,
                     photo: data.user.photo
                 }

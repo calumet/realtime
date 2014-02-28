@@ -11,9 +11,9 @@ body{}
 
 .none{ display: none; }
 
-.offline{ border-left: 5px solid gray; }
-.unavail{ border-left: 5px solid orange; }
-.avail{ border-left: 5px solid green; }
+.offline{ border-right: 5px solid gray; }
+.unavail{ border-right: 5px solid orange; }
+.avail{ border-right: 5px solid green; }
 
 
 /* ------------------------------------------------------------------------- */
@@ -71,6 +71,9 @@ body{}
         float: left;
         border-left-width: 3px;
     }
+    .user{
+        padding-left: 10px;
+    }
 
 #chat{
     float: left;
@@ -103,3 +106,209 @@ body{}
     #roomsList > div.active{
         font-style: italic;
     }
+
+/*-----------------------------------------------------*/
+/*------------Estructura de mensajes-------------------*/
+/*-----------------------------------------------------*/
+
+   .msg{
+        width: auto;
+        display: inline-block;
+        position: relative;
+        padding: 0;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        -ms-border-radius: 3px;
+        -o-border-radius: 3px;
+        border-radius: 3px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        position: relative;
+        -webkit-box-sizing: content-box;
+        -moz-box-sizing: content-box;
+        box-sizing: content-box;
+        -webkit-box-shadow: 0px 0px 9px 1px #CCC;
+        -moz-box-shadow: 0px 0px 9px 1px #CCC;
+        box-shadow: 0px 0px 9px 1px #CCC;
+    }
+    .msg.cian{
+     border: 1px solid #9ee8fa;
+ }
+ .msg.orange{
+     border: 1px solid #FFB371;
+ }
+ .msg.cian{
+    background: #d6f9ff; /* Old browsers */
+    background: -moz-linear-gradient(top,  #d6f9ff 0%, #9ee8fa 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d6f9ff), color-stop(100%,#9ee8fa)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #d6f9ff 0%,#9ee8fa 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #d6f9ff 0%,#9ee8fa 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #d6f9ff 0%,#9ee8fa 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #d6f9ff 0%,#9ee8fa 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d6f9ff', endColorstr='#9ee8fa',GradientType=0 ); /* IE6-9 */
+
+}
+.msg.orange{
+ background: #FFEBD7; /* Old browsers */
+ background: -moz-linear-gradient(top,  #FFEBD7 0%, #FFB371 100%); /* FF3.6+ */
+ background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFEBD7), color-stop(100%,#FFB371)); /* Chrome,Safari4+ */
+ background: -webkit-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* Chrome10+,Safari5.1+ */
+ background: -o-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* Opera 11.10+ */
+ background: -ms-linear-gradient(top,  #FFEBD7 0%,#FFB371 100%); /* IE10+ */
+ background: linear-gradient(to bottom,  #FFEBD7 0%,#FFB371 100%); /* W3C */
+ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFEBD7', endColorstr='#FFB371',GradientType=0 ); /* IE6-9 */
+
+}
+.msg {
+    margin-left: 75px;
+    margin-right: 75px;
+} 
+/*---  se hace la flecha ---*/
+.msg:after, .msg:before {
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+/*>>> Izquierda*/
+.msg.pull-left:before {
+    border-width: 8px 8px 8px 0;
+    top: 6px;
+    left: -9px;
+    z-index: 1;
+}
+.msg.pull-left:after {
+    border-width: 8px 8px 8px 0;
+    top: 6px;
+    left: -7px;
+    z-index: 2;
+}
+.msg.cian.pull-left:before {
+    border-right-color: #9ee8fa;
+}
+.msg.cian.pull-left:after {
+    border-right-color: #d6f9ff;
+}
+.msg.orange.pull-left:before {
+    border-right-color: #FFB371;
+}
+.msg.orange.pull-left:after {
+    border-right-color: #FFEBD7;
+}
+
+/*>>>> Derecha*/
+.msg.pull-right:before {
+    border-width: 8px 0 8px 8px;
+    top: 6px;
+    right: -9px;
+    z-index: 1;
+}
+.msg.pull-right:after {
+    border-width: 8px 0 8px 8px ;
+    top: 6px;
+    right: -7px;
+    z-index: 2;
+}
+.msg.cian.pull-right:before {
+    border-left-color: #9ee8fa;
+}
+.msg.cian.pull-right:after {
+    border-left-color: #d6f9ff;
+}
+.msg.orange.pull-right:before {
+    border-left-color: #FFB371;
+}
+.msg.orange.pull-right:after {
+    border-left-color: #FFEBD7;
+}
+
+.msg>.avatar{
+    width: auto;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+.msg.pull-left>.avatar {
+    left: -65px;
+}
+.msg.pull-right>.avatar {
+    right: -65px;
+}
+.msg>.avatar>img{
+    width: 40px;
+    height: 40px;
+}
+
+.avatar {
+    display: inline-block;
+}
+.msg>.info{
+    padding: 3px 10px;
+    font-size: 0.7em;
+}
+.msg>.content{
+    padding: 3px 10px;
+    font-size: 0.8em;
+}
+.msg.cian>.info {
+    color: #323B6F;
+    border-bottom: 1px solid #9EE8FA;
+}
+.msg.orange>.info {
+    color: #6F3232;
+    border-bottom: 1px solid #FFB371;
+}
+.msg>.info {
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    -ms-border-radius: 2px;
+    -o-border-radius: 2px;
+    border-radius: 2px;
+}
+.msg.pull-right>.info {
+   text-align: right;
+}
+.msg.pull-left>.info>.name {
+    margin-right: 100px;
+    min-width: 150px;
+}
+.msg.pull-right>.info>.name {
+    margin-left: 100px;
+    min-width: 150px;
+} 
+.msg.pull-right>.info>.time {
+    color: #555;
+    text-align: right;
+    position: absolute;
+    left: 10px;
+    top: 3px;
+}
+.msg.pull-left>.info>.time {
+    color: #555;
+    text-align: right;
+    position: absolute;
+    right: 10px;
+    top: 3px;
+}
+.msg>.content {
+    -moz-border-radius-bottomleft: 2px;
+    -webkit-border-bottom-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    -moz-border-radius-bottomright: 2px;
+    -webkit-border-bottom-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    float: none;
+    width: auto;
+} 
+.msg>.content>p{
+    margin: 4px 0 4px;
+}
+.msg.cian>.content {
+    border-top: 1px solid #d6f9ff;
+}
+.msg.orange>.content {
+    border-top: 1px solid #FFEBD7;
+}

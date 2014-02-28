@@ -1,0 +1,72 @@
+/*!
+ * PRHONE Applications
+ * Chat | Aula
+ * Romel Pérez, 2014
+ **/
+
+// ------------------------------------------------------------------------- //
+// APPLICATION //
+
+var app = app || {};
+
+app.config = {
+    server: 'http://192.168.65.42:9000'
+};
+
+app.user = null;  // Return the user data
+
+app.init = function () {
+    // Load user data
+    $.ajax({
+        type: 'post',
+        url: app.config.server + '/getUserData',
+        data: {
+            room: app.data.room,
+            code: app.data.code
+        },
+        success: function (data) {
+            app.user = {
+                user: function () { return data.user; },
+                room: function () { return data.room; }
+            };
+        },
+        error: function (err) {
+            console.log('Error while loading user data.');
+        }
+    });
+};
+
+
+// ------------------------------------------------------------------------- //
+// DOM EVENTS //
+
+$(document).ready(function () {
+
+    // Load data from server
+    app.init();
+
+    // Show chat info
+    $('#chat').on('click', function () {
+        // Show chat info
+        eModal({
+            title: 'Información del Chat',
+            container: 'chatMsg',
+            emodalWidth: 600,
+            emodalContentHeight: 300,
+            buttons: [{
+                btnText: 'Entrar',
+                btnClass: 'emodal_hide',
+                btnColor: 'azul',
+                btnPosition: 'right',
+                btnClick: function() {
+                    // Create chat window
+                    Elise.popup({
+                        position: 'full',
+                        url: '/chat'
+                    });
+                }
+            }]
+        });
+    });
+
+});
