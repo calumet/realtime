@@ -127,20 +127,40 @@ app.messages = {
 
         var num_msgs= $('#rc' + data.room).children('.block').length;
         var index_lastLocal_msg=$('#rc' + data.room).children('.block.'+user_remoto.code+':last').index();
+        var alto_msgs=0;
+        var caja_height=$('.chatRoom').height();
         // si su comentario fu el ultimo no crea bloque para mensaje
+        var msg=null;
         if((num_msgs==(index_lastLocal_msg+1)) && num_msgs>0 ){ 
             $('#rc' + data.room).children('.'+user_remoto.code+'.block').find('.content').append($('<p>'+data.text+'</p>'));
-            $('#rc' + data.room).scrollTop($(this).children('.block').height()+100);
-        }else{
+          //  $('#rc' + data.room).scrollTop($(this).children('.block').height()+100);
+          msg=$('#rc' + data.room).children('.'+user_remoto.code+'.block');
+      }else{
             // crea el menssaje
             var msg_name=$('<span/>',{class:'name'}).append($('<strong/>',{class:'indent',text:name}));
             var msg_info=$('<div/>',{class:'info'}).append(msg_name,$('<span/>',{class:'time',text:'Ahora'}));
             var msg_avatar=$('<div/>',{class:'avatar'}).append($('<img/>',{class:'img-polaroid img-rounded','src':user_remoto.photo}));
             var msg_content=$('<div/>',{class:'content'}).append($('<p>'+data.text+'</p>'));
             var msg=$('<div/>',{class:'msg '+ lugar+' '+tema}).append(msg_avatar,msg_info,msg_content);
-            var $l = $('<div/>',{class:'block hide '+user_remoto.code}).append(msg);
-            $('#rc' + data.room).append($l.slideDown(250))[0].scrollTop += $l.height() + 100;
+            var $l = $('<div/>',{class:'block  '+user_remoto.code}).append(msg);
+            //$('#rc' + data.room).append($l.slideDown(250))[0].scrollTop += $l.height() + 100;
+            msg=$l;
+            $('#rc' + data.room).append($l);
         }
+
+
+        $('.chatRoom').children('.block').each(function(){
+            alto_msgs=alto_msgs +$(this).height();
+        });
+        //  averigua si tiene que organizar los mensajes
+        if(alto_msgs<caja_height){
+            $('.chatRoom').find('.block:first').css({'margin-top':caja_height-(alto_msgs) });
+        }else{
+            $('.chatRoom').find('.block:first').css({'margin-top':0 });
+        }
+
+        $('#rc' + data.room).scrollTop(alto_msgs); // mueve el scroll
+
         app.rooms.update(data.room);
     },
 
