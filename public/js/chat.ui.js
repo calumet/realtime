@@ -129,7 +129,7 @@ app.messages = {
         var index_lastLocal_msg=$('#rc' + data.room).children('.block.'+user_remoto.code+':last').index();
         // si su comentario fu el ultimo no crea bloque para mensaje
         if((num_msgs==(index_lastLocal_msg+1)) && num_msgs>0 ){ 
-            $('#rc' + data.room).children('#'+user_remoto.code+'.block').find('.content').append($('<p>'+data.text+'</p>'));
+            $('#rc' + data.room).children('.'+user_remoto.code+'.block').find('.content').append($('<p>'+data.text+'</p>'));
             $('#rc' + data.room).scrollTop($(this).children('.block').height()+100);
         }else{
             // crea el menssaje
