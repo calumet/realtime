@@ -1,7 +1,9 @@
 /*!
- * PRHONE Applications
- * Chat | Sockets
- * Romel Pérez, 2013
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | Server Application
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Febrero del 2014
  **/
 
 // socket.broadcast.to(data.room).emit('userSynced', socket.id);
@@ -12,7 +14,9 @@
 var app = {
 
     users: {
+
         cache: {},
+
         add: function (data) {
             this.cache[data.id] = {
                 id: data.id,
@@ -26,9 +30,11 @@ var app = {
                 }
             };
         },
+
         remove: function (id) {
             delete this.cache[id];
         },
+
         byRoom: function (room, except) {
             var o, users = {};
             for (o in app.users.cache) {
@@ -38,6 +44,7 @@ var app = {
             }
             return users;
         }
+
     }
 
 };
@@ -77,6 +84,7 @@ exports.listen = function (io) {
 
             // Communicate registered state
             socket.emit('registered', {
+                // Send all roommates, except itself
                 users: app.users.byRoom(data.room, socket.id)
             });
 

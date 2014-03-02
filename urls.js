@@ -1,7 +1,9 @@
 /*!
- * PRHONE Applications
- * Chat | URLs
- * Romel Pérez, 2013
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | URLs
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Febrero del 2014
  **/
 
 // Modules
@@ -22,7 +24,8 @@ exports.listen = function (app) {
         // And use them for the chat
         res.render('aula', {
             code: req.query.code,
-            room: req.query.room
+            room: req.query.room,
+            user: req.query.user  // Only Test
         });
     });
 

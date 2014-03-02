@@ -1,14 +1,22 @@
 /*!
- * PRHONE Applications
- * Chat | Initializator
- * Romel Pérez, 2014
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | Initializator
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Febrero del 2014
  **/
 
 var app = app || {};
 
 // DOM Content Loaded
 jQuery(document).ready(function () {
+
+    // Start
     app.init();
+
+    // Complementary
+    $('*[title]').toolTip();
+
 });
 
 // Window Resized

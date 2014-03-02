@@ -1,7 +1,9 @@
 /*!
- * PRHONE Applications
- * Chat | Chat | Design
- * Romel Pérez, 2013
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | Design
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Febrero del 2014
  **/
 
  /* ------------------------------------------------------------------------- */
@@ -10,18 +12,34 @@
  body{}
 
  .none{ display: none; }
+ .invisible{ visibility: hidden; opacity: 0; -moz-opacity: 0; filter: alpha(opacity=0); }
 
  .offline{ border-right: 5px solid gray; }
  .unavail{ border-right: 5px solid orange; }
  .avail{ border-right: 5px solid green; }
 
 
- /* ------------------------------------------------------------------------- */
- /* STRUCTURE */
+/* ------------------------------------------------------------------------- */
+/* LOADER */
 
- #main{}
+#loader {
+    z-index: 10000;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding-top: 200px;
+    text-align: center;
+    font-weight: bold;
+}
 
- #header{
+
+/* ------------------------------------------------------------------------- */
+/* STRUCTURE */
+
+#main{}
+
+#header{
     height: 40px;
 }
 #header > *{
@@ -35,7 +53,10 @@
     font-size: 15px;
     line-height: 20px;
 }
-
+.option{
+    display: inline-block !important;
+    float: right !important;
+}
 #users{
     float: left;
 }

@@ -5,12 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chat</title>
         <link rel="shortcut icon" href="/img/favicon.png">
-        <link type="text/css" rel="stylesheet" href="/css/Elise.css">
+        <link rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
         <link rel="stylesheet" type="text/css" href="/css/chat.css">
     </head>
     <body>
+        <!-- // LOADER // -->
+        <div id="loader">Cargando...</div>
+
+
         <!-- // MAIN // -->
-        <div id="main">
+        <div id="main" class="invisible">
 
             <!-- // HEADER // -->
             <header id="header" class="block negro">
@@ -19,12 +23,14 @@
                     Student Name<br>
                     Student - Code
                 </div>
-                <div id="subject" class="part float-right">
-                    Subject Name<br>
-                    Teacher Name
-                </div>
                 <div class="part float-right">
-                    <button id="roomCreate" class="boton negro">Nueva Sala</button>
+                    <button id="config" class="boton negro">
+                        <span class="icon icon_o5"></span>
+                    </button>
+                </div>
+                <div id="subject" class="part float-right">
+                    Nombre de Materia<br>
+                    Nombre de Docente
                 </div>
             </header>
 
@@ -39,25 +45,35 @@
                 <div id="chatTitle" class="normal header"><div>Chat General</div></div>
                 <div id="chatRoom" class="block"></div>
                 <form id="toolbar" class="block" name="toolbar">
-                    <input id="message" type="text" placeholder="Escribe un mensaje...">
+                    <input id="message" type="text" autofocus autocomplete="off" placeholder="Escribe un mensaje...">
                     <button class="hidden" type="submit">Send</button>
                 </form>
             </section>
 
             <!-- // ROOMS // -->
             <section id="rooms">
-                <div id="roomsTitle" class="block header normal"><div>Salas</div></div>
+                <div id="roomsTitle" class="block header normal">
+                    <div>
+                        <span>Salas</span>
+                        <span id="roomsCreate" class="option icon icon_f8" title="Crear nueva sala"></span>
+                    </div>
+                </div>
                 <div id="roomsList"></div>
             </section>
 
         </div>
 
 
+        <!-- // TEMPLATES // -->
+        <script id="msgTemplate" type="text/template"></script>
+
+
         <!-- // SCRIPTS // -->
-        <script type="text/javascript" src="/js/jquery.min.js"></script>
-        <script type="text/javascript" src="/js/Elise.dev.js"></script>
-        <script type="text/javascript" src="/js/chat.app.js"></script>
-        <script type="text/javascript" src="/js/chat.ui.js"></script>
-        <script type="text/javascript" src="/js/chat.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        <script src="http://cormoran.uis.edu.co/eisi/Scripts/Estandar/Elise.js"></script>
+        <script src="/js/chat.app.js"></script>
+        <script src="/js/chat.ui.js"></script>
+        <script src="/js/chat.js"></script>
     </body>
 </html>

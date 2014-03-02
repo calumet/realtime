@@ -1,7 +1,9 @@
 /*!
- * PRHONE Applications
- * Chat | Aula
- * Romel Pérez, 2014
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | Aula
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Febrero del 2014
  **/
 
 // ------------------------------------------------------------------------- //
@@ -31,7 +33,7 @@ app.init = function () {
             };
         },
         error: function (err) {
-            console.log('Error while loading user data.');
+            console.log('>>> Error while loading user data.');
         }
     });
 };
@@ -51,7 +53,7 @@ $(document).ready(function () {
         eModal({
             title: 'Información del Chat',
             container: 'chatMsg',
-            emodalWidth: 300,
+            emodalWidth: 400,
             emodalContentHeight: 200,
             buttons: [{
                 btnText: 'Entrar',

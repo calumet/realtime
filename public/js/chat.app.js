@@ -1,7 +1,9 @@
 /*!
- * PRHONE Applications
- * Chat | Chat | App
- * Romel Pérez, 2013
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | Client Application
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Febrero del 2014
  **/
 
 var app = app || {};
@@ -11,45 +13,46 @@ var app = app || {};
 
 // Variables and configuration
 app.socket = null;
+app.aula = window.opener.app;
 app.config = {
-    server: window.opener.app.config.server
+    server: app.aula.config.server
 };
-app.data = window.opener.app.user;
+app.data = app.aula.user;
 
 
 // Initialization
 app.init = function () {
 
-    // Organize Interface
+    // Neat
     app.tool.win();
 
     // Start check interval with main window
     app.popup.check();
 
+    // Register DOM events
+    app.dom.init();
+
     // Connect
     app.connect(function () {
-        // Register User
+        // Socket events
+        app.events();
+
+        // Register user on server
         app.emit.register();
 
         // Charge general room
         app.rooms.add({
-            type: 'general',
             id: app.data.room(),
+            type: 'general',
             users: []
         });
-
-        // Start
-        app.main();
     });
 
-    // Start UI Events Modules
-    app.rooms.create();
-    app.messages.send();
 };
 
 
 // Connection to server
-app.connect = function (callback) {
+app.connect = function (started) {
 
     // Create connection with server
     var script = document.createElement('script');
@@ -59,7 +62,7 @@ app.connect = function (callback) {
     // When the socket is charged
     script.onload = script.onreadystatechange = function () {
         app.socket = io.connect(app.config.server);
-        callback();
+        started();
     };
 
 };
@@ -68,22 +71,27 @@ app.connect = function (callback) {
 // ------------------------------------------------------------------------- //
 // SOCKET EVENTS //
 
-app.main = function () {
+app.events = function () {
 
     // Connected
     app.socket.on('connected', function () {
-        //
+        console.debug('>>> Connected to server');
     });
 
 
     // Registered
     app.socket.on('registered', function (data) {
+        console.debug('>>> Registered in server');
         var user;
+
+        // Add all others users
         for (user in data.users) {
             app.users.add(data.users[user]);
         }
+
+        // Set interface
+        app.state.start();
         app.state.set('avail');
-        app.state.sync();
     });
 
 
@@ -124,7 +132,7 @@ app.emit = {
 
     msg: function (text) {
         if (text.length < 2) {
-            return;
+            return false;
         }
         app.socket.emit('msg', {
             room: app.rooms.active,
@@ -133,5 +141,3 @@ app.emit = {
     }
 
 };
-
-

@@ -1,10 +1,12 @@
 /*!
- * PRHONE Applications
- * Chat | User Interface
- * Romel Pérez, 2014
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | User Interface
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Febrero del 2014
  **/
 
- var app = app || {};
+var app = app || {};
 
 // ------------------------------------------------------------------------- //
 // WINDOW //
@@ -15,9 +17,9 @@ app.popup = {
     wincon: 0,  // Check interval with creator window
 
     check: function () {
-        app.wincon = setInterval(function () {
+        app.popup.wincon = setInterval(function () {
             if (!window.opener) {
-                clearInterval(app.wincon);
+                clearInterval(app.popup.wincon);
                 alert('La ventana del aula ha sido cerrada!', {
                     type: 'error',
                     success: function () {
@@ -38,6 +40,10 @@ app.tool = {
     win: function () {
         var dims = Elise.win.dims();
 
+        // Restrictions
+        dims.width = dims.width < 600 ? 600 : dims.width;
+        dims.height = dims.height < 300 ? 300 : dims.height;
+
         // Width - Vertical Borders
         $('#main').css('width', dims.width);
         $('#users').css('width', dims.width * 0.18 - 1);
@@ -54,23 +60,59 @@ app.tool = {
 };
 
 
+// Register DOM Events
+app.dom = {
+
+    init: function () {
+        this.messages();
+        this.rooms();
+    },
+
+    // When the user wants to send a message
+    messages: function () {
+        $('#toolbar').on('submit', function () {
+            app.emit.msg($('#message').val());
+            $('#message').val('').focus();
+            return false;
+        });
+    },
+
+    // Create a new chat between this user and others users
+    rooms: function () {
+        $('#roomCreate').on('click', function () {
+            // Create new room
+        });
+    }
+
+};
+
+
 // ------------------------------------------------------------------------- //
-// USER STATE //
+// STATE //
 
 app.state = {
 
-    sync: function () {
+    start: function () {
         var ud = app.data.user();
         $('#photo').attr('src', ud.photo);
         $('#user').html(ud.firstName + ' ' + ud.firstSurname + '<br>' + ud.level + ' - ' + ud.code);
+
+        // Subject Info
+        $('#subject').html(app.aula.data.subject + '<br>' + app.aula.data.teacher);
+
+        // Show User Interface
+        $('#loader').addClass('none');
+        $('#main').removeClass('invisible');
     },
 
     set: function (data) {
         var classes = ['offline', 'unavail', 'avail'];
         var $photo = $('#photo');
+        // Remove active class
         $.each(classes, function (i, v) {
             $photo.removeClass(classes[i]);
         });
+        // Add actual class
         $photo.addClass(data);
     }
 
@@ -117,59 +159,76 @@ app.users = {
 
 app.messages = {
 
-    receive: function (data) {
+    receive: function(data) {
 
-        var user_local=app.data.user();
-        var user_remoto= app.users.cache[data.id] ? app.users.cache[data.id].user  : app.data.user();
-        var name = user_remoto.firstName + ' ' + user_remoto.firstSurname ;
-        var lugar =(user_local.code==user_remoto.code)?'pull-right':'pull-left';
-        var tema =(user_local.code==user_remoto.code)?'cian':'orange';
+        var user_local = app.data.user();
+        var user_remoto = app.users.cache[data.id] ? app.users.cache[data.id].user : app.data.user();
+        var name = user_remoto.firstName + ' ' + user_remoto.firstSurname;
+        var lugar = (user_local.code == user_remoto.code) ? 'pull-right' : 'pull-left';
+        var tema = (user_local.code == user_remoto.code) ? 'cian' : 'orange';
 
-        var num_msgs= $('#rc' + data.room).children('.block').length;
-        var index_lastLocal_msg=$('#rc' + data.room).children('.block.'+user_remoto.code+':last').index();
-        var alto_msgs=0;
-        var caja_height=$('.chatRoom').height();
+        var num_msgs = $('#rc' + data.room).children('.block').length;
+        var index_lastLocal_msg = $('#rc' + data.room).children('.block.' + user_remoto.code + ':last').index();
+        var alto_msgs = 0;
+        var caja_height = $('.chatRoom').height();
         // si su comentario fu el ultimo no crea bloque para mensaje
-        var msg=null;
-        if((num_msgs==(index_lastLocal_msg+1)) && num_msgs>0 ){ 
-            $('#rc' + data.room).children('.'+user_remoto.code+'.block').find('.content').append($('<p>'+data.text+'</p>'));
-          //  $('#rc' + data.room).scrollTop($(this).children('.block').height()+100);
-          msg=$('#rc' + data.room).children('.'+user_remoto.code+'.block');
-      }else{
+        var msg = null;
+        if ((num_msgs == (index_lastLocal_msg + 1)) && num_msgs > 0) {
+            $('#rc' + data.room).children('.' + user_remoto.code + '.block').find('.content').append($('<p>' + data.text + '</p>'));
+            // $('#rc' + data.room).scrollTop($(this).children('.block').height()+100);
+            msg = $('#rc' + data.room).children('.' + user_remoto.code + '.block');
+        } else {
             // crea el menssaje
-            var msg_name=$('<span/>',{class:'name'}).append($('<strong/>',{class:'indent',text:name}));
-            var msg_info=$('<div/>',{class:'info'}).append(msg_name,$('<span/>',{class:'time',text:'Ahora'}));
-            var msg_avatar=$('<div/>',{class:'avatar'}).append($('<img/>',{class:'img-polaroid img-rounded','src':user_remoto.photo}));
-            var msg_content=$('<div/>',{class:'content'}).append($('<p>'+data.text+'</p>'));
-            var msg=$('<div/>',{class:'msg '+ lugar+' '+tema}).append(msg_avatar,msg_info,msg_content);
-            var $l = $('<div/>',{class:'block  '+user_remoto.code}).append(msg);
+            var msg_name = $('<span/>', {
+                class: 'name'
+            }).append($('<strong/>', {
+                class: 'indent',
+                text: name
+            }));
+            var msg_info = $('<div/>', {
+                class: 'info'
+            }).append(msg_name, $('<span/>', {
+                class: 'time',
+                text: 'Ahora'
+            }));
+            var msg_avatar = $('<div/>', {
+                class: 'avatar'
+            }).append($('<img/>', {
+                class: 'img-polaroid img-rounded',
+                'src': user_remoto.photo
+            }));
+            var msg_content = $('<div/>', {
+                class: 'content'
+            }).append($('<p>' + data.text + '</p>'));
+            var msg = $('<div/>', {
+                class: 'msg ' + lugar + ' ' + tema
+            }).append(msg_avatar, msg_info, msg_content);
+            var $l = $('<div/>', {
+                class: 'block ' + user_remoto.code
+            }).append(msg);
             //$('#rc' + data.room).append($l.slideDown(250))[0].scrollTop += $l.height() + 100;
-            msg=$l;
+            msg = $l;
             $('#rc' + data.room).append($l);
         }
 
 
-        $('.chatRoom').children('.block').each(function(){
-            alto_msgs=alto_msgs +$(this).height();
+        $('.chatRoom').children('.block').each(function() {
+            alto_msgs = alto_msgs + $(this).height();
         });
-        //  averigua si tiene que organizar los mensajes
-        if(alto_msgs<caja_height){
-            $('.chatRoom').find('.block:first').css({'margin-top':caja_height-(alto_msgs) });
-        }else{
-            $('.chatRoom').find('.block:first').css({'margin-top':0 });
+        // averigua si tiene que organizar los mensajes
+        if (alto_msgs < caja_height) {
+            $('.chatRoom').find('.block:first').css({
+                'margin-top': caja_height - (alto_msgs)
+            });
+        } else {
+            $('.chatRoom').find('.block:first').css({
+                'margin-top': 0
+            });
         }
 
         $('#rc' + data.room).scrollTop(alto_msgs); // mueve el scroll
 
         app.rooms.update(data.room);
-    },
-
-    send: function () {
-        $('#toolbar').on('submit', function () {
-            app.emit.msg($('#message').val());
-            $('#message').val('').focus();
-            return false;
-        });
     }
 
 };
@@ -182,13 +241,6 @@ app.rooms = {
 
     active: null,
     cache: {},
-
-    // This function create a new chat between this user and other user picked
-    create: function (data) {
-        $('#roomCreate').on('click', function () {
-            //
-        });
-    },
 
     // This function add the room chat in the DOM and make the functionalities
     add: function (data) {
@@ -226,7 +278,7 @@ app.rooms = {
             }).on('click', function () {
                 app.rooms.change(data.id);
             })
-            );
+        );
         $('#rl' + data.id).fadeIn(250);
 
         // Activate Room
@@ -272,5 +324,3 @@ app.rooms = {
     }
 
 };
-
-
