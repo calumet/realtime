@@ -43,7 +43,9 @@
             <!-- // CHAT // -->
             <section id="chat">
                 <div id="chatTitle" class="normal header"><div>Chat General</div></div>
-                <div id="chatRoom" class="block"></div>
+                <div id="content-chat">
+                    <div id="chatRoom" class="block"></div>
+                </div>
                 <form id="toolbar" class="block" name="toolbar">
                     <input id="message" type="text" autofocus autocomplete="off" placeholder="Escribe un mensaje...">
                     <button class="hidden" type="submit">Send</button>
@@ -65,7 +67,24 @@
 
 
         <!-- // TEMPLATES // -->
-        <script id="msgTemplate" type="text/template"></script>
+        <script id="msgTemplate" type="text/template">
+                <div class="block">
+                    <div class="msg <%=position+' '+theme+' '+user.code%>" style="">
+                        <div class="avatar">
+                            <img class="img-polaroid img-rounded" src="<%=user.photo%>">
+                        </div>
+                        <div class="info">
+                            <span class="name">
+                                <strong class="indent"><%=user.firstName +' '+user.secondName+ ' ' + user.firstSurname%></strong>
+                            </span>
+                            <span class="time">Ahora</span>
+                        </div>
+                        <div class="content">
+                            <p><%=msg.text%></p>
+                        </div>
+                    </div>
+                </div>
+        </script>
 
 
         <!-- // SCRIPTS // -->
