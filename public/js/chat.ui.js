@@ -161,14 +161,29 @@ app.messages = {
 
     msgTemplate:_.template($('#msgTemplate').html()),
 
+    notification:function(){
+        var audio = null;
+        audio = document.createElement("audio");
+        var source1=document.createElement("source");
+        source1.src="/sound/CyanPing.ogg";
+        var source2=document.createElement("source");
+        source2.src="/sound/CyanPing.mp3";
+        audio.appendChild(source1,source2);
+        audio.play();
+    },
+
     receive: function(data) {
 
         var user_local = app.data.user();
         var user_remoto = app.users.cache[data.id] ? app.users.cache[data.id].user : app.data.user();
+        var curTime=new Date();
+        var hour=curTime.getHours() > 12 ? curTime.getHours() - 12 : (curTime.getHours() < 10 ? "0" + curTime.getHours() : curTime.getHours());
+        var  curMinute = curTime.getMinutes() < 10 ? "0" + curTime.getMinutes() : curTime.getMinutes();
 
-        // si su comentario fu el ultimo no crea bloque para mensaje
-        if ($('#rc' + data.room).children('.block:last').find('.msg').hasClass(user_remoto.code)) {
-            $('#rc' + data.room).children('.block:last').find('.content').append($('<p/>',{text:data.text}));
+        var lastMsg=$('#rc' + data.room).children('.block:last');
+        // si su comentario fue el ultimo no crea bloque para mensaje
+        if (lastMsg.find('.msg').hasClass(user_remoto.code) && lastMsg.find('.msg').hasClass(hour+'_'+curMinute)) {
+            lastMsg.find('.content').append($('<p/>',{text:data.text}));
         } else {
             // crea el menssaje
             obj={};
@@ -176,8 +191,12 @@ app.messages = {
             obj.position=(user_local.code == user_remoto.code) ? 'pull-right' : 'pull-left';
             obj.theme=(user_local.code == user_remoto.code) ? 'cian' : 'orange';
             obj.msg=data;
+            obj.time=  hour+':'+curMinute;
             var html=app.messages.msgTemplate(obj);
             $('#rc' + data.room).append(html); // se agrega el mensaje en la sala correspondiente
+            if(user_local.code!=user_remoto.code){
+                app.messages.notification();
+            }
         }
 
        //$('#rc' + data.room).parent('#content-chat').scrollTop( $('#rc' + data.room).height()); // mueve el scroll
