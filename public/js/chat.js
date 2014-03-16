@@ -3,7 +3,7 @@
  * Aula Chat | Initializator
  * Romel Pérez, @prhonedev
  * Duvan Vargas, @DuvanJamid
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
 var app = app || {};

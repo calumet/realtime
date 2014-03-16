@@ -2,11 +2,9 @@
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | URLs
  * Romel Pérez, @prhonedev
- * Duvan Vargas, @DuvanJamid
  * Febrero del 2014
  **/
 
-// Modules
 var db = require('./database.js');
 
 // ------------------------------------------------------------------------- //
@@ -23,9 +21,9 @@ exports.listen = function (app) {
         // Instead, it will use JSP variables to write the user data
         // And use them for the chat
         res.render('aula', {
-            code: req.query.code,
-            room: req.query.room,
-            user: req.query.user  // Only Test
+            id: req.query.id,
+            clase: req.query.clase,
+            name: req.query.name
         });
     });
 
@@ -33,26 +31,31 @@ exports.listen = function (app) {
         res.render('chat');
     });
 
-    // Return the user data from Database
-    app.post('/getUserData', function (req, res) {
+
+    // --------------------------------------------------------------------- //
+    // AJAX Requests //
+
+    // Return the user data by code
+    app.post('/getUserByCode', function (req, res) {
         var code = req.body.code;
-        var room = req.body.room;
-
-        // Get data
-        var data = db.data(code);
-
-        // Send data
         res.json({
-            room: room,
-            user: {
-                code: data.code,
-                firstName: data.firstName,
-                secondName: data.secondName,
-                firstSurname: data.firstSurname,
-                secondSurname: data.secondSurname,
-                level: data.level,
-                photo: data.photo
-            }
+            user: db.userByCode(code)
+        });
+    });
+
+    // Return the user data by id
+    app.post('/getUserById', function (req, res) {
+        var id = req.body.id;
+        res.json({
+            user: db.userById(id)
+        });
+    });
+
+    // Return the users data by class
+    app.post('/getUsersByClass', function (req, res) {
+        var clase = req.body.clase;
+        res.json({
+            users: db.usersByClass(clase)
         });
     });
 

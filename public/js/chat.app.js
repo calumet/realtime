@@ -3,7 +3,7 @@
  * Aula Chat | Client Application
  * Romel Pérez, @prhonedev
  * Duvan Vargas, @DuvanJamid
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
 var app = app || {};
@@ -13,11 +13,15 @@ var app = app || {};
 
 // Variables and configuration
 app.socket = null;
-app.aula = window.opener.app;
-app.config = {
-    server: app.aula.config.server
+app.data = window.opener.app.chat.user;
+app.server = window.opener.app.chat.server;
+app.variables = {
+    // Users Categories
+    categories: {
+        'CT1': 'Docente',
+        'CT2': 'Estudiante'
+    }
 };
-app.data = app.aula.user;
 
 
 // Initialization
@@ -35,16 +39,15 @@ app.init = function () {
     // Connect
     app.connect(function () {
         // Socket events
-        app.events();
+        app.events.init();
 
         // Register user on server
-        app.emit.register();
+        app.emit.online();
 
-        // Charge general room
+        // Charge general clase
         app.rooms.add({
-            id: app.data.room(),
-            type: 'general',
-            users: []
+            id: app.data.clase(),
+            type: 'general'
         });
     });
 
@@ -56,12 +59,12 @@ app.connect = function (started) {
 
     // Create connection with server
     var script = document.createElement('script');
-    script.src = app.config.server + '/socket.io/socket.io.js';
+    script.src = app.server + '/socket.io/socket.io.js';
     document.getElementsByTagName('body')[0].appendChild(script);
 
     // When the socket is charged
     script.onload = script.onreadystatechange = function () {
-        app.socket = io.connect(app.config.server);
+        app.socket = io.connect(app.server);
         started();
     };
 
@@ -71,49 +74,93 @@ app.connect = function (started) {
 // ------------------------------------------------------------------------- //
 // SOCKET EVENTS //
 
-app.events = function () {
+app.events = {
 
-    // Connected
-    app.socket.on('connected', function () {
-        console.debug('>>> Connected to server');
-    });
+    init: function () {
 
+        app.socket.on('connected', this.mine.connected);
+        app.socket.on('onlined', this.mine.onlined);
 
-    // Registered
-    app.socket.on('registered', function (data) {
-        console.debug('>>> Registered in server');
-        var user;
+        app.socket.on('userOnline', this.others.user.online);
+        app.socket.on('userOffline', this.others.user.offline);
+        app.socket.on('userMsged', this.others.user.msged);
 
-        // Add all others users
-        for (user in data.users) {
-            app.users.add(data.users[user]);
+        app.socket.on('roomNewed', this.others.room.newed);
+        app.socket.on('roomGotout', this.others.room.gotout);
+
+    },
+
+    mine: {
+
+        // I am now connected
+        connected: function () {
+            console.debug('>>> Connected to server');
+        },
+
+        // data: {users: {id1, id2, ...}}
+        onlined: function (data) {
+            console.debug('>>> Online in server');
+
+            // Add all others users
+            _.each(data.users, function (user, id) {
+                app.users.add(user);
+            });
+
+            // Set interface
+            app.state.start();
+            app.state.set('avail');
+
+            // Activate Room Events
+            app.dom.rooms.main();
         }
 
-        // Set interface
-        app.state.start();
-        app.state.set('avail');
-    });
+    },
 
+    others: {
 
-    // User Registered
-    app.socket.on('userRegistered', function (data) {
-        app.users.add({
-            id: data.id,
-            user: data.user
-        });
-    });
+        user: {
 
+            // id: user id
+            online: function (id) {
+                app.users.online(id);
+            },
 
-    // User Unregistered
-    app.socket.on('userUnregistered', function (id) {
-        app.users.remove(id);
-    });
+            // id: user id
+            offline: function (id) {
+                app.users.offline(id);
+            },
 
+            // data: {id, room, content, params}
+            msged: function (data) {
+                console.debug('A new message from ' + data.id);
+                app.messages.receive(data);
+            }
 
-    // User Messaged
-    app.socket.on('userMsged', function (data) {
-        app.messages.receive(data);
-    });
+        },
+
+        room: {
+
+            // data: {room, type, name, users[ids]}
+            newed: function (data) {
+                app.rooms.add({
+                    id: data.room,
+                    type: data.type,
+                    name: data.name,
+                    users: data.users
+                });
+            },
+
+            // data: {room, id}
+            gotout: function (data) {
+                app.rooms.getout({
+                    room: data.room,
+                    id: data.id
+                });
+            }
+
+        }
+
+    }
 
 };
 
@@ -123,20 +170,42 @@ app.events = function () {
 
 app.emit = {
 
-    register: function () {
-        app.socket.emit('register', {
-            user: app.data.user(),
-            room: app.data.room()
+    online: function () {
+        app.socket.emit('online', {
+            clase: app.data.clase(),
+            id: app.data.user().id
         });
     },
 
-    msg: function (text) {
-        if (text.length < 2) {
+    // data: {content, params}
+    msg: function (data) {
+        if (data.content.length < 2) {
             return false;
         }
+        data.params = data.params ? data.params : {};
         app.socket.emit('msg', {
+            id: app.data.user().id,
             room: app.rooms.active,
-            text: text
+            content: data.content,
+            params: data.params
+        });
+    },
+
+    // data: {type, name, users[ids]}
+    newRoom: function (data) {
+        app.socket.emit('roomNew', {
+            id: app.data.user().id,
+            clase: app.data.clase(),
+            type: data.type,
+            name: data.name,
+            users: data.users
+        });
+    },
+
+    getout: function (room) {
+        app.socket.emit('roomGetout', {
+            id: app.data.user().id,
+            room: room
         });
     }
 

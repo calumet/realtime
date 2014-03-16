@@ -1,7 +1,8 @@
 /*!
- * PRHONE Applications
- * Chat | Server
- * Romel Pérez, 2013
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | Design
+ * Romel Pérez, @prhonedev
+ * Febrero del 2014
  **/
 
 // ------------------------------------------------------------------------- //

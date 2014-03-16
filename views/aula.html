@@ -1,21 +1,34 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Chat</title>
-        <link rel="shortcut icon" href="/img/favicon.png">
+        <title>Aula - {{name}}</title>
+        <link rel="icon" href="/img/favicon.ico">
         <link rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
         <style>
-            body{ margin: 20px; }
-            img{ height: 200px; margin: 2px; }
+            img { height: 200px; margin: 2px; }
         </style>
     </head>
     <body>
         <!-- // CHAT ENTRANCE // -->
-        <h2>Aula</h2>
-        <p>{{user}} - {{code}}</p>
-        <p><button id="chat" class="boton azul">Entrar al Chat</button></p>
+        <div class="row-fluid">
+            <div class="span8 offset2">
+                <h2>Aula</h2>
+                <p>
+                    El usuario entrará a la sala de chat ya estándo en el aula logueado.
+                    Aquí se cargarán los datos del usuario y se guardará copia de ellos.
+                    Luego, se instancia la sala de chat, la cual depende de esta ventana.
+                </p>
+                <p>{{clase}} - {{name}} - {{id}}</p>
+                <p>
+                    <button id="chat" class="boton azul">
+                        <span class="icon icon_i8"></span>
+                        <span class="label">Entrar al Chat</span>
+                    </button>
+                </p>
+            </div>
+        </div>
 
 
         <!-- // PRE-CHAT MESSAGE // -->
@@ -36,8 +49,8 @@
             app.data = {
                 // This is written with JSP, not Expressjs
                 // This is temporary
-                room: '{{room}}',
-                code: '{{code}}',
+                id: '{{id}}',
+                clase: '{{clase}}',
                 subject: 'Programación en la Web',
                 teacher: 'Pedro José Gonzales Martínez'
             };

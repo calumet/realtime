@@ -3,7 +3,7 @@
  * Aula Chat | Aula
  * Romel Pérez, @prhonedev
  * Duvan Vargas, @DuvanJamid
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
 // ------------------------------------------------------------------------- //
@@ -11,31 +11,49 @@
 
 var app = app || {};
 
-app.config = {
-    server: 'http://localhost:9000'
-};
+app.data = app.data || {};
 
-app.user = null;  // Return the user data
+app.chat = {
 
-app.init = function () {
+    // Sockets server
+    server: 'http://localhost:9000',
+
+    // Return user data
+    user: null,
+
     // Load user data
-    $.ajax({
-        type: 'post',
-        url: app.config.server + '/getUserData',
-        data: {
-            room: app.data.room,
-            code: app.data.code
-        },
-        success: function (data) {
-            app.user = {
-                user: function () { return data.user; },
-                room: function () { return data.room; }
-            };
-        },
-        error: function (err) {
-            console.log('>>> Error while loading user data.');
-        }
-    });
+    init: function () {
+        $.ajax({
+            type: 'post',
+            url: app.chat.server + '/getUserById',
+            data: {id: app.data.id},
+            success: function (data) {
+                app.chat.user = {
+                    user: function () {
+                        return data.user;
+                    },
+                    clase: function (val) {
+                        // Save var
+                        return function () {
+                            return val;
+                        };
+                    } (app.data.clase)
+                };
+            },
+            error: function (err) {
+                console.debug('>>> Error while loading user data.');
+            }
+        });
+    },
+
+    // Create the chat window
+    create: function () {
+        Elise.popup({
+            position: 'full',
+            url: '/chat'
+        });
+    }
+
 };
 
 
@@ -45,11 +63,10 @@ app.init = function () {
 $(document).ready(function () {
 
     // Load data from server
-    app.init();
+    app.chat.init();
 
     // Show chat info
     $('#chat').on('click', function () {
-        // Show chat info
         eModal({
             title: 'Información del Chat',
             container: 'chatMsg',
@@ -60,13 +77,7 @@ $(document).ready(function () {
                 btnClass: 'emodal_hide',
                 btnColor: 'azul',
                 btnPosition: 'right',
-                btnClick: function() {
-                    // Create chat window
-                    Elise.popup({
-                        position: 'full',
-                        url: '/chat'
-                    });
-                }
+                btnClick: app.chat.create
             }]
         });
     });

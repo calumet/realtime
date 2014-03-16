@@ -1,25 +1,20 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html lang="es">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Chat</title>
-        <link rel="shortcut icon" href="/img/favicon.png">
+        <title>Aula Chat</title>
+        <link rel="icon" href="/img/favicon.ico">
         <link rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
-        <link rel="stylesheet" type="text/css" href="/css/chat.css">
-        <style type="text/css">
-        body {
-            margin: 20px;
-        }
-        </style>
     </head>
     <body>
+        <!-- // MAIN // -->
         <div class="row-fluid">
             <div class="span8 offset2">
                 <h1>Aula Chat</h1>
                 <p>Salas de clase disponibles:</p>
                 <p>
-                    <select id="rooms">
+                    <select id="clases" name="clases">
                         <option value="262456_W9">262456_W9</option>
                         <option value="262456_G3">262456_G3</option>
                         <option value="287892_A1">287892_A1</option>
@@ -27,115 +22,72 @@
                     </select>
                 </p>
                 <p>Usuarios disponibles:</p>
-                <ul>
-                    <li><a data-code="2130000" href="/aula">Romel Pérez</a></li>
-                    <li><a data-code="2130001" href="/aula">Natalia Contreras</a></li>
-                    <li><a data-code="2130002" href="/aula">Duvan Vargas</a></li>
-                    <li><a data-code="2130003" href="/aula">Karen Vega</a></li>
-                </ul>
+                <p>
+                    <select id="users" name="users"></select>
+                </p>
+                <p>Entrar al aula virtual logueado con el usuario elegido en la clase elegida.</p>
+                <p class="block">
+                    <button id="enter" class="boton azul">
+                        <span class="icon icon_k8"></span>
+                        <span class="label">Entrar al Aula</span>
+                    </button>
+                </p>
             </div>
         </div>
-        <div class="row-fluid">
-            <div class="span6 offset3"></div>
-        </div>
-        <div class="row-fluid">
-            <div class="span8 offset2">
-                <h3>Ejemplo de chat</h3>
-                <div class="block">
-                    <div class="msg orange pull-left" style="">
-                        <div class="avatar">
-                            <img class="img-polaroid img-rounded" src="/img/photos/romel.jpg">
-                        </div>
-                        <div class="info">
-                            <span class="name">
-                                <strong class="indent">Romel Pérez</strong>
-                            </span>
-                            <span class="time">hace 12 seg</span>
-                        </div>
-                        <div class="content">
-                            <p>
-                                Hola este es el mensaje de prueba
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="block">
-                    <div class="msg cian pull-right" style="">
-                        <div class="avatar">
-                            <img class="img-polaroid img-rounded" src="/img/photos/duvan.jpg">
-                        </div>
-                        <div class="info">
-                            <span class="name">
-                                <strong class="indent">Duvan Jamid Vargas C</strong>
-                            </span>
-                            <span class="time">hace 12 seg</span>
-                        </div>
-                        <div class="content">
-                            <p>
-                                Hola este es el mensaje de prueba
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="block">
-                    <div class="msg orange pull-left" style="">
-                        <div class="avatar">
-                            <img class="img-polaroid img-rounded" src="/img/photos/romel.jpg">
-                        </div>
-                        <div class="info">
-                            <span class="name">
-                                <strong class="indent">Romel Pérez</strong>
-                            </span>
-                            <span class="time">hace 12 seg</span>
-                        </div>
-                        <div class="content">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="block">
-                    <div class="msg cian pull-right" style="">
-                        <div class="avatar">
-                            <img class="img-polaroid img-rounded" src="/img/photos/duvan.jpg">
-                        </div>
-                        <div class="info">
-                            <span class="name">
-                                <strong class="indent">Duvan Jamid Vargas C</strong>
-                            </span>
-                            <span class="time">hace 12 seg</span>
-                        </div>
-                        <div class="content">
-                            <p>
-                                Hola este es el mensaje de prueba
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
 
 
         <!-- // SCRIPTS // -->
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
         <script src="http://cormoran.uis.edu.co/eisi/Scripts/Estandar/Elise.js"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
+        <script>
+            // Application :: Users cache
+            var app = {
+                users: null
+            };
 
-                $('#rooms').select2({
-                    width: "200px",
+            // DOM Events
+            $(function() {
+
+                $('#clases').select2({
+                    width: 400,
                     minimumResultsForSearch: -1
-                });
+                }).on('change', function () {
+                    // Get Class users
+                    $.ajax({
+                        type: 'post',
+                        url: '/getUsersByClass',
+                        data: {
+                            clase: $('#clases').select2('val')
+                        },
+                        success: function (res) {
+                            var options = '';
+                            // Save cache
+                            app.users = res.users;
+                            // Parse users select
+                            _.each(res.users, function (user, i) {
+                                options += '<option value="'+ user.id +'">'
+                                        + user.firstName + ' '
+                                        + user.firstSurname +'</option>'
+                            });
+                            // Show users
+                            $('#users').html(options).select2({width: 400});
+                        },
+                        error: function () {
+                            console.debug('>>> Has occurred an error loading users!');
+                        }
+                    });
+                }).trigger('change');  // Fetch users when ready
 
-                $('a').on('click', function(e) {
-                    e.preventDefault();
+                $('#users').select2({width: 400});
 
-                    var code = $(this).data('code');
-                    var room = $('#rooms').select2('val');
-                    var user = $(this).html();
-                    window.location.href = '/aula?code=' + code + '&room=' + room + '&user=' + user;
+                // Enter to the aula
+                $('#enter').on('click', function(e) {
+                    var clase = $('#clases').select2('val');
+                    var id = $('#users').select2('val');
+                    var name = app.users[id].firstName + ' ' + app.users[id].firstSurname;
+
+                    window.location.href = '/aula?clase=' + clase + '&id=' + id + '&name=' + name;
                 });
 
             });

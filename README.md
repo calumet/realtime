@@ -1,14 +1,10 @@
-chat v0.2.0
-===========
+Chat (alpha v0.3.0)
+===================
 
-A chat test made with nodejs and socket.io.
+Un chat para un aula estudiantil.
 
-To run, you have to install the node modules:
+Instala el proyecto ejecutando "npm init" en la ruta principal.
 
-```js
-npm install express
-npm install swig
-npm install socket.io
-```
+Cambia la IP para pruebas en conexiones privadas en /public/js/aula.js en app.chat.server.
 
-Change the IP and port in /public/js/aula.js in app.config.server. Change the server port in /server.js.
+Proximamente: Los mensajes se guardan temporalmente, pudiendo crear salas de chat personalizadas con usuarios desconectados. Actualmente, no funciona correctamente el crear salas de chat con usuarios conectados y que uno de ellos se desconecte.
