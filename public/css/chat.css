@@ -9,7 +9,7 @@
  /* ------------------------------------------------------------------------- */
  /* AESTHETICS */
 
-body{}
+body{background-image: url('/img/wood_pattern.jpg');}
 
 .none{ display: none; }
 .invisible{ visibility: hidden; opacity: 0; -moz-opacity: 0; filter: alpha(opacity=0); }
@@ -40,11 +40,13 @@ body{}
 #main{}
 
 #header{
-    height: 40px;
+    height: 60px;
+    background-color: #2c2c2d;
 }
 #header > *{
-    height: 40px;
+    height: 60px;
     margin-right: 6px;
+    color: #fff;
 }
 #header > *.float-right{
     text-align: right;
@@ -59,17 +61,35 @@ body{}
 }
 #users{
     float: left;
+    background-color: #2c2c2d;
 }
 .header{
     font-size: 15px;
-    line-height: 22px;
     font-weight: bold;
+    background-color: #2c2c2d;
+    border-bottom: 1px solid #1f1f1f;
+    border-top: 1px solid #3b3b3c;
+}
+.header h5{
+    text-align: center;
+    color: #ffF;
 }
 .header div{
     margin-left: 3px;
 }
 #chatTitle, #roomsTitle{
     border-left-width: 0 !important;
+    background: #2c2c2d;
+    overflow: hidden;
+    color: #fff;
+}
+#chatTitle {
+   -webkit-border-radius: 4px 4px 0 0;
+   -moz-border-radius: 4px 4px 0 0;
+   border-radius: 4px 4px 0 0;
+}
+#chatTitle h5, #roomsTitle h5{
+    text-align: center;
 }
 #usersList, #roomsList{
     font-size: 14px;
@@ -92,16 +112,36 @@ body{}
     float: left;
     border-left-width: 3px;
 }
-.user{ padding-left: 10px; }
-#usersList > div.user { opacity: 0.5; -moz-opacity: 0.5; filter: alpha(opacity=50); }
-#usersList > div.user.isconnected { opacity: 1; -moz-opacity: 1; filter: alpha(opacity=100); }
+.user{ 
+    padding-left: 10px;
+     }
+#usersList > div.user { 
+    opacity: 0.5; 
+    -moz-opacity: 0.5; 
+    filter: alpha(opacity=50);
+    border-bottom: 1px solid #1f1f1f;
+    border-top: 1px solid #3b3b3c;
+    color: #FFF;
+}
+#usersList > div.user:hover { 
+   background-color: #404040;
+}
+#usersList > div.user.isconnected { 
+    opacity: 1; 
+    -moz-opacity: 1; 
+    filter: alpha(opacity=100);
+}
 
 #chat{
     float: left;
-    border-left: 1px solid #CCC;
+    margin: 25px 25px 0 25px;
 }
 #chat > #content-chat{
     overflow: auto;
+    border-width: 1px;
+    border-color: #aaa;
+    border-style: solid; 
+    background: #fff;
 }
 #chatRoom{
     display: table;
@@ -114,28 +154,74 @@ body{}
     overflow: auto;
     display: table-cell;
     vertical-align: bottom;
+    padding-bottom: 10px;
 }
-
+.toolbar{
+    margin: 25px -25px 0 -25px;
+    background: #2c2c2d;
+    overflow: hidden;
+}
+#toolbar{
+    margin: 20px;
+    display: block;
+}
 #message{
-    width: 100%;
-    height: 30px;
+    height: 50px;
     margin: 0;
     padding: 4px 6px;
     border-radius: 0;
     border-left-width: 0;
     border-right-width: 0;
+    display: block;
+    resize: none;
+    width: 100%;
 }
 
 #rooms{
     float: left;
-    border-left: 1px solid #CCC;
+    background: #2c2c2d;
 }
-#roomsList > div.active{
-    font-style: italic;
+#roomsList .room-box {
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 1px solid #1f1f1f;
+    border-top: 1px solid #3b3b3c;
+    color: #fff;
+    position: relative;
+    min-height: 30px;
+}
+.room-box> h5 {
+    margin-left: 40px;
+}
+.room-box> span {
+    width: 20px;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    background-color: rgb(250, 51, 2);
+    height: 20px;
+    display: block;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    margin-top: -11px;
+    text-align: center;
+    box-shadow: 0 0 6px #000;
+    border: 1px solid rgb(139, 34, 8);
+}
+.room-box.active> span {
+    background-color: rgb(2, 210, 250);
+    border: 1px solid rgb(5, 78, 92);
+}
+#roomsList .room-box:hover {
+    background-color: #404040;
 }
 #roomsList > div > div {
     overflow: hidden;
     white-space: nowrap;
+}
+a.option{
+    margin: -5px 10px 0;
 }
 
 
@@ -308,7 +394,7 @@ body{}
 }
 .msg.pull-right>.info>.name {
     display: inline-block;
-    margin-left: 100px;
+    margin-left: 120px;
     min-width: 150px;
 } 
 .msg.pull-right>.info>.time {

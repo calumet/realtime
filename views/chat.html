@@ -17,7 +17,7 @@
         <div id="main" class="invisible">
 
             <!-- // HEADER // -->
-            <header id="header" class="block negro">
+            <header id="header" class="block">
                 <img id="photo" class="part float-left offline" src="/img/photos/avatar.jpg">
                 <div id="user" class="part float-left">
                     Nombre de Usuario<br>
@@ -36,29 +36,40 @@
 
             <!-- // USERS // -->
             <section id="users">
-                <div id="usersTitle" class="block header normal"><div>Usuarios Online</div></div>
+                <div id="usersTitle" class="block header ">
+                    <h5>Usuarios Online</h5>
+                </div>
                 <div id="usersList"></div>
             </section>
 
             <!-- // CHAT // -->
             <section id="chat">
-                <div id="chatTitle" class="normal header"><div>Chat General</div></div>
+                <div id="chatTitle" class=" "><h5>Chat General</h5></div>
                 <div id="content-chat">
                     <div id="chatRoom" class="block"></div>
                 </div>
-                <form id="toolbar" class="block" name="toolbar">
-                    <input id="message" type="text" autofocus autocomplete="off" placeholder="Escribe un mensaje...">
-                    <button class="hidden" type="submit">Send</button>
-                </form>
+                <div class="toolbar">
+                 <form id="toolbar" class="" name="toolbar">
+                    <div class="row-fluid">
+                        <div class="span10">
+                        <textarea  id="message" type="text" autofocus autocomplete="off" placextarea placeholder="Escribe un mensaje..."></textarea>
+                        </div>
+                        <div class="span2"><button class="boton boton-grande celeste" type="submit">Enviar</button></div>
+                    </div> 
+                    </form>
+                </div>
+                    
             </section>
 
             <!-- // ROOMS // -->
             <section id="rooms">
-                <div id="roomsTitle" class="block header normal">
-                    <div>
+                <div id="roomsTitle" class="block header">
+                    <h5>
                         <span>Salas</span>
-                        <span id="roomsCreate" class="option icon icon_f8" title="Crear nueva sala"></span>
-                    </div>
+                        <a class="btn option" id="roomsCreate" title="Crear nueva sala">
+                            <span  class=" icon icon_f8 active" ></span>
+                        </a>
+                    </h5>
                 </div>
                 <div id="roomsList"></div>
             </section>

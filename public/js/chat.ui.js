@@ -46,14 +46,15 @@ app.tool = {
 
         // Width - Vertical Borders
         $('#main').css('width', dims.width);
-        $('#users').css('width', dims.width * 0.18 - 1);
-        $('#chat').css('width', dims.width * 0.64 - 2);
-        $('#rooms').css('width', dims.width * 0.18 - 1);
+        $('#users').css('width', dims.width * 0.18 );
+        $('#chat').css('width', dims.width * 0.64 - 50);
+        $('#rooms').css('width', dims.width * 0.18 );
 
         // Height - Lateral Borders
         $('#main').css('height', dims.height);
-        $('#users, #chat, #rooms').css('height', dims.height - $('#header').height() - 2);
-        $('#content-chat').css('height', dims.height - $('#header').height() - $('#chatTitle').height() - $('#toolbar').height() - 2);
+        $('#users, #rooms').css('height', dims.height - $('#header').height() -2);
+        $('#chat').css('height', dims.height - $('#header').height() - 50);
+        $('#content-chat').css('height', dims.height - $('#header').height() - $('#chatTitle').height() - $('.toolbar').height() - 54);
         $('#usersList, #roomsList').css('height', $('#users').height() - $('#usersTitle').height());
     }
 
@@ -426,17 +427,17 @@ app.rooms = {
         $('#roomsList').append(
             $('<div>', {
                 'id': 'rl' + data.id,
-                'class': 'none',
-                'html': '<div>' + name + '</div><small><b>Nueva Sala</b></small>'
+                'class': 'none room-box',
+                'html': '<h5>' + name + '</h5><span></span>'
             }).on('click', function () {
-                app.rooms.change(data.id);
+                app.rooms.change(data.id,name);
             })
         );
         $('#rl' + data.id).fadeIn(250);
 
         // Activate Room
         if (data.type === 'general') {
-            app.rooms.change(data.id);
+            app.rooms.change(data.id,name);
         }
         // Notify
         if (data.type !== 'general') {
@@ -456,24 +457,25 @@ app.rooms = {
 
     // Se han recibido nuevos mensajes en esta sala
     update: function (id) {
-        var $el = $('#rl' + id + ' small');
+        var $el = $('#rl' + id + ' span');
 
         // If the user is not reading this
         if (id !== app.rooms.active) {
-            $el.html('<b>Mensajes nuevos</b>');
+            $el.html('1');
         } else {
-            $el.html('Leyendo');
+            $el.html('');
         }
     },
 
-    change: function (id) {
+    change: function (id,name) {
         // Leave item active
-        $('#rl' + app.rooms.active + ' small').html('No hay mensajes nuevos');
+        $('#rl' + app.rooms.active + ' span').html('');
 
         // Change item active
         $('#roomsList > div').removeClass('active');
         $('#rl' + id).addClass('active');
-        $('#rl' + id + ' small').html('Leyendo');
+        $('#chatTitle h5').text(name);
+        $('#rl' + id + ' span').html('');
 
         // Change chat active
         $('.chatRoom').css('display', 'none');
