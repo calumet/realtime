@@ -3,7 +3,7 @@ Chat (alpha v0.3.0)
 
 Un chat para un aula estudiantil.
 
-Instala el proyecto ejecutando "npm init" en la ruta principal.
+Instala el proyecto ejecutando "npm install" en la ruta principal.
 
 Cambia la IP para pruebas en conexiones privadas en /public/js/aula.js en app.chat.server.
 
