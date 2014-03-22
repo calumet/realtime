@@ -2,7 +2,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | Database
  * Romel Pérez, @prhonedev
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
 var _ = require('underscore');
@@ -10,6 +10,7 @@ var _ = require('underscore');
 // ------------------------------------------------------------------------- //
 // DATA //
 
+// Esquema de datos de usuarios
 var data = {
     "U40200": {
         "id": "U40200",
@@ -178,6 +179,7 @@ var data = {
     }
 };
 
+// Filtrar los datos de un usuario
 var filter = function (obj) {
     var filteredUser = _.pick(obj, 'id', 'code', 'firstName', 'secondName', 'firstSurname', 'secondSurname', 'photo', 'category');
     return filteredUser;
@@ -187,7 +189,7 @@ var filter = function (obj) {
 // ------------------------------------------------------------------------- //
 // EXPORTS //
 
-// Return all user data by code
+// Returnar un usuario por código
 exports.userByCode = function (code) {
     var user;
     for (user in data) {
@@ -197,12 +199,12 @@ exports.userByCode = function (code) {
     }
 };
 
-// Return all user data by id
+// Retornar un usuario por id
 exports.userById = function (id) {
     return filter(data[id]);
 };
 
-// Return all class users (teachers and students)
+// Retornar todos los usuarios de una clase (profesor/a y estudiantes)
 exports.usersByClass = function (clase) {
     var user, users = {};
     for (user in data) {

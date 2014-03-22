@@ -9,10 +9,6 @@
         <link rel="stylesheet" type="text/css" href="/css/chat.css">
     </head>
     <body>
-        <!-- // LOADER // -->
-        <div id="loader">Cargando...</div>
-
-
         <!-- // MAIN // -->
         <div id="main" class="invisible">
 
@@ -26,6 +22,9 @@
                 <div class="part float-right">
                     <button id="config" class="boton negro">
                         <span class="icon icon_o5"></span>
+                    </button>
+                    <button id="exit" class="boton rojo">
+                        <span class="icon icon_l1"></span>
                     </button>
                 </div>
                 <div id="subject" class="part float-right">
@@ -77,29 +76,30 @@
         </div>
 
 
-        <!-- // LOADER // -->
+        <!-- // CREATE CUSTOM ROOM // -->
         <div id="createRoomModal" class="none">
-            <p>Crea una nueva sala de chat privada con quienes selecciones. Agregale un nombre a la sala de chat de al menos 10 carácteres.</p>
+            <p>Crea una nueva sala de chat privada con quienes selecciones.</p>
             <input id="createRoomName" class="input-supergrande" type="text" placeholder="Nombre de sala" value="">
             <select id="createRoomUsers" multiple></select>
         </div>
 
 
         <!-- // TEMPLATES // -->
+        <!-- // reemplazar < { por { { y reemplazar } > por } } // -->
         <script id="msgTemplate" type="text/template">
             <div class="block">
-                <div class="msg <%=(position +' '+ theme +' '+ user.id +' '+ time).replace(':','_')%>">
+                <div class="msg <{(position +' '+ theme +' '+ user.id +' '+ time).replace(':','_')}>">
                     <div class="avatar">
-                        <img class="img-polaroid img-rounded" src="<%=user.photo%>">
+                        <img class="img-polaroid img-rounded" src="<{user.photo}>">
                     </div>
                     <div class="info">
                         <span class="name">
-                            <strong class="indent"><%=user.firstName +' '+ user.secondName +' '+ user.firstSurname%></strong>
+                            <strong class="indent"><{user.firstName +' '+ user.secondName +' '+ user.firstSurname}></strong>
                         </span>
-                        <span class="time" title="<%=ago%>"><%=time%></span>
+                        <span class="time" title="<{ago}>"><{time}></span>
                     </div>
                     <div class="content">
-                        <p><%=content%></p>
+                        <p><{content}></p>
                     </div>
                 </div>
             </div>

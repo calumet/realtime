@@ -8,16 +8,16 @@
 
 var app = app || {};
 
-// DOM Content Loaded
+// Aplicación descargada
 jQuery(document).ready(function () {
 
-    // Start
+    // Iniciar Aplicación
     app.init();
 
-    // Complementary
+    // Complementario
     $('*[title]').toolTip();
 
 });
 
-// Window Resized
+// Cuando la ventana se redimensione
 jQuery(window).resize(app.tool.win);

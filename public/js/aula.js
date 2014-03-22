@@ -15,13 +15,13 @@ app.data = app.data || {};
 
 app.chat = {
 
-    // Sockets server
+    // Conexión con el servidor de sockets
     server: 'http://localhost:9000',
 
-    // Return user data
+    // Retornar datos de usuario
     user: null,
 
-    // Load user data
+    // Cargar datos y configuración
     init: function () {
         $.ajax({
             type: 'post',
@@ -41,12 +41,12 @@ app.chat = {
                 };
             },
             error: function (err) {
-                console.debug('>>> Error while loading user data.');
+                console.debug('>>> Error conectando con el servidor.');
             }
         });
     },
 
-    // Create the chat window
+    // Crear la ventana de chat
     create: function () {
         Elise.popup({
             position: 'full',
@@ -62,10 +62,10 @@ app.chat = {
 
 $(document).ready(function () {
 
-    // Load data from server
+    // Iniciar cargado de datos y configuración
     app.chat.init();
 
-    // Show chat info
+    // Mostrar información de chat
     $('#chat').on('click', function () {
         eModal({
             title: 'Información del Chat',

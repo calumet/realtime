@@ -3,11 +3,11 @@
  * Aula Chat | Design
  * Romel Pérez, @prhonedev
  * Duvan Vargas, @DuvanJamid
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
  /* ------------------------------------------------------------------------- */
- /* AESTHETICS */
+ /* ESTÉTICA */
 
 body{background-image: url('/img/wood_pattern.jpg');}
 
@@ -20,22 +20,7 @@ body{background-image: url('/img/wood_pattern.jpg');}
 
 
 /* ------------------------------------------------------------------------- */
-/* LOADER */
-
-#loader {
-    z-index: 10000;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding-top: 200px;
-    text-align: center;
-    font-weight: bold;
-}
-
-
-/* ------------------------------------------------------------------------- */
-/* STRUCTURE */
+/* ESTRUCTURA */
 
 #main{}
 
@@ -226,7 +211,7 @@ a.option{
 
 
 /* ------------------------------------------------------------------------- */
-/* Estructura de mensajes */
+/* ESTRUCTURA DE MENSAJES */
 
 .msg{
     width: auto;

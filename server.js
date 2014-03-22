@@ -1,8 +1,8 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Aula Chat | Design
+ * Aula Chat | Server
  * Romel Pérez, @prhonedev
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
 // ------------------------------------------------------------------------- //
@@ -10,7 +10,7 @@
 
 var port = 9000;
 
-// Main objects
+// Módulos
 var http = require('http');
 var express = require('express');
 var swig = require('swig');
@@ -21,7 +21,7 @@ var server = http.createServer(app);
 var io = socketio.listen(server);
 
 
-// Configuration
+// Configuración
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 app.engine('html', swig.renderFile);
@@ -30,10 +30,10 @@ app.use(app.router);
 app.use(express.static(__dirname + '/public'));
 
 
-// Start server
+// Iniciar server
 server.listen(port, function () {
-    console.log('>>> Server listening at port ' + port + '!');
-    console.log('>>> Server running in mode "' + app.settings.env + '"!');
+    console.log('>>> Escuchando servidor en el puerto ' + port + '!');
+    console.log('>>> Servidor en modo "' + app.settings.env + '"!');
 });
 
 
@@ -41,5 +41,5 @@ server.listen(port, function () {
 require('./urls').listen(app);
 
 
-// SOCKETS
+// Sockets
 require('./sockets').listen(io);

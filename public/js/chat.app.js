@@ -11,12 +11,16 @@ var app = app || {};
 // ------------------------------------------------------------------------- //
 // CORE //
 
-// Variables and configuration
+// Variables y configuración
 app.socket = null;
 app.data = window.opener.app.chat.user;
 app.server = window.opener.app.chat.server;
+app.state = {
+    focus: true,
+    ready: false
+};
 app.variables = {
-    // Users Categories
+    // Categorías de usuarios
     categories: {
         'CT1': 'Docente',
         'CT2': 'Estudiante'
@@ -24,27 +28,27 @@ app.variables = {
 };
 
 
-// Initialization
+// Inicialización
 app.init = function () {
 
-    // Neat
+    // Estructurar aplicación
     app.tool.win();
 
-    // Start check interval with main window
+    // Chequeo con la ventana del aula
     app.popup.check();
 
-    // Register DOM events
+    // Registrar eventos al DOM
     app.dom.init();
 
-    // Connect
+    // Conectar con servidor
     app.connect(function () {
-        // Socket events
+        // Eventos de socket
         app.events.init();
 
-        // Register user on server
+        // Registrar usuario como online en el servidor
         app.emit.online();
 
-        // Charge general clase
+        // Cargar sala de clase
         app.rooms.add({
             id: app.data.clase(),
             type: 'general'
@@ -54,15 +58,15 @@ app.init = function () {
 };
 
 
-// Connection to server
+// Conexión con el servidor
 app.connect = function (started) {
 
-    // Create connection with server
+    // Crear conexión con el servidor
     var script = document.createElement('script');
     script.src = app.server + '/socket.io/socket.io.js';
     document.getElementsByTagName('body')[0].appendChild(script);
 
-    // When the socket is charged
+    // Cuando la conexión esté cargada
     script.onload = script.onreadystatechange = function () {
         app.socket = io.connect(app.server);
         started();
@@ -88,29 +92,36 @@ app.events = {
         app.socket.on('roomNewed', this.others.room.newed);
         app.socket.on('roomGotout', this.others.room.gotout);
 
+        app.socket.on('disconnect', this.server.failed);
+        app.socket.on('connect_failed', this.server.failed);
+        app.socket.on('reconnect', this.server.reconnect);
+
     },
 
     mine: {
 
-        // I am now connected
+        // Éste usuario ahora está conectado
         connected: function () {
-            console.debug('>>> Connected to server');
+            console.debug('>>> Conectado con el servidor.');
         },
 
         // data: {users: {id1, id2, ...}}
         onlined: function (data) {
-            console.debug('>>> Online in server');
+            console.debug('>>> Usuario online en el servidor.');
 
-            // Add all others users
+            // Agregar todos los usuarios de la clase
             _.each(data.users, function (user, id) {
                 app.users.add(user);
             });
 
-            // Set interface
-            app.state.start();
-            app.state.set('avail');
+            // Agregar todas las salas de éste usuario y sus mensajes
+            //
 
-            // Activate Room Events
+            // Configurar interfaz de usuario
+            app.user.start();
+            app.user.set('avail');
+
+            // Activar eventos del DOM de salas
             app.dom.rooms.main();
         }
 
@@ -132,7 +143,6 @@ app.events = {
 
             // data: {id, room, content, params}
             msged: function (data) {
-                console.debug('A new message from ' + data.id);
                 app.messages.receive(data);
             }
 
@@ -158,6 +168,20 @@ app.events = {
                 });
             }
 
+        }
+
+    },
+
+    server: {
+
+        failed: function () {
+            alert('El servidor se está reiniciando. Reconectando...');
+        },
+
+        reconnect: function () {
+            setTimeout(function () {
+                window.location.reload();
+            }, 1000);
         }
 
     }

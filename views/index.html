@@ -53,7 +53,8 @@
                     width: 400,
                     minimumResultsForSearch: -1
                 }).on('change', function () {
-                    // Get Class users
+
+                    // Conseguir usuarios de la clase seleccionada
                     $.ajax({
                         type: 'post',
                         url: '/getUsersByClass',
@@ -62,26 +63,27 @@
                         },
                         success: function (res) {
                             var options = '';
-                            // Save cache
+                            // Guardar cache
                             app.users = res.users;
-                            // Parse users select
+                            // Colocar usuarios en selector
                             _.each(res.users, function (user, i) {
                                 options += '<option value="'+ user.id +'">'
                                         + user.firstName + ' '
                                         + user.firstSurname +'</option>'
                             });
-                            // Show users
+                            // Mostrar usuarios
                             $('#users').html(options).select2({width: 400});
                         },
                         error: function () {
-                            console.debug('>>> Has occurred an error loading users!');
+                            console.debug('>>> Error conectando con el servidor!');
                         }
                     });
-                }).trigger('change');  // Fetch users when ready
+
+                }).trigger('change');  // Conseguir usuarios cuando ya esté cargada la página
 
                 $('#users').select2({width: 400});
 
-                // Enter to the aula
+                // Entrar al aula
                 $('#enter').on('click', function(e) {
                     var clase = $('#clases').select2('val');
                     var id = $('#users').select2('val');

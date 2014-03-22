@@ -2,7 +2,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | URLs
  * Romel Pérez, @prhonedev
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
 var db = require('./database.js');
@@ -17,9 +17,8 @@ exports.listen = function (app) {
     });
 
     app.get('/aula', function (req, res) {
-        // Really, this way to know what user is, it will not be used
-        // Instead, it will use JSP variables to write the user data
-        // And use them for the chat
+        // Los datos que se envían deben ser enviados de acuerdo
+        // al lenguaje del servidor usado, puede ser JSP u otro
         res.render('aula', {
             id: req.query.id,
             clase: req.query.clase,
@@ -35,7 +34,7 @@ exports.listen = function (app) {
     // --------------------------------------------------------------------- //
     // AJAX Requests //
 
-    // Return the user data by code
+    // Retornar datos de usuario por su código
     app.post('/getUserByCode', function (req, res) {
         var code = req.body.code;
         res.json({
@@ -43,7 +42,7 @@ exports.listen = function (app) {
         });
     });
 
-    // Return the user data by id
+    // Retornar datos de usuario por su id
     app.post('/getUserById', function (req, res) {
         var id = req.body.id;
         res.json({
@@ -51,7 +50,7 @@ exports.listen = function (app) {
         });
     });
 
-    // Return the users data by class
+    // Retornar datos de usuarios de una clase
     app.post('/getUsersByClass', function (req, res) {
         var clase = req.body.clase;
         res.json({

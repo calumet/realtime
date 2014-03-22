@@ -1,8 +1,8 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Aula Chat | Server Application
+ * Aula Chat | Server Sockets Application
  * Romel Pérez, @prhonedev
- * Febrero del 2014
+ * Marzo del 2014
  **/
 
 var _ = require('underscore');
@@ -13,13 +13,13 @@ var db = require('./database.js');
 
 var app = {
 
-    // All classes within active users
+    // Todas las clases con sus usuarios activos
     classes: {
 
         // { 'class_group': { id1: {user1}, id2: {user2}, ... }, ... }
         cache: {},
 
-        // Add user to a class
+        // Agregar usuario activo a clase, crear sino tiene usuarios activos
         // data: {id, socket, state, code, clase}
         addUser: function (data) {
             this.cache[data.clase] = this.cache[data.clase] || {};
@@ -30,7 +30,7 @@ var app = {
             };
         },
 
-        // Remove an user from a class
+        // Remover un usuario de una clase por socket
         removeUser: function (socket) {
             _.each(this.cache, function (group, ind) {
                 _.each(group, function (user, index) {
@@ -42,18 +42,18 @@ var app = {
             });
         },
 
-        // All users by class and parse the avails/unavails
+        // Todos los usuarios de una clase, activos y offline
         users: function (clase, except) {
             var users = db.usersByClass(clase);
 
-            // Remove user exception
+            // Remover usuario excepción de la lista
             _.each(users, function (el, i) {
                 if (except === el.id) {
                     delete users[i];
                 }
             });
 
-            // Parse states by students
+            // Colocar estados a usuarios de lista
             _.each(users, function (user, id) {
                 users[id] = {
                     id: id,
@@ -73,13 +73,13 @@ var app = {
     },
 
 
-    // All class and custom rooms
+    // Todas las salas personalizadas
     rooms: {
 
         // { id: {type, name, clase, users[ids]}, ... }
         cache: {},
 
-        // Add a new room
+        // Agregar una nueva sala personalizada
         // data: {type, name, clase, users[ids]}
         add: function (data) {
             var id = data.clase + '_' + (new Date()).getTime();
@@ -89,7 +89,7 @@ var app = {
                 clase: data.clase,
                 users: data.users
             };
-            // Return the room id
+            // Retornar el id de sala
             return id;
         },
 
@@ -97,7 +97,7 @@ var app = {
             delete this.cache[id];
         },
 
-        // If a user got out from a custom room
+        // Si un usuario se ha salido de una sala personalizada
         getout: function (id, userid) {
             this.cache[id].users = _.without(this.cache[id].users, userid);
             if (this.cache[id].users.length === 0) {
@@ -108,17 +108,17 @@ var app = {
     },
 
 
-    // Sockets events functions
+    // Eventos de Sockets
     events: {
 
-        // The user becomes online
+        // Un usuario se vuelve online
         // data: {clase, id}
         online: function (data) {
             var io = this.io;
             var socket = this.socket;
             var info = db.userById(data.id);
 
-            // Add to online class users cache
+            // Agregar a la lista de usuarios activos de una clase
             app.classes.addUser({
                 id: data.id,
                 socket: socket.id,
@@ -127,30 +127,33 @@ var app = {
                 clase: data.clase
             });
 
-            // Add to its class room
+            // Agregarlo a la sala
             socket.join(data.clase);
 
-            // Communicate registered state
+            // Comunicar que ya está online y enviarle datos
             socket.emit('onlined', {
-                // Send all connected classmates, except itself
-                users: app.classes.users(data.clase, data.id)
+                // Enviar todos los usuarios de la clase
+                users: app.classes.users(data.clase, data.id),
+                // Enviar las salas y sus mensajes a las que pertenece
+                rooms: {}  // id: {name, type, users[ids], msgs: []}
             });
 
-            // Communicate to all connected students
+            // Comunicar a todos los demás usuarios conectados
             socket.broadcast.to(data.clase).emit('userOnline', data.id);
         },
 
-        // The user becomes offline
+        // Un usuario se vuelve offline
         offline: function () {
-            var i, j, room, id;
+            var i, j, id, clase;
             var io = this.io;
             var socket = this.socket;
 
-            // Find user id by socket id
+            // Encontrar id de usuario y clase por su socket
             for (i in app.classes.cache) {
                 for (j in app.classes.cache[i]) {
                     if (socket.id === app.classes.cache[i][j].socket) {
                         id = j;
+                        clase = i;
                         break;
                     }
                 }
@@ -159,21 +162,16 @@ var app = {
                 }
             }
 
-            // Remove from online class users cache
+            // Remover de la lista de usuarios activos de la clase
             app.classes.removeUser(socket.id);
 
-            // It's not neccessary to send anything to itself
+            // No es necesario enviar nada al usuario desconectado
 
-            // Update other students connected with this in all its rooms
-            for (room in io.sockets.manager.roomClients[socket.id]) {
-                if (room !== '') {
-                    // Send the user id
-                    io.sockets['in'](room.replace('/', '')).emit('userOffline', id);
-                }
-            }
+            // Actualizar a todos los demás usuarios de la misma clase
+            socket.broadcast.to(clase).emit('userOffline', id);
         },
 
-        // The user has sent a message
+        // Un usuario ha enviado un mensaje
         // data: {id, room, content, params}
         msg: function (data) {
             var io = this.io;
@@ -182,27 +180,27 @@ var app = {
             io.sockets['in'](data.room).emit('userMsged', data);
         },
 
-        // The user has created a new room
-        // data: {*id, type, name, clase, *users[ids]} // *id: user id, *users: except itself
+        // Un usuario ha creado una nueva sala
+        // data: {*id, type, name, clase, *users[ids]} // *id: id de usuario, *users: usuarios excepto él mismo
         roomNew: function (data) {
             var room, newData;
             var uSockets = [];
             var io = this.io;
             var socket = this.socket;
 
-            data.users.unshift(data.id);  // Add itself to list
-            room = app.rooms.add(data);  // Create room
+            data.users.unshift(data.id);  // Agregar él mismo a la lista
+            room = app.rooms.add(data);  // Crear sala
 
             _.each(data.users, function (id, i) {
                 if (app.classes.cache[data.clase] && app.classes.cache[data.clase][id]) {
-                    // The user is connected ('avail' || 'unavail')
+                    // El usuario está activo ('avail' || 'unavail')
                     uSockets.push(app.classes.cache[data.clase][id].socket);
                 }
             });
 
-            // Send to every user in room, including itself
+            // Enviar a cada usuario de la sala, incluyendolo a él mismo
             newData = {
-                room: room,  // The new room id
+                room: room,  // El nuevo identificador
                 type: data.type,
                 name: data.name,
                 users: data.users
@@ -213,17 +211,20 @@ var app = {
             });
         },
 
-        // The user has got out from a room
+        // El usuario ha salido de una sala
         // data: {id, room}
         roomGetout: function (data) {
             var io = this.io;
             var socket = this.socket;
 
-            app.rooms.getout(data.room, data.id);
-            io.sockets['in'](data.room).emit('roomGotout', {
-                id: data.id,
-                room: data.room
-            });
+            // Si pertenece a una sala personalizada
+            if (app.rooms.cache[data.room]) {
+                app.rooms.getout(data.room, data.id);
+                io.sockets['in'](data.room).emit('roomGotout', {
+                    id: data.id,
+                    room: data.room
+                });
+            }
         }
 
     }
@@ -247,20 +248,20 @@ exports.listen = function (io) {
             socket: socket
         };
 
-        // User Online
+        // Usuario Online
         socket.on('online', function () { app.events.online.apply(context, arguments); });
 
-        // User Offline
+        // Usuario Offline
         socket.on('offline', function () { app.events.offline.apply(context, arguments); });
         socket.on('disconnect', function () { app.events.offline.apply(context, arguments); });
 
-        // User Message
+        // Usuario Mensaje
         socket.on('msg', function () { app.events.msg.apply(context, arguments); });
 
-        // Room New
+        // Sala Nueva
         socket.on('roomNew', function () { app.events.roomNew.apply(context, arguments); });
 
-        // Room Get Out
+        // Sala Usuario que ha Salido
         socket.on('roomGetout', function () { app.events.roomGetout.apply(context, arguments); });
 
     });

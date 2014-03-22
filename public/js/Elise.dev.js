@@ -218,6 +218,7 @@ var firstAvailCol;if(typeof(matrix[rowIndex])=="undefined"){matrix[rowIndex]=[];
     };
 })(jQuery);
 
+
 /*! Tooltip
  * Copyright 2010 Drew Wilson
  * www.drewwilson.com
@@ -726,8 +727,9 @@ var firstAvailCol;if(typeof(matrix[rowIndex])=="undefined"){matrix[rowIndex]=[];
             var config = EMODAL.config;
 
             // Initialization
-            if(WIN.eModalElement)
+            if (WIN.eModalElement) {
                 WIN.eModalElement.remove();
+            }
 
             var emodal_hold = $('<div/>', {
                 id: 'emodal_hold',

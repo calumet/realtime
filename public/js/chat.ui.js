@@ -11,14 +11,14 @@ var app = app || {};
 // ------------------------------------------------------------------------- //
 // WINDOW //
 
-// Popup functions
+// Funciones como ventana dependiente de la ventana aula
 app.popup = {
 
-    wincon: 0,  // Check interval with creator window
+    wincon: 0,  // Intervalo de chequeo con la ventana del aula
 
     check: function () {
         app.popup.wincon = setInterval(function () {
-            if (!window.opener && !window.opener.app && !window.opener.app.chat) {
+            if (window.opener === null || !(window.opener.app && window.opener.app.chat)) {
                 clearInterval(app.popup.wincon);
                 alert('La ventana del aula ha sido cerrada!', {
                     type: 'error',
@@ -33,24 +33,24 @@ app.popup = {
 };
 
 
-// Window functions
+// Funciones de la ventana
 app.tool = {
 
-    // Make neat the interface
+    // Hacer ordenada la interfaz de la aplicación
     win: function () {
         var dims = Elise.win.dims();
 
-        // Restrictions
+        // Restricciones
         dims.width = dims.width < 600 ? 600 : dims.width;
         dims.height = dims.height < 300 ? 300 : dims.height;
 
-        // Width - Vertical Borders
+        // Ancho contando bordes verticales
         $('#main').css('width', dims.width);
         $('#users').css('width', dims.width * 0.18 );
         $('#chat').css('width', dims.width * 0.64 - 50);
         $('#rooms').css('width', dims.width * 0.18 );
 
-        // Height - Lateral Borders
+        // Alto contando bordes laterales
         $('#main').css('height', dims.height);
         $('#users, #rooms').css('height', dims.height - $('#header').height() -2);
         $('#chat').css('height', dims.height - $('#header').height() - 50);
@@ -61,15 +61,44 @@ app.tool = {
 };
 
 
-// Register DOM Events
+// Registrar Eventos al DOM
 app.dom = {
 
     init: function () {
+        this.window();
+        this.exit();
         this.messages();
         this.files();
     },
 
-    // When the user wants to send a message
+    // Eventos de la ventana
+    window: function () {
+        $(window).on('focus', function (e) {
+            app.state.focus = true;
+        });
+        $(window).on('blur', function (e) {
+            app.state.focus = false;
+        });
+    },
+
+    // Salir de la aplicación
+    exit: function () {
+        $('#exit').on('click', function () {
+            alert('¿Está seguro de querer salir?', {
+                type: 'alert',
+                buttons: [{
+                    value: 'Sí',
+                    click: function () {
+                        window.close();
+                    }
+                }, {
+                    value: 'No'
+                }]
+            });
+        });
+    },
+
+    // Cuando se envía un mensaje
     messages: function () {
         $('#toolbar').on('submit', function () {
             app.emit.msg({
@@ -80,55 +109,53 @@ app.dom = {
         });
     },
 
-    // Create a new chat between this user and others users
+    // Crear una sala personalizada con este usuario y otros seleccionados
     rooms: {
 
         newRoomModal: null,
 
         main: function () {
+            var $name = $('#createRoomName');
+            var $users = $('#createRoomUsers');
+            var users = '<option value=""></option>';
 
-            // Launch Room
+            // Colocar datos de usuarios
+            _.each(app.users.cache, function (user, id) {
+                users += '<option value="' + id + '">' + user.info.firstName + ' ' + user.info.firstSurname +'</option>';
+            });
+            $users.html(users).select2({
+                placeholder: 'Selecciona...',
+                width: 270,
+                maximumSelectionSize: 10
+            });
+
+            // Lanzar sala
             var launchRoom = function (e) {
-                var $name = $('#createRoomName');
-                var $users = $('#createRoomUsers');
+                var name = $('#createRoomName').val();
+                var users = $('#createRoomUsers').val();
 
-                // Validations
-                if ($name.val().length < 10) {
-                    alert('El nombre de la sala debe ser de al menos 10 carácteres.', {type: 'error'});
+                // Validaciones
+                if (name.length < 10 || name.length > 30) {
+                    alert('El nombre de la sala debe tener mínimo 10 pero no más de 30 carácteres.', {type: 'error'});
                     return;
-                } else if($users.val() === null) {
+                } else if(users === null || users === ['']) {
                     alert('Debes seleccionar al menos otro usuario.', {type: 'error'});
                     return;
                 }
 
-                // Create room
+                // Crear sala
                 app.emit.newRoom({
                     type: 'custom',
-                    name: $name.val(),
-                    users: $users.val()
+                    name: name,
+                    users: users
                 });
 
-                // Hide eModal
+                // Esconder ventana creadora
                 this.hide();
             };
 
-            // Activate modal window
+            // Mostrar ventana para crear una nueva sala
             $('#roomsCreate').on('click', function () {
-
-                // Parse users select
-                var users = '<option value=""></option>';
-                _.each(app.users.cache, function (user, id) {
-                    if (user.state !== 'offline') {
-                        users += '<option value="' + id + '">' + user.info.firstName + ' ' + user.info.firstSurname +'</option>';
-                    }
-                });
-                $('#createRoomUsers').html(users).select2({
-                    placeholder: 'Selecciona...',
-                    width: 270,
-                    maximumSelectionSize: 10
-                });
-
-                // Create modal window
                 if (app.dom.rooms.newRoomModal) {
                     app.dom.rooms.newRoomModal.show();
                 } else {
@@ -144,7 +171,7 @@ app.dom = {
                             btnClick: launchRoom
                         }, {
                             btnClass: "emodal_hide",
-                            btnText: "Cerrar",
+                            btnText: "Cancelar",
                             btnColor: "rojo",
                             btnPosition: "left"
                         }]
@@ -156,17 +183,20 @@ app.dom = {
 
     },
 
-    // Load utility files
+    // Cargar archivos extras
     files: function () {
-        
-        // Sounds
+
+        // Sonidos
+        var firefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
         var createSoundFile = function (source) {
             var audio = document.createElement("audio");
-            var sourceMP3 = document.createElement("source");
-            var sourceOGG = document.createElement("source");
-            sourceMP3.src = '/sound/' + source + '.mp3';
-            sourceOGG.src = '/sound/' + source + '.ogg';
-            audio.appendChild(sourceMP3, sourceOGG);
+            var src = firefox ? '/sound/' + source + '.ogg' : '/sound/' + source + '.mp3';
+            audio.src = src;
+            audio.load();
+            audio.refreshSoundToPlay = function () {
+                audio.src = src;
+                audio.play();
+            };
             return audio;
         };
         app.notify.audios = {
@@ -193,22 +223,21 @@ app.notify = {
 
     _play: function (sound) {
         if (sound && Elise.val.number(sound.currentTime)) {
-            sound.currentTime = 0;
-            sound.play();
+            sound.refreshSoundToPlay();
         }
     },
 
-    // A new message has arrived
+    // Un nuevo mensaje ha llegado
     msg: function () {
         this._play(this.audios.msg);
     },
 
-    // A new user has been connected
+    // Un usuario se ha conectado
     user: function () {
         this._play(this.audios.user);
     },
 
-    // A new room has been created with me
+    // Una sala ha sido creada conmigo
     room: function () {
         this._play(this.audios.room);
     }
@@ -217,60 +246,37 @@ app.notify = {
 
 
 // ------------------------------------------------------------------------- //
-// STATE //
+// USER //
 
-app.state = {
+app.user = {
 
     start: function () {
         var user = app.data.user();
 
-        // User Info
+        // Información del usuario
         $('#photo').attr('src', user.photo);
         $('#user').html(
             user.firstName + ' ' + user.secondName + ' ' + user.firstSurname + ' ' + user.secondSurname
             + '<br>' + app.variables.categories[user.category] + ' - ' + user.code
         );
 
-        // Subject Info
+        // Información de la clase
         $('#subject').html(window.opener.app.data.subject + '<br>' + window.opener.app.data.teacher);
 
-        // Show User Interface
-        $('#loader').addClass('none');
+        // Mostrar interfaz de usuario
         $('#main').removeClass('invisible');
 
-        // Window title
+        // Modificar título de ventana
         window.document.title = 'Chat - ' + user.firstName + ' ' + user.firstSurname;
     },
 
-    set: function (state, id) {
-        var i, $user, $state;
+    set: function (state) {
         var classes = ['offline', 'unavail', 'avail'];
-        var $temp = $('#usersList > div.user.isconnected:last');
+        var $state = $('#photo');
 
-        if (id) {
-            $user = $('#u' + id);
-            $state = $('#u' + id + ' > div');
-            // Classify user
-            if(state === 'offline') {
-                $user.removeClass('isconnected');
-            } else {
-                $user.addClass('isconnected');
-            }
-            // Move user
-            if ($temp.length === 0) {
-                $('#usersList').prepend($user);
-            } else {
-                $temp.after($user);
-            }
-        } else {
-            $state = $('#photo');
-        }
-
-        // Remove active class
         for (i = 0; i < classes.length; i += 1) {
             $state.removeClass(classes[i]);
         }
-        // Add actual classes
         $state.addClass(state);
     }
 
@@ -289,13 +295,13 @@ app.users = {
     add: function (data) {
         var name = data.info.firstName + ' ' + data.info.firstSurname;
 
-        // Add to Cache
+        // Agregar usuario a cache
         this.cache[data.id] = {
             state: data.state,
             info: data.info
         };
 
-        // Add to UI
+        // Crear interfaz de usuario
         $('#usersList').append(
             $('<div>', {
                 'id': 'u' + data.id,
@@ -306,20 +312,54 @@ app.users = {
             })
         );
 
-        // Set user state
-        app.state.set(data.state, data.id);
-        // Notify
-        app.notify.user();
+        // Colocar estado de usuario
+        app.users.set(data.id, data.state);
+        // Notificar
+        if (data.state !== 'offline') {
+            app.notify.user();
+        }
     },
 
+    // Un usuario se vuelve online
     online: function (id) {
         this.cache[id].state = 'avail';
-        app.state.set('avail', id);
+        app.users.set(id, 'avail');
     },
 
+    // Un usuario se vuelve offline
     offline: function (id) {
         this.cache[id].state = 'offline';
-        app.state.set('offline', id);
+        app.users.set(id, 'offline');
+    },
+
+    // Actualizar el estado de un usuario
+    set: function (id, state) {
+        var i, $user, $state;
+        var classes = ['offline', 'unavail', 'avail'];
+        var $temp = $('#usersList > div.user.isconnected:last');
+
+        $user = $('#u' + id);
+        $state = $('#u' + id + ' > div');
+
+        // Clasificar usuario
+        if(state === 'offline') {
+            $user.removeClass('isconnected');
+        } else {
+            $user.addClass('isconnected');
+        }
+
+        // Mover usuario según estado
+        if ($temp.length === 0) {
+            $('#usersList').prepend($user);
+        } else {
+            $temp.after($user);
+        }
+
+        // Actualizar estado
+        for (i = 0; i < classes.length; i += 1) {
+            $state.removeClass(classes[i]);
+        }
+        $state.addClass(state);
     }
 
 };
@@ -352,6 +392,7 @@ app.messages = {
 
         var lastMsg = $('#rc' + data.room).children('.block:last');
 
+        // Insertar mensaje dependiendo de la sala
         if (lastMsg.find('.msg').hasClass(user_remoto.id) &&
             lastMsg.find('.msg').hasClass(hour + '_' + curMinute)) {
 
@@ -360,7 +401,7 @@ app.messages = {
 
         } else {
 
-            // Sino, crea el menssaje
+            // Sino, crea bloque de menssaje
             ago = curTime.getFullYear() + '-' + fmt(curTime.getMonth() + 1) + '-' + fmt(curTime.getDate())
                         + 'T' + fmt(curTime.getHours()) + ':' + fmt(curTime.getMinutes()) + ':' + fmt(curTime.getSeconds());
             html = $(this.msgTemplate({
@@ -378,11 +419,12 @@ app.messages = {
 
         }
 
-        if(user_local.id !== user_remoto.id){
-            app.notify.msg();  // Hace notificación
+        // Notificar con sonido si es otro usuario o no está en focus la ventana
+        if (user_remoto.id !== app.data.user().id || !app.state.focus) {
+            app.notify.msg();
         }
-        $('#content-chat').scrollTop($('#rc' + data.room).height()); // Mueve el scroll
-        app.rooms.update(data.room);
+        $('#content-chat').scrollTop($('#rc' + data.room).height());  // Mueve el scroll
+        app.rooms.update(data.room);  // Actulizar la sala que recibe el mensaje
    }
 
 };
@@ -393,58 +435,59 @@ app.messages = {
 
 app.rooms = {
 
-    // Active chat room
+    // Sala de chat activa
     active: null,
-    // { id: {name, type, users}, ... }
+    // { id: {name, type, users[ids]}, ... }
     cache: {},
 
     // data: {id, name, type, users[ids]}
     add: function (data) {
         var i, name = '';
 
-        // Add to list
+        // Agregar sala al cache
         app.rooms.cache[data.id] = {
             name: data.name,
             type: data.type,
             users: data.users
         };
 
-        // Set Room Name
+        // Colocar nombre a la sala
         if (data.type === 'general') {
-            name = 'Chat General';
+            name = app.rooms.cache[data.id].name = 'Chat General';
         } else if (data.type === 'custom') {
             name = data.name;
         }
 
-        // Create Chat Room
+        // Crear contenedor de mensajes de sala
         $('#chatRoom').append($('<div>', {
-            id: 'rc' + data.id,
+            'id': 'rc' + data.id,
             'class': 'chatRoom',
             'style': 'display: none;'
         }));
 
-        // Create List Item
+        // Crear interfaz de la sala
         $('#roomsList').append(
             $('<div>', {
                 'id': 'rl' + data.id,
                 'class': 'none room-box',
                 'html': '<h5>' + name + '</h5><span></span>'
             }).on('click', function () {
-                app.rooms.change(data.id,name);
+                app.rooms.change(data.id);
             })
         );
-        $('#rl' + data.id).fadeIn(250);
+        $('#rl' + data.id).fadeIn(250);  // Mostrar la interfaz
 
-        // Activate Room
+        // Mostrar sala si es de clase
         if (data.type === 'general') {
-            app.rooms.change(data.id,name);
+            app.rooms.change(data.id);
         }
-        // Notify
+        // Notificar si no es una sala de clase
         if (data.type !== 'general') {
             app.notify.room();
         }
     },
 
+    // Remover una sala personalizada de este usuario
     remove: function (id) {
         if (id === app.data.clase()) {
             return;
@@ -455,29 +498,32 @@ app.rooms = {
         });
     },
 
-    // Se han recibido nuevos mensajes en esta sala
+    // Si se han recibido nuevos mensajes en una sala
     update: function (id) {
         var $el = $('#rl' + id + ' span');
 
-        // If the user is not reading this
+        // Si el usuario no está leyendo esto, avisar
         if (id !== app.rooms.active) {
-            $el.html('1');
-        } else {
-            $el.html('');
+            if (Elise.val.number($el.html())) {
+                $el.html( Number($el.html()) === 9 ? '9+' : Number($el.html()) + 1 );
+            } else if ($el.html() !== '9+') {
+                $el.html('1');
+            }
         }
     },
 
-    change: function (id,name) {
-        // Leave item active
+    // Cambiar la sala activa
+    change: function (id) {
+        // Dejar interfaz de sala
         $('#rl' + app.rooms.active + ' span').html('');
 
-        // Change item active
+        // Cambiar a nueva interfaz activa
         $('#roomsList > div').removeClass('active');
         $('#rl' + id).addClass('active');
-        $('#chatTitle h5').text(name);
+        $('#chatTitle h5').text(app.rooms.cache[id].name);
         $('#rl' + id + ' span').html('');
 
-        // Change chat active
+        // Cambiar contenedor de mensajes de sala
         $('.chatRoom').css('display', 'none');
         $('#rc' + id).css('display', 'table-cell');
 
@@ -485,11 +531,11 @@ app.rooms = {
         $('#content-chat').scrollTop($('#rc' + id).height());
         $('#message').val('').focus();
 
-        // Change room active
+        // Colocar como nueva sala activa
         app.rooms.active = id;
     },
 
-    // Sacar usuario de una sala
+    // Sacar el éste usuario de una sala
     // data: {room, id}
     getout: function (data) {
         var leftUsers = _.without(this.cache[data.room].users, data.id);
