@@ -19,6 +19,7 @@ body{background-image: url('/img/wood_pattern.jpg');}
 .avail{ border-right: 5px solid green; }
 
 
+
 /* ------------------------------------------------------------------------- */
 /* ESTRUCTURA */
 
@@ -40,14 +41,12 @@ body{background-image: url('/img/wood_pattern.jpg');}
     font-size: 15px;
     line-height: 20px;
 }
+
 .option{
     display: inline-block !important;
     float: right !important;
 }
-#users{
-    float: left;
-    background-color: #2c2c2d;
-}
+
 .header{
     font-size: 15px;
     font-weight: bold;
@@ -61,6 +60,11 @@ body{background-image: url('/img/wood_pattern.jpg');}
 }
 .header div{
     margin-left: 3px;
+}
+
+#users{
+    float: left;
+    background-color: #2c2c2d;
 }
 #chatTitle, #roomsTitle{
     border-left-width: 0 !important;
@@ -99,7 +103,7 @@ body{background-image: url('/img/wood_pattern.jpg');}
 }
 .user{ 
     padding-left: 10px;
-     }
+}
 #usersList > div.user { 
     opacity: 0.5; 
     -moz-opacity: 0.5; 
@@ -141,6 +145,7 @@ body{background-image: url('/img/wood_pattern.jpg');}
     vertical-align: bottom;
     padding-bottom: 10px;
 }
+
 .toolbar{
     margin: 25px -25px 0 -25px;
     background: #2c2c2d;
@@ -161,6 +166,20 @@ body{background-image: url('/img/wood_pattern.jpg');}
     resize: none;
     width: 100%;
 }
+#send {
+    display: inline-block;
+    margin: 5px;
+}
+#isEnterLabel {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+#isEnterLabel > span {
+    display: inline-block;
+    margin-top: 5px;
+    color: #EEE;
+}
 
 #rooms{
     float: left;
@@ -175,10 +194,10 @@ body{background-image: url('/img/wood_pattern.jpg');}
     position: relative;
     min-height: 30px;
 }
-.room-box> h5 {
+.room-box > h5 {
     margin-left: 40px;
 }
-.room-box> span {
+.room-box > span.roomState {
     width: 20px;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
@@ -194,10 +213,20 @@ body{background-image: url('/img/wood_pattern.jpg');}
     box-shadow: 0 0 6px #000;
     border: 1px solid rgb(139, 34, 8);
 }
-.room-box.active> span {
+.room-box.active > span.roomState {
     background-color: rgb(2, 210, 250);
     border: 1px solid rgb(5, 78, 92);
 }
+.room-box > span.roomOptions {
+    display: block;
+    height: 20px;
+    margin-top: -11px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    width: 20px;
+}
+
 #roomsList .room-box:hover {
     background-color: #404040;
 }

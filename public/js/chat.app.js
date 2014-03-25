@@ -123,6 +123,9 @@ app.events = {
 
             // Activar eventos del DOM de salas
             app.dom.rooms.main();
+
+            // Aplicación Lista
+            app.state.ready = true;
         }
 
     },

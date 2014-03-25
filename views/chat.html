@@ -43,7 +43,7 @@
 
             <!-- // CHAT // -->
             <section id="chat">
-                <div id="chatTitle" class=" "><h5>Chat General</h5></div>
+                <div id="chatTitle" class=""><h5>Chat General</h5></div>
                 <div id="content-chat">
                     <div id="chatRoom" class="block"></div>
                 </div>
@@ -51,9 +51,15 @@
                  <form id="toolbar" class="" name="toolbar">
                     <div class="row-fluid">
                         <div class="span10">
-                        <textarea  id="message" type="text" autofocus autocomplete="off" placextarea placeholder="Escribe un mensaje..."></textarea>
+                            <textarea  id="message" type="text" autofocus autocomplete="off" placextarea placeholder="Escribe un mensaje..."></textarea>
                         </div>
-                        <div class="span2"><button class="boton boton-grande celeste" type="submit">Enviar</button></div>
+                        <div class="span2">
+                            <button id="send" class="boton celeste" type="submit">Enviar</button>
+                            <label id="isEnterLabel" for="isEnter">
+                                <input id="isEnter" name="isEnter" type="checkbox" checked>
+                                <span>Enter</span>
+                            </label>
+                        </div>
                     </div> 
                     </form>
                 </div>
@@ -102,6 +108,13 @@
                         <p><{content}></p>
                     </div>
                 </div>
+            </div>
+        </script>
+        <script id="roomItemTemplate" type="text/template">
+            <div id="rl<{ id }>" class="room-box" style="display: none">
+                <h5><{ name }></h5>
+                <span class="roomState"></span>
+                <span class="roomOptions icon icon_p1"></span>
             </div>
         </script>
 

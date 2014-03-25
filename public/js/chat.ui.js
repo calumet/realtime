@@ -71,6 +71,7 @@ app.dom = {
         this.files();
     },
 
+
     // Eventos de la ventana
     window: function () {
         $(window).on('focus', function (e) {
@@ -80,6 +81,7 @@ app.dom = {
             app.state.focus = false;
         });
     },
+
 
     // Salir de la aplicación
     exit: function () {
@@ -98,16 +100,39 @@ app.dom = {
         });
     },
 
+
     // Cuando se envía un mensaje
     messages: function () {
-        $('#toolbar').on('submit', function () {
+        var isEnter = document.getElementById('isEnter');
+        var $message = $('#message');
+
+        var send = function () {
             app.emit.msg({
-                content: $('#message').val()
+                content: $message.val()
             });
-            $('#message').val('').focus();
+
+            // Resetear input del mensaje
+            setTimeout(function () {
+                $message.trigger('blur').val('');
+                setTimeout(function () {
+                    $message.trigger('focus');
+                }, 1);
+            }, 1);
+        };
+
+        // Cuando se presione la tecla Enter
+        $('#toolbar').on('keypress', function (e) {
+            if (isEnter.checked && (e.which === 13 || e.keyCode === 13)) {
+                send();
+            }
+        }).on('submit', function (e) {
+            // Cuando se trate de enviar el formulario de mensaje
+            e.preventDefault();
             return false;
         });
+        $('#send').on('click', send);
     },
+
 
     // Crear una sala personalizada con este usuario y otros seleccionados
     rooms: {
@@ -183,6 +208,7 @@ app.dom = {
 
     },
 
+
     // Cargar archivos extras
     files: function () {
 
@@ -208,6 +234,7 @@ app.dom = {
     }
 
 };
+
 
 
 // ------------------------------------------------------------------------- //
@@ -245,11 +272,13 @@ app.notify = {
 };
 
 
+
 // ------------------------------------------------------------------------- //
 // USER //
 
 app.user = {
 
+    // Configurar interfaz de usuario
     start: function () {
         var user = app.data.user();
 
@@ -270,7 +299,9 @@ app.user = {
         window.document.title = 'Chat - ' + user.firstName + ' ' + user.firstSurname;
     },
 
+    // Poner usuario en un estado de conexión
     set: function (state) {
+        var i;
         var classes = ['offline', 'unavail', 'avail'];
         var $state = $('#photo');
 
@@ -281,6 +312,7 @@ app.user = {
     }
 
 };
+
 
 
 // ------------------------------------------------------------------------- //
@@ -320,17 +352,20 @@ app.users = {
         }
     },
 
+
     // Un usuario se vuelve online
     online: function (id) {
         this.cache[id].state = 'avail';
         app.users.set(id, 'avail');
     },
 
+
     // Un usuario se vuelve offline
     offline: function (id) {
         this.cache[id].state = 'offline';
         app.users.set(id, 'offline');
     },
+
 
     // Actualizar el estado de un usuario
     set: function (id, state) {
@@ -363,6 +398,7 @@ app.users = {
     }
 
 };
+
 
 
 // ------------------------------------------------------------------------- //
@@ -430,6 +466,7 @@ app.messages = {
 };
 
 
+
 // ------------------------------------------------------------------------- //
 // ROOMS //
 
@@ -437,6 +474,10 @@ app.rooms = {
 
     // Sala de chat activa
     active: null,
+
+    // Room Item Template
+    roomItemTemplate: _.template($('#roomItemTemplate').html()),
+
     // { id: {name, type, users[ids]}, ... }
     cache: {},
 
@@ -467,15 +508,21 @@ app.rooms = {
 
         // Crear interfaz de la sala
         $('#roomsList').append(
-            $('<div>', {
-                'id': 'rl' + data.id,
-                'class': 'none room-box',
-                'html': '<h5>' + name + '</h5><span></span>'
-            }).on('click', function () {
+            $(this.roomItemTemplate({
+                id: data.id,
+                name: name
+            })).on('click', function () {
                 app.rooms.change(data.id);
             })
         );
         $('#rl' + data.id).fadeIn(250);  // Mostrar la interfaz
+
+        // Opciones de sala
+        $('#rl' + data.id + ' .roomOptions').on('click', function (e) {
+            e.stopPropagation();
+
+            //
+        });
 
         // Mostrar sala si es de clase
         if (data.type === 'general') {
@@ -487,6 +534,7 @@ app.rooms = {
         }
     },
 
+
     // Remover una sala personalizada de este usuario
     remove: function (id) {
         if (id === app.data.clase()) {
@@ -497,6 +545,7 @@ app.rooms = {
             app.rooms.change(app.data.clase());
         });
     },
+
 
     // Si se han recibido nuevos mensajes en una sala
     update: function (id) {
@@ -511,6 +560,7 @@ app.rooms = {
             }
         }
     },
+
 
     // Cambiar la sala activa
     change: function (id) {
@@ -534,6 +584,7 @@ app.rooms = {
         // Colocar como nueva sala activa
         app.rooms.active = id;
     },
+
 
     // Sacar el éste usuario de una sala
     // data: {room, id}
