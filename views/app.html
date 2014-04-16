@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Application</title>
+    </head>
+    <body>
+
+        <p>Application connecting with server... look at console.</p>
+
+        <script src="http://localhost:9000/socket.io/socket.io.js"></script>
+        <script>
+
+            window.onload = function (e) {
+
+                io.connect('http://localhost:9000/app', {
+                    query: 'userid=U123456'
+                });
+
+                io.on('connect', function (data) {
+
+                    console.log('>>> Connected with Server!');
+                    console.dir(data);
+
+                });
+
+            };
+
+        </script>
+
+    </body>
+</html>

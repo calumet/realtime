@@ -8,6 +8,7 @@
 
 var app = app || {};
 
+
 // ------------------------------------------------------------------------- //
 // CORE //
 
@@ -75,12 +76,15 @@ app.connect = function (started) {
 };
 
 
+
 // ------------------------------------------------------------------------- //
 // SOCKET EVENTS //
 
 app.events = {
 
     init: function () {
+
+        // on('connect') when the client is connected with the server
 
         app.socket.on('connected', this.mine.connected);
         app.socket.on('onlined', this.mine.onlined);
@@ -192,6 +196,7 @@ app.events = {
 };
 
 
+
 // ------------------------------------------------------------------------- //
 // SOCKET TRIGGERS //
 
@@ -237,3 +242,28 @@ app.emit = {
     }
 
 };
+
+/*!
+ * Grupo de Desarrollo de Software Calumet
+ * Aula Chat | Initializator
+ * Romel Pérez, @prhonedev
+ * Duvan Vargas, @DuvanJamid
+ * Marzo del 2014
+ **/
+
+var app = app || {};
+
+// Aplicación descargada
+jQuery(document).ready(function () {
+
+    // Iniciar Aplicación
+    app.init();
+
+    // Complementario
+    $('*[title]').toolTip();
+
+});
+
+// Cuando la ventana se redimensione
+jQuery(window).resize(app.tool.win);
+

@@ -2,16 +2,20 @@
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | Database
  * Romel Pérez, @prhonedev
- * Marzo del 2014
+ * Abril del 2014
  **/
 
+var config = require('./config');
 var _ = require('underscore');
+var appMDB = require('mongoose');
+var aulachatMDB = require('mongoose');
 
 // ------------------------------------------------------------------------- //
-// DATA //
+// MYSQL DATABASE //
 
 // Esquema de datos de usuarios
-var data = {
+// 'userid': {userid, code, firstName, secondName, firstSurname, secondSurname, category, clases[], photo}
+var _data = {
     "U40200": {
         "id": "U40200",
         "code": "2120099",
@@ -20,7 +24,7 @@ var data = {
         "firstSurname": "Gonzales",
         "secondSurname": "",
         "category": "CT1",
-        "clase": ["262456_W9", "262456_G3", "287892_A1"],
+        "clases": ["262456_W9", "262456_G3", "287892_A1"],
         "photo": "/img/photos/luis.jpg"
     },
     "U40201": {
@@ -31,7 +35,7 @@ var data = {
         "firstSurname": "Pérez",
         "secondSurname": "Estrada",
         "category": "CT2",
-        "clase": ["262456_W9", "262456_G3", "287892_A1"],
+        "clases": ["262456_W9", "262456_G3", "287892_A1"],
         "photo": "/img/photos/romel.jpg"
     },
     "U40203": {
@@ -42,7 +46,7 @@ var data = {
         "firstSurname": "Vargas",
         "secondSurname": "Castillo",
         "category": "CT2",
-        "clase": ["262456_W9", "262456_G3", "287892_A1"],
+        "clases": ["262456_W9", "262456_G3", "287892_A1"],
         "photo": "/img/photos/duvan.jpg"
     },
     "U40205": {
@@ -53,7 +57,7 @@ var data = {
         "firstSurname": "Laitón",
         "secondSurname": "Zaraté",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/yadiana.jpg"
     },
     "U40214": {
@@ -64,7 +68,7 @@ var data = {
         "firstSurname": "Agudelo",
         "secondSurname": "Hernandez",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/sebastian.jpg"
     },
     "U40207": {
@@ -75,7 +79,7 @@ var data = {
         "firstSurname": "Portilla",
         "secondSurname": "",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/john.jpg"
     },
     "U40209": {
@@ -86,7 +90,7 @@ var data = {
         "firstSurname": "Rojas",
         "secondSurname": "",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/carlos.jpg"
     },
     "U40210": {
@@ -97,7 +101,7 @@ var data = {
         "firstSurname": "Villa",
         "secondSurname": "",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/angie.jpg"
     },
     "U40211": {
@@ -108,7 +112,7 @@ var data = {
         "firstSurname": "Neira",
         "secondSurname": "Bermudez",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/katherin.jpg"
     },
     "U40212": {
@@ -119,7 +123,7 @@ var data = {
         "firstSurname": "Rueda",
         "secondSurname": "",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/laura.jpg"
     },
     "U40213": {
@@ -130,7 +134,7 @@ var data = {
         "firstSurname": "Rodriguez",
         "secondSurname": "",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/paola.jpg"
     },
     "U40202": {
@@ -141,7 +145,7 @@ var data = {
         "firstSurname": "Contreras",
         "secondSurname": "Castro",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/natalia.jpg"
     },
     "U40206": {
@@ -152,7 +156,7 @@ var data = {
         "firstSurname": "Ruíz",
         "secondSurname": "Nieto",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/fernando.jpg"
     },
     "U40204": {
@@ -163,7 +167,7 @@ var data = {
         "firstSurname": "Vega",
         "secondSurname": "López",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/karen.jpg"
     },
     "U40208": {
@@ -174,43 +178,174 @@ var data = {
         "firstSurname": "Saker",
         "secondSurname": "",
         "category": "CT2",
-        "clase": ["262456_W9"],
+        "clases": ["262456_W9"],
         "photo": "/img/photos/habib.jpg"
     }
 };
 
-// Filtrar los datos de un usuario
-var filter = function (obj) {
-    var filteredUser = _.pick(obj, 'id', 'code', 'firstName', 'secondName', 'firstSurname', 'secondSurname', 'photo', 'category');
-    return filteredUser;
-};
+// MySQL Procedures
+exports.mysql = {};
+
 
 
 // ------------------------------------------------------------------------- //
-// EXPORTS //
+// MONGODB DATABASE //
+
+var handleMDBErrors = function (err) {
+    console.log('>>> Ha ocurrido un error al conectarse a MongoDB!');
+    console.dir(err);
+};
+
+// Conectarse a la base de datos de Mongo 'app'
+appMDB.connect('mongodb://localhost/app');
+appMDB.connection.on('error', handleMDBErrors);
+
+// Conexiones con colecciones
+var appMDBColls = {
+
+    connections: appMDB.model('connections', new appMDB.Schema(
+        {
+            id: String,
+            ip: String,
+            devices: [
+                {
+                    socket: String,
+                    time: Date,
+                    agent: String
+                }
+            ]
+        },
+        {
+            collection: 'connections'
+        }
+    ))
+
+};
+
+
+// Conectarse a la base de datos de Mongo 'aulachat'
+aulachatMDB.connect('mongodb://localhost/aulachat');
+aulachatMDB.connection.on('error', handleMDBErrors);
+
+// Conexiones con colecciones
+var aulachatMDBColls = {
+
+    users: aulachatMDB.model('users', new aulachatMDB.Schema(
+        {
+            id: String,
+            ip: String,
+            time: Date,
+            agent: String
+        },
+        {
+            collection: 'users'
+        }
+    )),
+
+    rooms: aulachatMDB.model('rooms', new aulachatMDB.Schema(
+        {
+            id: String,
+            type: String,
+            name: String,
+            users: [String],
+            messages: [
+                {
+                    user: String,
+                    content: String,
+                    time: Date,
+                    params: {}
+                }
+            ]
+        },
+        {
+            collection: 'rooms'
+        }
+    ))
+
+};
+
+// MongoDB Procedures
+exports.mongo = {};
+
+
+
+// ------------------------------------------------------------------------- //
+// GENERAL PROCEDURES //
+
+// Filtrar los datos de un usuario
+var _filterUserData = function (user) {
+    return _.pick(user, 'id', 'code', 'firstName', 'secondName', 'firstSurname', 'secondSurname', 'photo', 'category');
+};
+
 
 // Returnar un usuario por código
+// MySQL
 exports.userByCode = function (code) {
     var user;
-    for (user in data) {
-        if (data[user].code === code) {
-            return filter(data[user]);
+    for (user in _data) {
+        if (_data[user].code === code) {
+            return _filterUserData(_data[user]);
         }
     }
 };
 
+
 // Retornar un usuario por id
+// MySQL
 exports.userById = function (id) {
-    return filter(data[id]);
+    return _filterUserData(_data[id]);
 };
 
-// Retornar todos los usuarios de una clase (profesor/a y estudiantes)
+
+// Retornar todos los usuarios de una clase (profesor/a/s y estudiantes)
+// MySQL
 exports.usersByClass = function (clase) {
     var user, users = {};
-    for (user in data) {
-        if (_.indexOf(data[user].clase, clase) !== -1) {
-            users[user] = filter(data[user]);
+    for (user in _data) {
+        if (_.indexOf(_data[user].clases, clase) !== -1) {
+            users[user] = _filterUserData(_data[user]);
         }
     }
     return users;
+};
+
+
+
+// ------------------------------------------------------------------------- //
+// APP PROCEDURES //
+
+exports.app = {
+
+    // Un usuario instancia la aplicación
+    // data: {id, ip, time, agent}
+    instantiate: function (data) {
+        appMDBColls.connections.findOne({id: data.id}, function (err, doc) {
+            if (err) {
+                console.log(err);
+            }
+            if (doc) {
+                // found
+            } else {
+                // not found
+            }
+        });
+    },
+
+    // Un usuario cierra una instancia de la aplicación
+    uninstantiate: function () {},
+
+    // Todas las instancias de la aplicación de un usuario
+    instances: function () {}
+
+};
+
+
+
+// ------------------------------------------------------------------------- //
+// AULACHAT PROCEDURES //
+
+exports.aulachat = {
+
+    //
+
 };

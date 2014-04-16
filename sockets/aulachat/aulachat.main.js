@@ -2,11 +2,12 @@
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | Server Sockets Application
  * Romel Pérez, @prhonedev
- * Marzo del 2014
+ * Abril del 2014
  **/
 
 var _ = require('underscore');
-var db = require('./database.js');
+var db = require('../../databases');
+
 
 // ------------------------------------------------------------------------- //
 // APPLICATION //
@@ -232,43 +233,55 @@ var app = {
 };
 
 
+
 // ------------------------------------------------------------------------- //
 // EVENTS //
 
-exports.listen = function (io) {
+module.exports = function (io) {
 
-    io.sockets.on('connection', function (socket) {
+    // Authorization
+    io.of('/aulachat').authorization(function (handshake, connection) {
 
-        // CONNECTED
-        socket.emit('connected');
+        var errors = null;
+        var authorized = true;
 
+        connection(errors, authorized);
 
-        var context = {
-            io: io,
-            socket: socket
-        };
+    })
+
+    // Connection
+    .on('connection', function (socket) {
+/*
+        var context = {io: io, socket: socket};
 
         // Usuario Online
-        socket.on('online', function () { app.events.online.apply(context, arguments); });
+        socket.on('online', function () {
+            app.events.online.apply(context, arguments);
+        });
 
         // Usuario Offline
-        socket.on('offline', function () { app.events.offline.apply(context, arguments); });
-        socket.on('disconnect', function () { app.events.offline.apply(context, arguments); });
+        socket.on('offline', function () {
+            app.events.offline.apply(context, arguments);
+        });
+        socket.on('disconnect', function () {
+            app.events.offline.apply(context, arguments);
+        });
 
         // Usuario Mensaje
-        socket.on('msg', function () { app.events.msg.apply(context, arguments); });
+        socket.on('msg', function () {
+            app.events.msg.apply(context, arguments);
+        });
 
         // Sala Nueva
-        socket.on('roomNew', function () { app.events.roomNew.apply(context, arguments); });
+        socket.on('roomNew', function () {
+            app.events.roomNew.apply(context, arguments);
+        });
 
         // Sala Usuario que ha Salido
-        socket.on('roomGetout', function () { app.events.roomGetout.apply(context, arguments); });
-
+        socket.on('roomGetout', function () {
+            app.events.roomGetout.apply(context, arguments);
+        });
+*/
     });
 
 };
-
-/* // NOTES //
-How to emit messages in socket.io:
-https://github.com/LearnBoost/socket.io/wiki/How-do-I-send-a-response-to-all-clients-except-sender%3F
-*/
