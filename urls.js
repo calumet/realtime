@@ -1,11 +1,11 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Aula Chat | URLs
+ * Realtime | URLs
  * Romel Pérez, @prhonedev
  * Abril del 2014
  **/
 
-var db = require('./databases');
+var db = require('./databases/mysql');
 
 // ------------------------------------------------------------------------- //
 // RESTful API //

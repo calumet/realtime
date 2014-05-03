@@ -1,7 +1,7 @@
 {
-    "name": "Chat",
+    "name": "realtime",
     "version": "0.4.0",
-    "description": "Un chat para un aula estudiantil.",
+    "description": "Un sistema de comunicación en tiempo real para los portales de Calumet.",
     "author": {
         "name": "Romel Perez",
         "email": "ronelprhone@gmail.com",
@@ -16,7 +16,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/prhonedev/chat.git"
+        "url": "https://github.com/calumet/realtime.git"
     },
     "private": false,
     "scripts": {

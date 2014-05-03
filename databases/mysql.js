@@ -1,14 +1,13 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Aula Chat | Database
+ * Realtime | Databases
  * Romel Pérez, @prhonedev
  * Abril del 2014
  **/
 
-var config = require('./config');
+var config = require('../config');
 var _ = require('underscore');
-var appMDB = require('mongoose');
-var aulachatMDB = require('mongoose');
+
 
 // ------------------------------------------------------------------------- //
 // MYSQL DATABASE //
@@ -183,90 +182,6 @@ var _data = {
     }
 };
 
-// MySQL Procedures
-exports.mysql = {};
-
-
-
-// ------------------------------------------------------------------------- //
-// MONGODB DATABASE //
-
-var handleMDBErrors = function (err) {
-    console.log('>>> Ha ocurrido un error al conectarse a MongoDB!');
-    console.dir(err);
-};
-
-// Conectarse a la base de datos de Mongo 'app'
-appMDB.connect('mongodb://localhost/app');
-appMDB.connection.on('error', handleMDBErrors);
-
-// Conexiones con colecciones
-var appMDBColls = {
-
-    connections: appMDB.model('connections', new appMDB.Schema(
-        {
-            id: String,
-            ip: String,
-            devices: [
-                {
-                    socket: String,
-                    time: Date,
-                    agent: String
-                }
-            ]
-        },
-        {
-            collection: 'connections'
-        }
-    ))
-
-};
-
-
-// Conectarse a la base de datos de Mongo 'aulachat'
-aulachatMDB.connect('mongodb://localhost/aulachat');
-aulachatMDB.connection.on('error', handleMDBErrors);
-
-// Conexiones con colecciones
-var aulachatMDBColls = {
-
-    users: aulachatMDB.model('users', new aulachatMDB.Schema(
-        {
-            id: String,
-            ip: String,
-            time: Date,
-            agent: String
-        },
-        {
-            collection: 'users'
-        }
-    )),
-
-    rooms: aulachatMDB.model('rooms', new aulachatMDB.Schema(
-        {
-            id: String,
-            type: String,
-            name: String,
-            users: [String],
-            messages: [
-                {
-                    user: String,
-                    content: String,
-                    time: Date,
-                    params: {}
-                }
-            ]
-        },
-        {
-            collection: 'rooms'
-        }
-    ))
-
-};
-
-// MongoDB Procedures
-exports.mongo = {};
-
 
 
 // ------------------------------------------------------------------------- //
@@ -279,7 +194,6 @@ var _filterUserData = function (user) {
 
 
 // Returnar un usuario por código
-// MySQL
 exports.userByCode = function (code) {
     var user;
     for (user in _data) {
@@ -291,14 +205,12 @@ exports.userByCode = function (code) {
 
 
 // Retornar un usuario por id
-// MySQL
 exports.userById = function (id) {
     return _filterUserData(_data[id]);
 };
 
 
 // Retornar todos los usuarios de una clase (profesor/a/s y estudiantes)
-// MySQL
 exports.usersByClass = function (clase) {
     var user, users = {};
     for (user in _data) {
@@ -307,45 +219,4 @@ exports.usersByClass = function (clase) {
         }
     }
     return users;
-};
-
-
-
-// ------------------------------------------------------------------------- //
-// APP PROCEDURES //
-
-exports.app = {
-
-    // Un usuario instancia la aplicación
-    // data: {id, ip, time, agent}
-    instantiate: function (data) {
-        appMDBColls.connections.findOne({id: data.id}, function (err, doc) {
-            if (err) {
-                console.log(err);
-            }
-            if (doc) {
-                // found
-            } else {
-                // not found
-            }
-        });
-    },
-
-    // Un usuario cierra una instancia de la aplicación
-    uninstantiate: function () {},
-
-    // Todas las instancias de la aplicación de un usuario
-    instances: function () {}
-
-};
-
-
-
-// ------------------------------------------------------------------------- //
-// AULACHAT PROCEDURES //
-
-exports.aulachat = {
-
-    //
-
 };

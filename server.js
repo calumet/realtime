@@ -1,20 +1,21 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Aula Chat | Server
+ * Realtime | Server
  * Romel Pérez, @prhonedev
  * Abril del 2014
  **/
+
+var http = require('http');
+var express = require('express');
+var swig = require('swig');
+var socketio = require('socket.io');
+
 
 // ------------------------------------------------------------------------- //
 // SERVER APPLICATION //
 
 // Módulos
-/*var http = require('http');
-var express = require('express');
-var swig = require('swig');
-var socketio = require('socket.io');
-
-var app = express();
+/*var app = express();
 var config = require('./config')[app.get('env')];
 
 var server = http.createServer(app);
@@ -32,7 +33,8 @@ app.use(express.static(__dirname + '/public'));
 
 
 // Sockets
-require('./sockets/sockets')(io);
+require('./sockets/app')(io);
+require('./sockets/aulachat')(io);
 
 
 // URLs
@@ -47,7 +49,7 @@ server.listen(config.port, function () {
 
 
 
-// ------------------------------------------------------- //
+// ------------------------------------------------------------------------- //
 // MONGODB TESTS //
 
 var mongoose = require('mongoose');
