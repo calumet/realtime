@@ -1,17 +1,17 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Aula Chat | Aulachat Database
+ * Realtime | Database | Aulachat
  * Romel Pérez, @prhonedev
- * Abril del 2014
+ * 2014
  **/
 
-var config = require('../config');
 var _ = require('underscore');
 var Esmeralda = require('mongoose');
+var config = require('../config');
 
 
 // ------------------------------------------------------------------------- //
-// CONNECTING TO DATABASES //
+// CONNECTING //
 
 // Conectarse a la base de datos de Mongo 'Esmeralda'
 Esmeralda.connect('mongodb://localhost/esmeralda');

@@ -5,6 +5,6 @@
 	},
 	"development": {
 		"host": "http://localhost",
-		"port": 7000
+		"port": 9000
 	}
 }

@@ -1,8 +1,8 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Application | Server Sockets Application
+ * Realtime | Sockets | App
  * Romel Pérez, @prhonedev
- * Abril del 2014
+ * 2014
  **/
 
 var _ = require('underscore');

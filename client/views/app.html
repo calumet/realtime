@@ -8,12 +8,12 @@
 
         <p>Application connecting with server... look at console.</p>
 
-        <script src="http://localhost:9000/socket.io/socket.io.js"></script>
+        <script src="http://localhost:7000/socket.io/socket.io.js"></script>
         <script>
 
             window.onload = function (e) {
 
-                io.connect('http://localhost:9000/app', {
+                io.connect('http://localhost:7000/app', {
                     query: 'userid=U123456'
                 });
 

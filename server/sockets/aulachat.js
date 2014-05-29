@@ -1,12 +1,13 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Aula Chat | Server Sockets Application
+ * Realtime | Sockets | Aulachat
  * Romel Pérez, @prhonedev
- * Abril del 2014
+ * 2014
  **/
 
 var _ = require('underscore');
-var db = require('../../databases');
+var mysql = require('../databases/mysql');
+var acdb = require('../databases/aulachat');
 
 
 // ------------------------------------------------------------------------- //
@@ -251,7 +252,7 @@ module.exports = function (io) {
 
     // Connection
     .on('connection', function (socket) {
-/*
+
         var context = {io: io, socket: socket};
 
         // Usuario Online
@@ -281,7 +282,7 @@ module.exports = function (io) {
         socket.on('roomGetout', function () {
             app.events.roomGetout.apply(context, arguments);
         });
-*/
+
     });
 
 };

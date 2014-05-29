@@ -11,22 +11,20 @@
         {
             "name": "Duvan Vargas",
             "email": "mi13dj22@gmail.com",
-            "url": "http://github.com/duvanjamid"
+            "url": "http://dujatuts.blogspot.com"
         }
     ],
+    "private": false,
     "repository": {
         "type": "git",
         "url": "https://github.com/calumet/realtime.git"
     },
-    "private": false,
-    "scripts": {
-        "start": "node server"
-    },
     "dependencies": {
-        "express": "3.1.x",
-        "swig": "1.3.x",
-        "mongoose": "3.8.x",
-        "socket.io": "0.9.x",
-        "underscore": "1.6.x"
+        "socket.io": "1.x",
+        "underscore": "1.x",
+        "mongoose": "3.x",
+        "mysql": "2.x",
+        "express": "3.x",
+        "swig": "1.x"
     }
 }

@@ -1,16 +1,20 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Realtime | Databases
+ * Realtime | Database | MySQL
  * Romel Pérez, @prhonedev
- * Abril del 2014
+ * 2014
  **/
 
-var config = require('../config');
 var _ = require('underscore');
+var mysql = require('mysql');
+var config = require('../config');
 
 
 // ------------------------------------------------------------------------- //
-// MYSQL DATABASE //
+// MYSQL DATABASE TEST //
+
+// CAMBIAR A CONEXION CON DB 'diamante' IN MYSQL
+// WHICH IS WHO HAS THE COMPLETE DATA
 
 // Esquema de datos de usuarios
 // 'userid': {userid, code, firstName, secondName, firstSurname, secondSurname, category, clases[], photo}
