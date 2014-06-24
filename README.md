@@ -7,16 +7,18 @@ Un sistema de aplicaciones para comunicación en tiempo real para los portales d
 
 **client** se refiere al servidor que funcionará en JSP, es decir, es sólo una simulación del servidor real que funcionará en el puerto 80 con JSP. Se hacen pruebas con este servidor creado en nodejs haciendose pasar como un cliente del servidor de sockets. Las pruebas se hacen con el puerto 4000.
 
-**test** son pruebas de componentes y funcionalidades como RESTful API, base de datos, entre otros.
+**test** son pruebas de componentes y funcionalidades.
 
 Instalación
 -----------
 
-Se necesita instalar nodejs y mongodb. Instrucciones no documentadas.
+Se necesita instalar Node.js y MongoDB. Instrucciones no documentadas.
 
-Para instalar los paquetes de cada servidor, entra en cada carpeta por terminal y ejecuta el siguiente comando:
+Para instalar los paquetes de cada servidor (client y server), entra en cada carpeta por terminal y ejecuta el siguiente comando:
 
-``npm install``
+```bash
+npm install
+```
 
 Esto instalará todos los paquetes de nodejs que sean necesarios para el funcionamiento del proyecto.
 

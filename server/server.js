@@ -5,36 +5,32 @@
  * 2014
  **/
 
+// Módulos
 var http = require('http');
-var socketio = require('socket.io');
 var express = require('express');
-//var swig = require('swig'); // not yet
-
-
-// Servidor
-var app = express();
-var config = require('./config')[app.get('env')];
-var server = http.createServer(app);
-var io = socketio.listen(server);
+var socketio = require('socket.io');
 
 
 // Configuración
-app.use(app.router);
+var config = require('./config');
+var env = process.env.NODE_ENV || 'development';
 
 
-// Sockets
-require('./sockets/app')(io);
-require('./sockets/aulachat')(io);
+// Instanciar
+var app = express();
+var io = socketio();
+var server = http.createServer(app);
 
 
-// Routes
-require('./routes/app')(app);
-require('./routes/aulachat')(app);
+// Componentes funcionales
+require('./portal')({app: app, io: io});
+require('./aulachat')({app: app, io: io});
 
 
 // Iniciar
-server.listen(config.port, function () {
-    console.log('Servidor de sockets:');
-    console.log('>>> Servidor en modo ' + app.get('env') + '!');
-    console.log('>>> Servidor escuchando en el puerto ' + config.port + '!');
+io.listen(server);
+app.listen(config.port, function () {
+    console.log('>>> Servidor de sockets:');
+    console.log('>>> Servidor en modo ' + env);
+    console.log('>>> Servidor escuchando en el puerto ' + config.port);
 });

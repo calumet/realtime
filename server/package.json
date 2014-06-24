@@ -1,9 +1,9 @@
 {
     "name": "realtime",
-    "version": "0.4.0",
+    "version": "0.4.3",
     "description": "Un sistema de comunicación en tiempo real para los portales de Calumet.",
     "author": {
-        "name": "Romel Perez",
+        "name": "Romel Pérez",
         "email": "ronelprhone@gmail.com",
         "url": "http://prhone.blogspot.com"
     },
@@ -24,7 +24,7 @@
         "underscore": "1.x",
         "mongoose": "3.x",
         "mysql": "2.x",
-        "express": "3.x",
+        "express": "4.x",
         "swig": "1.x"
     }
 }
