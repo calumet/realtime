@@ -1,6 +1,6 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Realtime | Portal | Databases
+ * Realtime | Databases | Portal
  * Romel Pérez, @prhonedev
  * 2014
  **/
@@ -118,13 +118,12 @@ exports.addInstance = function (user, socket, callback) {
 
 
 // Un usuario cierra una instancia de la aplicación
-exports.rmInstance = function (user, callback) {
-    //
-};
-
-
-
-// Todas las instancias del 'portal' de un usuario
-exports.instances = function (user, callback) {
-    //
+exports.rmInstance = function (user, socket, callback) {
+    User.findOneAndUpdate({
+        _id: user.id
+    }, {
+        $pull: {
+            'devices.socket': socket
+        }
+    }, callback);
 };

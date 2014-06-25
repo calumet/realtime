@@ -7,25 +7,30 @@
     <body>
 
         <p>Application connecting with server... look at console.</p>
+        <div id="answer">Server answers</div>
 
-        <script src="http://localhost:7000/socket.io/socket.io.js"></script>
+        <script src="http://127.0.0.1:9000/socket.io/socket.io.js"></script>
         <script>
+            var log = function (t) {
+                var el = document.getElementById('answer');
+                el.innerHTML += '<div>' + t + '</div>';
+            }
 
             window.onload = function (e) {
 
-                io.connect('http://localhost:7000/app', {
+                var socket = io('http://127.0.0.1:9000/portal', {
                     query: 'userid=U123456'
                 });
 
-                io.on('connect', function (data) {
+                socket.on('connect', function (data) {
 
+                    log('connected ' + data);
                     console.log('>>> Connected with Server!');
                     console.dir(data);
 
                 });
 
             };
-
         </script>
 
     </body>

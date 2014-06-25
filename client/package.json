@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "express": "3.x",
+        "express": "4.x",
         "swig": "1.x"
     }
 }

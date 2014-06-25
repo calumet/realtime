@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Portal</title>
+        <link href="/favicon.ico" rel="shortcut icon">
+    </head>
+    <body>
+        <div id="answer">Server answers</div>
+
+        <script src="http://127.0.0.1:9000/socket.io/socket.io.js"></script>
+        <script>
+            window.onload = function (e) {
+
+                var query = {
+                    query: 'userid=U123456'
+                };
+                var socket = io('http://127.0.0.1:9000/portal', query);
+
+                socket.on('connect', function (data) {
+                    console.log('>>> Connected with Server:');
+                    console.dir(data);
+
+                });
+
+                socket.on('youareconnected', function (data) {
+                    console.log('>>> custom event:');
+                    console.dir(data);
+                });
+
+                socket.on('error', function (err) {
+                    console.log('>>> Error in connection:');
+                    console.dir(err);
+                });
+
+            };
+        </script>
+    </body>
+</html>

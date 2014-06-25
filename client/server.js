@@ -5,36 +5,33 @@
  * 2014
  **/
 
-var http = require('http');
+// Módulos
 var express = require('express');
 var swig = require('swig');
+var config = require('./config');
 
 
-// Módulos
+
+// Instanciar y configurar
 var app = express();
-var config = require('./config')[app.get('env')];
-var server = http.createServer(app);
-
-
-
-// Configuración
+app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
-app.engine('html', swig.renderFile);
-app.use(app.router);
 app.use(express.static(__dirname + '/public'));
 
 
-
 // URLs
-app.get('/', function (req, res) {
+app.get('/test', function (req, res) {
+    res.render('test');
+});
+/*app.get('/', function (req, res) {
     res.redirect('/login');
 });
 app.get('/login', function (req, res) {
     res.render('login');
 });
-app.get('/app', function (req, res) {
-    res.render('app', {
+app.get('/portal', function (req, res) {
+    res.render('portal', {
         id: req.query.id,
         clase: req.query.clase,
         name: req.query.name,
@@ -51,13 +48,12 @@ app.get('/aula', function (req, res) {
 });
 app.get('/chat', function (req, res) {
     res.render('chat');
-});
-
+});*/
 
 
 // Iniciar servidor
-server.listen(config.port, function () {
-    console.log('Servidor cliente simulando el de JSP:');
-    console.log('>>> Servidor en modo ' + app.get('env') + '!');
-    console.log('>>> Servidor escuchando en el puerto ' + config.port + '!');
+app.listen(config.port, function () {
+    console.log('>>> Servidor cliente simulando el de JSP:');
+    console.log('>>> Servidor en modo ' + app.get('env'));
+    console.log('>>> Servidor escuchando en el puerto ' + config.port);
 });

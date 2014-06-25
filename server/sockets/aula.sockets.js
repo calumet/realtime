@@ -1,6 +1,6 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Realtime | Sockets | Aulachat
+ * Realtime | Sockets | Aula
  * Romel Pérez, @prhonedev
  * 2014
  **/
