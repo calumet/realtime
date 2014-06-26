@@ -19,14 +19,14 @@ var io = socketio(server);
 
 
 // Componentes funcionales
-var context = {app: app, io: io};
+var context = {express: app, io: io};
 require('./sockets/sockets').apply(context);
-//require('./routes/routes').apply(context);
+require('./routes/routes').apply(context);
 
 
 // Iniciar
 server.listen(config.port, function () {
-    console.log('>>> Servidor de sockets:');
+    console.log('>>> Servidor de Sockets:');
     console.log('>>> Servidor en modo ' + app.get('env'));
     console.log('>>> Servidor escuchando en el puerto ' + config.port);
 });

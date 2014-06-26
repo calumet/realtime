@@ -6,13 +6,15 @@
  **/
 
 var portal = require('./portal.sockets');
+//var aula = require('./aula.sockets');
 
 module.exports = exports = function () {
 
-    var app = this.app;
+    var express = this.express;
     var io = this.io;
 
     // Habilitar funcionalidades de aplicaciones
     portal.apply(this);
-    
+    //aula.apply(this);
+
 };

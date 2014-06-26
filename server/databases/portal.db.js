@@ -7,20 +7,32 @@
 
 var _ = require('underscore');
 var rubi = require('mongoose');
+var debug = require('debug')('portal:db');
 var config = require('../config');
 
+/*
+# rubi.users:
+_id
+ip
+time
+devices: [{
+    _id: socket,
+    agent: user.agent
+}]
+*/
 
-// ------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------- //
 // COLLECTIONS //
 
 var User = (function () {
 
     // Conectarse a la db
-    rubi.connect('mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/' + config.mongodb.db);
+    rubi.connect('mongodb://' + config.mongodb.host + ':' +
+    config.mongodb.port + '/' + config.mongodb.db);
 
-    // Error conectándose
+    // Error al conectarse
     rubi.connection.on('error', function (err) {
-        console.log('>>> Error conectándose a MongoDB: ', err.message);
+        debug(err);
     });
 
     // Usuarios
@@ -29,7 +41,7 @@ var User = (function () {
             ip: String,
             time: Date,
             devices: [{
-                socket: String,
+                _id: String,
                 agent: String
             }]
         }, {
@@ -41,7 +53,7 @@ var User = (function () {
 
 
 
-// ------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------- //
 // PROCEDURES //
 
 // Un usuario instancia la aplicación y es verificado
@@ -50,40 +62,27 @@ var User = (function () {
 exports.authorize = function (user, authorize) {
     
     User.findOne({_id: user.id}, function (err, myUser) {
-        if (err) {
-            console.log('>>> ' + user.ip + ' - ' + err.message);
-            authorize(false);
-        }
+        if (err) debug(err);
+        // FIXME: Cuándo ocurre un error de búsqueda y qué hacer en tal caso
 
         // Usuario encontrado
-        if (myUser) {
-            user.ip === myUser.ip ? authorize(true) : authorize(false);
+        if (!!myUser) {
+            // Tiene session/es
+            if (myUser.devices.length) {
+                user.ip === myUser.ip ?
+                    authorize('AUTH') :
+                    authorize('AUTH_NOT');
+            }
+            // No tiene sessiones
+            else {
+                authorize('AUTH');
+            }
         }
         // No encontrado
         else {
-            authorize('NOT_FOUND');
+            authorize('FOUND_NOT');
         }
     });
-
-};
-
-
-
-// Crear primer documento de usuario
-// @user  {id, ip, time, agent}
-// @socket
-// @callback
-exports.firstInstance = function (user, socket, callback) {
-
-    User.insert({
-        _id: user.id,
-        ip: user.ip,
-        time: user.time,
-        devices: [{
-            socket: socket,
-            agent: user.agent
-        }]
-    }, callback);
 
 };
 
@@ -95,22 +94,19 @@ exports.firstInstance = function (user, socket, callback) {
 // @callback
 exports.addInstance = function (user, socket, callback) {
 
-    // Actualizar/reescribir o crear document
     User.findOneAndUpdate({
         _id: user.id
     }, {
         $set: {
-            ip: user.ip,
-            time: user.time
+            time: user.time,
+            ip: user.ip
         },
         $push: {
             devices: {
-                socket: socket,
+                _id: socket,
                 agent: user.agent
             }
         }
-    }, {
-        aupsert: true
     }, callback);
 
 };
@@ -118,12 +114,24 @@ exports.addInstance = function (user, socket, callback) {
 
 
 // Un usuario cierra una instancia de la aplicación
+// @user  {id, ip, time, agent}
+// @socket
+// @callback
 exports.rmInstance = function (user, socket, callback) {
-    User.findOneAndUpdate({
+
+    User.findOne({
         _id: user.id
-    }, {
-        $pull: {
-            'devices.socket': socket
+    }, function (err, doc) {
+        if (err) {
+            callback.apply(this, arguments);
+            return;
         }
-    }, callback);
+
+        doc.devices = _.reject(doc.devices, function (el) {
+            return socket ===  el._id;
+        });
+
+        doc.save(callback);
+    });
+
 };

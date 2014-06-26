@@ -6,12 +6,11 @@
  **/
 
 var _ = require('underscore');
-var mysql = require('../databases/mysql');
-var acdb = require('../databases/aulachat');
+var db = require('../databases/aula.db');
 
 
 // ------------------------------------------------------------------------- //
-// APPLICATION //
+// PROCESSES //
 
 var app = {
 
@@ -238,7 +237,10 @@ var app = {
 // ------------------------------------------------------------------------- //
 // EVENTS //
 
-module.exports = function (io) {
+module.exports = function () {
+
+    var express = this.express;
+    var io = this.io;
 
     // Authorization
     io.of('/aulachat').authorization(function (handshake, connection) {

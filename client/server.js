@@ -21,10 +21,7 @@ app.use(express.static(__dirname + '/public'));
 
 
 // URLs
-app.get('/test', function (req, res) {
-    res.render('test');
-});
-/*app.get('/', function (req, res) {
+app.get('/', function (req, res) {
     res.redirect('/login');
 });
 app.get('/login', function (req, res) {
@@ -35,7 +32,9 @@ app.get('/portal', function (req, res) {
         id: req.query.id,
         clase: req.query.clase,
         name: req.query.name,
-        photo: req.query.photo
+        photo: req.query.photo,
+
+        socketsServer: config.sockets
     });
 });
 app.get('/aula', function (req, res) {
@@ -48,12 +47,12 @@ app.get('/aula', function (req, res) {
 });
 app.get('/chat', function (req, res) {
     res.render('chat');
-});*/
+});
 
 
 // Iniciar servidor
 app.listen(config.port, function () {
-    console.log('>>> Servidor cliente simulando el de JSP:');
+    console.log('>>> Servidor JSP:');
     console.log('>>> Servidor en modo ' + app.get('env'));
     console.log('>>> Servidor escuchando en el puerto ' + config.port);
 });

@@ -1,6 +1,6 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Realtime | Routes | Aulachat
+ * Realtime | Routes | Aula
  * Romel Pérez, @prhonedev
  * 2014
  **/

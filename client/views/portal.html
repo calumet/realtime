@@ -2,36 +2,40 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <title>Application</title>
+        <title>Portal</title>
+        <link rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
+        <style>
+            body{margin: 20px;}
+        </style>
     </head>
     <body>
+        <h2>Portal</h2>
+        <p>Connection results in browser console.</p>
+        <div><input id="userid" type="text" value="U3856" placeholder="User identifier"></div>
+        <div class="block"><button id="connect" class="boton">Connect</button></div>
 
-        <p>Application connecting with server... look at console.</p>
-        <div id="answer">Server answers</div>
-
-        <script src="http://127.0.0.1:9000/socket.io/socket.io.js"></script>
+        <script src="http://{{socketsServer.host}}:{{socketsServer.port}}/socket.io/socket.io.js"></script>
         <script>
-            var log = function (t) {
-                var el = document.getElementById('answer');
-                el.innerHTML += '<div>' + t + '</div>';
-            }
+            document.getElementById('connect').addEventListener('click', function () {
 
-            window.onload = function (e) {
+                this.remove();
 
-                var socket = io('http://127.0.0.1:9000/portal', {
-                    query: 'userid=U123456'
+                window.userid = document.getElementById('userid').value;
+
+                window.socket = io('http://{{socketsServer.host}}:{{socketsServer.port}}/portal', {
+                    query: 'userid=' + userid
                 });
+                console.log('Connecting with user ' + userid);
 
                 socket.on('connect', function (data) {
-
-                    log('connected ' + data);
-                    console.log('>>> Connected with Server!');
-                    console.dir(data);
-
+                    console.log('Connected with Server:', data);
                 });
 
-            };
-        </script>
+                socket.on('error', function (err) {
+                    console.log('Error in connection:', err);
+                });
 
+            }, false);
+        </script>
     </body>
 </html>

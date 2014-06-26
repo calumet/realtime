@@ -1,24 +1,33 @@
 // Realtime
 // Mongo tests
 
-var mongoose = require('../server/node_modules/mongoose');
+var rubi = require('../server/node_modules/mongoose');
 
-mongoose.connect('mongodb://127.0.0.1:27017/rubi');
+var User = (function () {
 
-mongoose.connection.on('error', function (err) {
-    console.log('>>> Ha ocurrido un error al conectarse a MongoDB!');
-    console.dir(err);
-});
+    // Conectarse a la db
+    rubi.connect('mongodb://127.0.0.1:27017/rubi');
 
-var User = mongoose.model('users', new mongoose.Schema({
-    _id: String,
-    ip: String,
-    time: Date,
-    devices: [{
-        socket: String,
-        agent: String
-    }]
-}), 'users');
+    // Error conectándose
+    rubi.connection.on('error', function (err) {
+        console.log('>>> Error conectándose a MongoDB: ', err.message);
+    });
+
+    // Usuarios
+    return rubi.model('users', new rubi.Schema({
+            _id: String,
+            ip: String,
+            time: Date,
+            devices: [{
+                socket: String,
+                agent: String
+            }]
+        }, {
+            collection: 'users'
+        }
+    ));
+
+})();
 
 
 // Create a Save Document

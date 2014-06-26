@@ -2,20 +2,24 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Portal</title>
+        <title>TEST</title>
         <link href="/favicon.ico" rel="shortcut icon">
     </head>
     <body>
+        <h2>Realtime Client Test</h2>
+        <button id="send">Send something</button>
         <div id="answer">Server answers</div>
 
         <script src="http://127.0.0.1:9000/socket.io/socket.io.js"></script>
         <script>
+            var log = function (t) {
+                document.getElementById('answer').innerHTML += '<div>' + t + '</div>';
+            };
             window.onload = function (e) {
 
-                var query = {
-                    query: 'userid=U123456'
-                };
-                var socket = io('http://127.0.0.1:9000/portal', query);
+                //var query = {query: 'userid=U123456'};
+                //var socket = io('http://127.0.0.1:9000/portal', query);
+                var socket = io('http://127.0.0.1:9000');
 
                 socket.on('connect', function (data) {
                     console.log('>>> Connected with Server:');
@@ -23,14 +27,21 @@
 
                 });
 
-                socket.on('youareconnected', function (data) {
-                    console.log('>>> custom event:');
-                    console.dir(data);
-                });
-
                 socket.on('error', function (err) {
                     console.log('>>> Error in connection:');
                     console.dir(err);
+                });
+
+                document.getElementById('send').addEventListener('click', function (e) {
+                    socket.emit('helloServer', {
+                        myName: 'Romel Pérez'
+                    });
+                }, false);
+
+                socket.on('helloClient', function (data) {
+                    console.log('>>> custom event:');
+                    console.dir(data);
+                    log(JSON.stringify(data));
                 });
 
             };
