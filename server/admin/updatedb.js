@@ -1,28 +1,46 @@
 // Realtime
 // Update rubi with diamante
 
-var UPDATE = true;
+var UPDATE = false;  // OBVIOUS SECURITY TRICK
+var config = require('../config');
 var rubi = require('mongoose');
 var diamante = require('mysql');
+var _ = require('underscore');
 
+// Sólo actualizar si se está consciente de ello
 if (UPDATE) {
 
-    console.log('Processing databases...');
+    console.log('Migrando datos de usuarios de "diamante" a "rubi"');
+    console.log('Procesando queries...');
 
-    var connection = diamante.createConnection({
-        host: '127.0.0.1',
-        port: 3306,
-        user: 'root',
-        password: 'admin',
-        database: 'diamante'
+    // Conectarse a MySQL
+    var diamanteConn = diamante.createConnection({
+        host: config.mysql.host,
+        port: config.mysql.port,
+        user: config.mysql.user,
+        password: config.mysql.pass,
+        database: config.mysql.db
     });
-
-    connection.connect();
-
-    connection.query('SELECT IdUsr FROM TP_Usuarios;', function(err, rows, fields) {
+    diamanteConn.connect();
+    diamanteConn.query('SELECT IdUsr FROM TP_Usuarios;', function (err, rows, fields) {
         if (err) throw err;
 
-        rubi.connect('mongodb://127.0.0.1:27017/rubi');
+        // Conectarse a MongoDB
+        rubi.connect('mongodb://' + config.mongodb.host + ':'
+            + config.mongodb.port + '/' + config.mongodb.db, {
+            user: config.mongodb.user,
+            pass: config.mongodb.pass,
+            server: {
+                socketOptions: {
+                    keepAlive: 1
+                }
+            },
+            replset: {
+                socketOptions: {
+                    keepAlive: 1
+                }
+            }
+        });
         rubi.connection.on('error', function (err) {
             if (err) throw err;
         });
@@ -30,29 +48,51 @@ if (UPDATE) {
                 _id: String,
                 ip: String,
                 time: Date,
-                devices: []
+                devices: [],
+                admin: Boolean
             }, {
                 collection: 'users'
             }
         ));
-        var newUser;
 
+        // Migrar datos
         for (var user = 0; user < rows.length; user += 1) {
-            newUser = new User({
-                _id: rows[user].IdUsr,
+            User.update({
+                _id: rows[user].IdUsr
+            }, {
                 devices: []
-            });
-            newUser.save(function (err) {
+            }, {
+                upsert: true
+            }, function (err) {
                 if (err) throw err;
             });
+            process.stdout.write('.');
         }
 
+        // Declarando usuarios especiales
+        console.log('\nDeclarando usuarios especiales...');
+        _.each(config.admins, function (id) {
+            User.findOneAndUpdate({
+                _id: id
+            }, {
+                $set: {
+                    admin: true
+                }
+            }, function (err, result) {
+                if (err) throw err;
+            });
+        });
+
+        // Estado del proceso completo
         setTimeout(function () {
-            console.log('Complete');
-            rubi.close();
-            connection.end();
+            console.log('Complete!\nCtrl+C para cerrar.');
+            diamanteConn.end();
         }, 0);
 
     });
 
-}
+} else {
+
+    console.log('La actualización no se ha definido por realizar.');
+
+};
