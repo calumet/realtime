@@ -25,6 +25,7 @@
         "mongoose": "3.x",
         "mysql": "2.x",
         "express": "4.x",
+        "body-parser": "1.x",
         "swig": "1.x",
         "debug": "0.x"
     }

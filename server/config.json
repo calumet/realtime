@@ -1,18 +1,22 @@
 {
-    "host": "192.168.0.14",
-    "port": 9000,
+    "host": "127.0.0.1",
+    "port": 7000,
     "mongodb": {
-        "host": "192.168.0.14",
-        "port": 27017,
-        "user": "admin",
-        "password": "admin",
+        "host": "127.0.0.1",
+        "port": 2000,
+        "user": "programmer",
+        "pass": "admin",
         "db": "rubi"
     },
     "mysql": {
-        "host": "192.168.0.14",
+        "host": "127.0.0.1",
         "port": 3306,
         "user": "root",
-        "password": "admin",
+        "pass": "admin",
         "db": "diamante"
-    }
+    },
+    "admins": [
+        "U0",
+        "U3856"
+    ]
 }
