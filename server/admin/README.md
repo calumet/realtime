@@ -14,9 +14,9 @@ Entrar a mongo shell, hablandole al servidor en el puerto 2000.
 
 ```bash
 $ mongo --port 2000
-use admin;
-db.createUser({user: "manager", pwd: "admin", roles: [{role: "userAdminAnyDatabase", db: "admin"}]});
-db.runCommand({usersInfo: "manager", showPrivileges: true});
+> use admin;
+> db.createUser({user: "manager", pwd: "admin", roles: [{role: "userAdminAnyDatabase", db: "admin"}]});
+> db.runCommand({usersInfo: "manager", showPrivileges: true});
 ```
 
 ## Crear usuario programador
@@ -31,14 +31,14 @@ Entrar a mongo shell como administrador. Se pueden crear más usuarios tanto com
 
 ```bash
 $ mongo rubi -u manager -p admin --port 2000 --authenticationDatabase admin
-db.createUser({user: "programmer", pwd: "admin", roles: [{ role: "readWrite", db: "rubi" }]});
-db.runCommand({usersInfo: "programmer", showPrivileges: true});
+> db.createUser({user: "programmer", pwd: "admin", roles: [{ role: "readWrite", db: "rubi" }]});
+> db.runCommand({usersInfo: "programmer", showPrivileges: true});
 ```
 
 Entrar a mongo shell, pero esta vez con el usuario suministrado para utilizar la base de datos como programador, tanto desde la aplicación como para administrar desde la shell.
 
 ```bash
 $ mongo rubi -u programmer -p admin --port 2000 --authenticationDatabase rubi
-show collections;
-db.users.find();
+> show collections;
+> db.users.find();
 ```
