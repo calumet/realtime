@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="/favicon.ico">
+        <link rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
+        <title>Portal</title>
+    </head>
+    <body>
+        <div class="row-fluid">
+            <div class="span8 offset2">
+                <h2>Portal (/eisi/eisi.jsp)</h2>
+                <p>Esta es la página mostrada cuando el usuario se loguea.</p>
+                <p>Desde aquí se entra a las otras aplicaciones y/o servicios.</p>
+                <ul>
+                    <li><a href="/aula">Aula</a></li>
+                    <li><a href="/logout">Log out</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- // Scripts // -->
+        <script src="http://cormoran.uis.edu.co/eisi/Scripts/jQuery/jquery.min.js"></script>
+        <script src="http://cormoran.uis.edu.co/eisi/Scripts/Estandar/Elise.js"></script>
+
+        <!-- // Portal Realtime // -->
+        <script>
+            var portal = portal || {};
+            portal.server = portal.server || {};
+            portal.server.host = '{{=sockets.host}}';
+            portal.server.port = '{{=sockets.port}}';
+            portal.server.url = 'http://{{=sockets.host}}:{{=sockets.port}}';
+            portal.user = portal.user || {};
+            portal.user.id = '{{id}}';
+        </script>
+        <script src="/js/portal/portal.realtime.js"></script>
+    </body>
+</html>

@@ -1,8 +1,12 @@
 {
-    "host": "192.168.0.14",
-    "port": 4000,
+    "host": "127.0.0.1",
+    "port": 7200,
+    "security": {
+        "cookie": "PORTAL_USER",
+        "key": "ABCD1234"
+    },
     "sockets": {
-        "host": "192.168.0.14",
-        "port": 9000
+        "host": "127.0.0.1",
+        "port": 7000
     }
 }

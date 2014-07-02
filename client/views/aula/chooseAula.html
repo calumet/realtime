@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login</title>
+        <title>Choose Aula</title>
         <link rel="shortcut icon" href="/favicon.ico">
         <link rel="stylesheet" href="http://cormoran.uis.edu.co/eisi/css/Estandar/Elise/Elise.css">
     </head>
@@ -12,17 +12,24 @@
         <div class="row-fluid">
             <div class="span8 offset2">
                 <h1>Login</h1>
-                <p>Usuarios disponibles para hacer pruebas.</p>
+                <p>Salas de clase disponibles:</p>
                 <p>
-                    <select id="users" name="users">
-                        <option value="U3856">Romel Pérez</option>
+                    <select id="clases" name="clases">
+                        <option value="262456_W9">262456_W9</option>
+                        <option value="262456_G3">262456_G3</option>
+                        <option value="287892_A1">287892_A1</option>
+                        <option value="287892_K4">287892_K4</option>
                     </select>
                 </p>
-                <p>Entrar al portal con el usuario elegido.</p>
+                <p>Usuarios disponibles:</p>
+                <p>
+                    <select id="users" name="users"></select>
+                </p>
+                <p>Entrar al aula virtual logueado con el usuario elegido en la clase elegida.</p>
                 <p class="block">
                     <button id="enter" class="boton azul">
-                        <span class="icon icon_l12"></span>
-                        <span class="label">Entrar al Portal</span>
+                        <span class="icon icon_k8"></span>
+                        <span class="label">Entrar al Aula</span>
                     </button>
                 </p>
             </div>
@@ -31,8 +38,8 @@
 
         <!-- // Scripts // -->
         <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
-        <script src="http://cormoran.uis.edu.co/eisi/Scripts/jQuery/jquery.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
         <script src="http://cormoran.uis.edu.co/eisi/Scripts/Estandar/Elise.js"></script>
-        <script src="/js/login.js"></script>
+        <script src="/js/aula/chooseAula.js"></script>
     </body>
 </html>
