@@ -7,19 +7,9 @@
 
 var _ = require('underscore');
 var rubi = require('mongoose');
-var debug = require('debug')('portal:db');
+var debug = require('debug')('dbs:portal');
 var config = require('../config');
 
-/*
-# rubi.users:
-_id
-ip
-time
-devices: [{
-    _id: socket,
-    agent: user.agent
-}]
-*/
 
 // -------------------------------------------------------------------------- //
 // COLLECTIONS //
@@ -27,8 +17,11 @@ devices: [{
 var User = (function () {
 
     // Conectarse a la db
-    rubi.connect('mongodb://' + config.mongodb.host + ':' +
-    config.mongodb.port + '/' + config.mongodb.db);
+    rubi.connect('mongodb://' + config.mongodb.host + ':'
+        + config.mongodb.port + '/' + config.mongodb.db, {
+        user: config.mongodb.user,
+        pass: config.mongodb.pass
+    });
 
     // Error al conectarse
     rubi.connection.on('error', function (err) {
@@ -43,7 +36,8 @@ var User = (function () {
             devices: [{
                 _id: String,
                 agent: String
-            }]
+            }],
+            admin: Boolean
         }, {
             collection: 'users'
         }
@@ -56,14 +50,38 @@ var User = (function () {
 // -------------------------------------------------------------------------- //
 // PROCEDURES //
 
-// Un usuario instancia la aplicación y es verificado
-// @user  {id, ip, time, agent}
-// @authorize  si el usuario está autorizado
+// Resetear todas las instancias de conexión de usuarios
+// @param  {Function}  callback(err, result)
+exports.reset = function (callback) {
+
+    User.update({}, {
+        $set: {
+            devices: []
+        }
+    }, {
+        multi: true
+    }, callback);
+
+};
+
+
+
+/**
+ * Autorizar usuario si cumple las condiciones de conexión
+ * @param  user  {id, ip, time, agent}
+ * @param  authorize Callback con el posible mensaje de respuesta
+ * AUTH | AUTH_NOT | NOT_FOUND
+ */
 exports.authorize = function (user, authorize) {
     
     User.findOne({_id: user.id}, function (err, myUser) {
-        if (err) debug(err);
-        // FIXME: Cuándo ocurre un error de búsqueda y qué hacer en tal caso
+        if (err) {
+            debug(user.id + ' error autorizando: ' + err.message);
+            authorize('AUTH_NOT');
+            return;
+        }
+
+        // TODO: Verificar que no haya otro usuario conectado con la misma ip
 
         // Usuario encontrado
         if (!!myUser) {
@@ -71,7 +89,7 @@ exports.authorize = function (user, authorize) {
             if (myUser.devices.length) {
                 user.ip === myUser.ip ?
                     authorize('AUTH') :
-                    authorize('AUTH_NOT');
+                    authorize('NOT_AUTH');
             }
             // No tiene sessiones
             else {
@@ -80,7 +98,7 @@ exports.authorize = function (user, authorize) {
         }
         // No encontrado
         else {
-            authorize('FOUND_NOT');
+            authorize('NOT_FOUND');
         }
     });
 
@@ -88,10 +106,8 @@ exports.authorize = function (user, authorize) {
 
 
 
-// Un usuario ha instanciado por primera vez
-// @user  {id, ip, time, agent}
-// @socket
-// @callback
+// Un usuario se conecta y crea una instancia
+// @param  {Function}  callback(err, result)
 exports.addInstance = function (user, socket, callback) {
 
     User.findOneAndUpdate({
@@ -114,9 +130,7 @@ exports.addInstance = function (user, socket, callback) {
 
 
 // Un usuario cierra una instancia de la aplicación
-// @user  {id, ip, time, agent}
-// @socket
-// @callback
+// @param  {Function}  callback(err, result)
 exports.rmInstance = function (user, socket, callback) {
 
     User.findOne({
@@ -133,5 +147,35 @@ exports.rmInstance = function (user, socket, callback) {
 
         doc.save(callback);
     });
+
+};
+
+
+
+// Verificar si un usuario es administrador
+// Llama al callback con: true | false
+exports.isAdmin = function (id, callback) {
+
+    User.findOne({
+        _id: id
+    }, function (err, user) {
+        if (err) {
+            callback(false);
+            return;
+        }
+        user.admin ? callback(true) : callback(false);
+    });
+
+};
+
+
+
+// Conseguir datos estadísticos del portal
+// @param  {Function}  callback(err, result)
+exports.stats = function (callback) {
+
+    User.count({
+        $where: 'this.devices.length > 0'
+    }, callback);
 
 };

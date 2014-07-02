@@ -5,15 +5,17 @@
  * 2014
  **/
 
-var portal = require('./portal.sockets');
-//var aula = require('./aula.sockets');
+var debug = require('debug')('sockets');
+var portal = require('./socket.portal');
+//var aula = require('./socket.aula');
+
+
+// -------------------------------------------------------------------------- //
+// GLOBAL PROCEDURES AND SOCKETS MANAGERS //
 
 module.exports = exports = function () {
 
-    var express = this.express;
-    var io = this.io;
-
-    // Habilitar funcionalidades de aplicaciones
+    // Sockets de aplicaciones
     portal.apply(this);
     //aula.apply(this);
 
