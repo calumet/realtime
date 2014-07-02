@@ -3,10 +3,13 @@
 
 var rubi = require('../server/node_modules/mongoose');
 
+// -------------------------------------------------------------------------- //
+// CONNECTIONS AND PROCEDURES //
+
 var User = (function () {
 
     // Conectarse a la db
-    rubi.connect('mongodb://127.0.0.1:27017/rubi');
+    rubi.connect('mongodb://127.0.0.1:2000/rubi');
 
     // Error conectándose
     rubi.connection.on('error', function (err) {
@@ -80,5 +83,3 @@ User.findOne({_id: 'U7898427'}, function (err, user) {
         console.log('Not found');
     }
 });
-
-
