@@ -11,5 +11,6 @@ pids
 logs
 results
 
-npm-debug.log
+dev
 node_modules
+npm-debug.log
