@@ -1,14 +1,9 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Server
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
-
-/*
-> Especificar GMT-5 y UTF-8 en rubi
-> Set sounds in cellphone when typing and calling
-*/
 
 // Módulos
 var http = require('http');
@@ -26,13 +21,14 @@ var io = socketio(server);
 
 // Componentes funcionales
 var context = {express: app, io: io};
-require('./sockets/sockets').apply(context);
-require('./routes/routes').apply(context);
-require('./databases/databases').apply(context);
+require('./sockets').apply(context);
+require('./routes').apply(context);
+require('./databases').apply(context);
 
 
 // Iniciar
-server.listen(config.port, function () {
-    debug('servidor en modo ' + app.get('env'));
-    debug('servidor escuchando en el puerto ' + config.port);
+server.listen(config.port, function (err) {
+    if (err) debug(err);
+    debug('modo ' + app.get('env'));
+    debug('escuchando en el puerto ' + config.port);
 });

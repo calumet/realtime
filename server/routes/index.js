@@ -1,14 +1,14 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Routes
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
 
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var debug = require('debug')('routes');
-var portal = require('./routes.portal');
+//var portal = require('./routes.portal');
 //var aula = require('./routes.aula');
 
 
@@ -23,22 +23,19 @@ module.exports = exports = function () {
     }));
     this.express.use(bodyParser.json());
 
-
     // Registrar cookies
     this.express.use(cookieParser());
 
-
-    // Permitir XMLHttpRequest's al servidor JSP
+    // Permitir XMLHttpRequest's al servidor JSP (y cualquier otro)
     this.express.use('/app/*', function(req, res, next) {
         res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Credentials', 'true');
         res.header('Access-Control-Allow-Headers',
                    'Origin, X-Requested-With, Content-Type, Accept');
         next();
     });
 
-
     // Routes de aplicaciones
-    portal.apply(this);
+    //portal.apply(this);
     //aula.apply(this);
-
 };

@@ -1,7 +1,7 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Security
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
 

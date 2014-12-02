@@ -1,15 +1,27 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Sockets | Aula
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
 
+// IMPORTANT: VERY INESTABLE!
+
 var _ = require('underscore');
-var db = require('../databases/aula.db');
+var cookie = require('cookie');
+var debug = require('debug')('socket:aula');
+var config = require('../config');
+var security = require('../security');
+var db = require('../databases/dbs.aula');
 
 
-// ------------------------------------------------------------------------- //
+/*
+MYSQL:
+Seleccionar todos los alumnos de una materia y grupo:
+'SELECT * FROM TR_Alumnos WHERE IdMat="22957" AND Grupo="B1";'
+*/
+
+// -------------------------------------------------------------------------- //
 // PROCESSES //
 
 var app = {
@@ -234,7 +246,7 @@ var app = {
 
 
 
-// ------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------- //
 // EVENTS //
 
 module.exports = function () {

@@ -1,6 +1,8 @@
 // Realtime
 // Mongo tests
 
+var rubi = require('../server/libs/rubi.js');
+
 var rubi = require('../server/node_modules/mongoose');
 
 // -------------------------------------------------------------------------- //

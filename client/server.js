@@ -1,15 +1,20 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
- * Realtime | JSP-Server
- * Romel Pérez, @prhonedev
+ * Realtime | JSP-Fake-Server
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
+
+// TODO: Responder a los mensajes recibidos al conectarse por sockets.
+// TODO: Cambiar configuración en **server** para autorizar todas las conexiones.
+
 
 // Módulos
 var express = require('express');
 var swig = require('swig');
-var crypto = require('crypto');
+var cookieParser = require('cookie-parser');
 var config = require('./config');
+var security = require('../server/security');
 
 
 // Instanciar y configurar
@@ -17,6 +22,7 @@ var app = express();
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
+app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
 
 
@@ -28,54 +34,34 @@ app.get('/login', function (req, res) {
     res.render('login');
 });
 app.get('/logout', function (req, res) {
+
+    // Limpiar cookie de seguridad.
     res.cookie(config.security.cookie, 'NONE', {
-        domain: '127.0.0.1',
+        domain: config.host,
+        port: '*',
         path: '/'
     });
+
     res.redirect('/');
 });
-
 app.get('/portal', function (req, res) {
-    // Codificar mensaje para comunicación entre servidores
-    var encrypt = function(data) {
-        var iv = new Buffer('0000000000000000');
-        var key = config.security.key;
-        var decodeKey = crypto.createHash('sha256').update(key, 'utf-8').digest();
-        var cipher = crypto.createCipheriv('aes-256-cbc', decodeKey, iv);
-        return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
-    };
-    var certificate = encrypt(req.query.id);
+
+    // Aplicar cookie de seguridad para certificar la conexión de socket.
+    var certificate = security.encrypt(req.query.id);
     res.cookie(config.security.cookie, certificate, {
-        domain: '127.0.0.1',
+        domain: config.host,
+        port: '*',
         path: '/'
     });
 
-    // Renderizar portal con datos de usuario y para conexión
+    // Envíamos sólo los datos de conexión de socket y el id del usuario.
     res.render('portal/portal', {
         id: req.query.id,
-        clase: req.query.clase,
-        name: req.query.name,
-        photo: req.query.photo,
         sockets: config.sockets
     });
 });
-app.get('/admin', function (req, res) {
-    res.render('portal/admin', {
-        id: req.query.id,
-        clase: req.query.clase,
-        name: req.query.name,
-        photo: req.query.photo,
-        sockets: config.sockets
-    });
-});
-
 app.get('/aula', function (req, res) {
-    res.render('aula/aula', {
-        id: req.query.id,
-        clase: req.query.clase,
-        name: req.query.name,
-        photo: req.query.photo
-    });
+    res.render('aula/aula');
 });
 app.get('/chat', function (req, res) {
     res.render('aula/chat');

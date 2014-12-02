@@ -9,6 +9,7 @@
     </head>
     <body>
         <div class="row-fluid">
+
             <div class="span8 offset2">
                 <h2>Portal (/eisi/eisi.jsp)</h2>
                 <p>Esta es la página mostrada cuando el usuario se loguea.</p>
@@ -18,7 +19,31 @@
                     <li><a href="/logout">Log out</a></li>
                 </ul>
             </div>
+            <div class="span8 offset2">
+                <h2>Conexión por sockets</h2>
+                <p>Actualmente nos encontramos: <strong id="conn">conectándonos...</strong></p>
+                <p id="mensaje">&nbsp;</p>
+            </div>
+
         </div>
+
+        <!-- Admin
+        {% if admin %}
+        <div class="row-fluid">
+
+            <div class="span8 offset2">
+                <h2>Admin | Sockets</h2>
+                <p>Esta sección es sólo ofrecida para administradores.</p>
+                <p>La verificación de que el usuario el administrador se realiza desde JSP.</p>
+                <p>Cuando el administrador ejecuta funciones sólo de administrador, en el servidor se verifican.</p>
+                <div class="block">
+                    <h3>Estadísticas</h3>
+                    <p>Usuarios conectados <strong id="statsUsers"><small>(buscando...)</small></strong></p>
+                </div>
+            </div>
+
+        </div>
+        {% endif %}-->
 
         <!-- // Scripts // -->
         <script src="http://cormoran.uis.edu.co/eisi/Scripts/jQuery/jquery.min.js"></script>
@@ -26,14 +51,21 @@
 
         <!-- // Portal Realtime // -->
         <script>
-            var portal = portal || {};
-            portal.server = portal.server || {};
-            portal.server.host = '{{=sockets.host}}';
-            portal.server.port = '{{=sockets.port}}';
-            portal.server.url = 'http://{{=sockets.host}}:{{=sockets.port}}';
-            portal.user = portal.user || {};
-            portal.user.id = '{{id}}';
+            window.portal = window.portal || {};
+            portal.server = {
+                host: '{{=sockets.host}}',
+                port: '{{=sockets.port}}',
+                url: 'http://{{=sockets.host}}:{{=sockets.port}}'
+            };
+            portal.user = {
+                id: '{{id}}'
+            };
         </script>
-        <script src="/js/portal/portal.realtime.js"></script>
+        <script src="/eisi/Scripts/Portal/socket.js"></script>
+
+        <!-- // Realtime :: Portal Plugin :: Admin //
+        {% if admin %}
+            <script src="/js/portal/admin.js"></script>
+        {% endif %}-->
     </body>
 </html>

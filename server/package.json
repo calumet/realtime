@@ -1,6 +1,6 @@
 {
     "name": "realtime",
-    "version": "0.4.3",
+    "version": "0.4.0",
     "description": "Un sistema de comunicación en tiempo real para los portales de Calumet.",
     "private": false,
     "author": {
@@ -29,6 +29,7 @@
         "cookie-parser": "1.x",
         "cookie": "0.x",
         "swig": "1.x",
+	"async": "0.x",
         "debug": "0.x"
     }
 }

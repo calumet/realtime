@@ -1,15 +1,17 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Routes | Aula
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
 
-var _ = require('underscore');
-var mysql = require('../databases/mysql');
+// IMPORTANT: INESTABLE!
 
-// ------------------------------------------------------------------------- //
-// RESTful API //
+var _ = require('underscore');
+var mysql = require('../databases/dbs.aula');
+
+// -------------------------------------------------------------------------- //
+// API //
 
 module.exports = function (app) {
 

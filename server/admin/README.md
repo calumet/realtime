@@ -63,16 +63,16 @@ Ahora ya se puede iniciar el servidor de sockets.
 
 ## Actualizar datos de diamante a rubi
 
-Periódicamente se necesitan sincronizar datos de diamante a rubi. Esto buscara cambios en datos de usuarios, clases, etc. Para ello, sólo ejecuta el script *update.js*:
+Periódicamente se necesitan sincronizar datos de diamante a rubi. Esto buscara cambios en datos de usuarios, clases, etc. Para ello:
 
 ```bash
-$ node update.js
+$ node sync.js
 ```
 
 También se puede programar un **crontab** para que ejecute el mismo comando cada cierto tiempo en **/etc/crontab**:
 
 ```bash
-0 3 * * * root node /home/romel/projects/work/realtime/server/admin/update.js
+0 3 * * * root node /home/romel/projects/work/realtime/server/admin/sync.js
 ```
 
 Esto sincronizará datos a las 3 AM todos los días.

@@ -1,7 +1,7 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Portal | Admin
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
 

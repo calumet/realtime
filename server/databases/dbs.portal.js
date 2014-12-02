@@ -1,120 +1,60 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Databases | Portal
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * 2014
  **/
 
-var _ = require('underscore');
-var rubi = require('mongoose');
-var debug = require('debug')('dbs:portal');
 var config = require('../config');
-
-
-// -------------------------------------------------------------------------- //
-// COLLECTIONS //
-
-var User = (function () {
-
-    // Conectarse a la db
-    rubi.connect('mongodb://' + config.mongodb.host + ':'
-        + config.mongodb.port + '/' + config.mongodb.db, {
-        user: config.mongodb.user,
-        pass: config.mongodb.pass
-    });
-
-    // Error al conectarse
-    rubi.connection.on('error', function (err) {
-        debug(err);
-    });
-
-    // Usuarios
-    return rubi.model('users', new rubi.Schema({
-            _id: String,
-            ip: String,
-            time: Date,
-            devices: [{
-                _id: String,
-                agent: String
-            }],
-            admin: Boolean
-        }, {
-            collection: 'users'
-        }
-    ));
-
-})();
-
+var _ = require('underscore');
+var rubi = require('../libs/rubi');
+var diamante = require('../libs/diamante');
+var debug = require('debug')('dbs:portal');
 
 
 // -------------------------------------------------------------------------- //
 // PROCEDURES //
 
-// Resetear todas las instancias de conexión de usuarios
-// @param  {Function}  callback(err, result)
-exports.reset = function (callback) {
+// Referencias a los controladores de las bases de datos.
+module.exports.rubi = exports.rubi = rubi;
+module.exports.diamante = exports.diamante = diamante;
 
-    User.update({}, {
+
+/**
+ * Inicialización de procesos con las bases de datos.
+ * @param  {function} success Al haberse conectado
+ * @param  {function} error   Cuando ocurra un error
+ */
+module.exports.init = exports.init = rubi.connect;
+
+
+/**
+ * Resetear todas las instancias de conexión de usuarios.
+ * @param  {Function} callback function(err,result){}
+ */
+module.exports.reset = exports.reset = function (callback) {
+    rubi.users.update({}, {
         $set: {
             devices: []
         }
     }, {
         multi: true
     }, callback);
-
 };
-
 
 
 /**
- * Autorizar usuario si cumple las condiciones de conexión
- * @param  user  {id, ip, time, agent}
- * @param  authorize Callback con el posible mensaje de respuesta
- * AUTH | AUTH_NOT | NOT_FOUND
+ * Un usuario se conecta y crea una instancia.
+ * @param {Object}   user     {id, ip, time, agent}
+ * @param {Object}   socket
+ * @param {Function} callback function(err,result){}
  */
-exports.authorize = function (user, authorize) {
-    
-    User.findOne({_id: user.id}, function (err, myUser) {
-        if (err) {
-            debug(user.id + ' error autorizando: ' + err.message);
-            authorize('AUTH_NOT');
-            return;
-        }
-
-        // TODO: Verificar que no haya otro usuario conectado con la misma ip
-
-        // Usuario encontrado
-        if (!!myUser) {
-            // Tiene session/es
-            if (myUser.devices.length) {
-                user.ip === myUser.ip ?
-                    authorize('AUTH') :
-                    authorize('NOT_AUTH');
-            }
-            // No tiene sessiones
-            else {
-                authorize('AUTH');
-            }
-        }
-        // No encontrado
-        else {
-            authorize('NOT_FOUND');
-        }
-    });
-
-};
-
-
-
-// Un usuario se conecta y crea una instancia
-// @param  {Function}  callback(err, result)
-exports.addInstance = function (user, socket, callback) {
-
-    User.findOneAndUpdate({
+module.exports.addInstance = exports.addInstance = function (user, socket, callback) {
+    rubi.users.findOneAndUpdate({
         _id: user.id
     }, {
         $set: {
-            time: user.time,
+            time: new Date(user.time),
             ip: user.ip
         },
         $push: {
@@ -124,16 +64,18 @@ exports.addInstance = function (user, socket, callback) {
             }
         }
     }, callback);
-
 };
 
 
+/**
+ * Un usuario cierra una instancia de la aplicación.
+ * @param  {Object}   user     {id, ip, time, agent}
+ * @param  {Object}   socket
+ * @param  {Function} callback function(err,result){}
+ */
+module.exports.rmInstance = exports.rmInstance = function (user, socket, callback) {
 
-// Un usuario cierra una instancia de la aplicación
-// @param  {Function}  callback(err, result)
-exports.rmInstance = function (user, socket, callback) {
-
-    User.findOne({
+    rubi.users.findOne({
         _id: user.id
     }, function (err, doc) {
         if (err) {
@@ -147,16 +89,16 @@ exports.rmInstance = function (user, socket, callback) {
 
         doc.save(callback);
     });
-
 };
 
 
-
-// Verificar si un usuario es administrador
-// Llama al callback con: true | false
-exports.isAdmin = function (id, callback) {
-
-    User.findOne({
+/**
+ * Verificar si un usuario es administrador.
+ * @param  {String}   id       Identificador del usuario
+ * @param  {Function} callback function(esAdmin){}
+ */
+module.exports.isAdmin = exports.isAdmin = function (id, callback) {
+    rubi.users.findOne({
         _id: id
     }, function (err, user) {
         if (err) {
@@ -165,17 +107,15 @@ exports.isAdmin = function (id, callback) {
         }
         user.admin ? callback(true) : callback(false);
     });
-
 };
 
 
-
-// Conseguir datos estadísticos del portal
-// @param  {Function}  callback(err, result)
-exports.stats = function (callback) {
-
-    User.count({
+/**
+ * Conseguir cantidad de conectados.
+ * @param  {Function} callback function(err,results){}
+ */
+module.exports.count = exports.stats = function (callback) {
+    rubi.users.count({
         $where: 'this.devices.length > 0'
     }, callback);
-
 };

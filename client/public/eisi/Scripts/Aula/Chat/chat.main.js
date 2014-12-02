@@ -1,7 +1,7 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | Client Application
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * Duvan Vargas, @DuvanJamid
  * Marzo del 2014
  **/
@@ -43,6 +43,7 @@ app.init = function () {
 
     // Conectar con servidor
     app.connect(function () {
+        
         // Eventos de socket
         app.events.init();
 
@@ -246,7 +247,7 @@ app.emit = {
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | Initializator
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * Duvan Vargas, @DuvanJamid
  * Marzo del 2014
  **/

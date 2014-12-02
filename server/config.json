@@ -18,9 +18,5 @@
     "security": {
         "cookie": "PORTAL_USER",
         "key": "ABCD1234"
-    },
-    "admins": [
-        "U0",
-        "U3856"
-    ]
+    }
 }

@@ -1,7 +1,7 @@
 /*!
  * Grupo de Desarrollo de Software Calumet
  * Aula Chat | Aula
- * Romel Pérez, @prhonedev
+ * Romel Pérez, prhone.blogspot.com
  * Duvan Vargas, @DuvanJamid
  * Marzo del 2014
  **/
