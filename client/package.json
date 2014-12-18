@@ -1,7 +1,0 @@
-{
-    "dependencies": {
-        "express": "4.x",
-        "swig": "1.x",
-        "cookie-parser": "1.x"
-    }
-}
