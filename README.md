@@ -1,12 +1,12 @@
 # RealTime (alpha v0.4)
 
+> Todavía inestable, en etapa de desarrollo. Se prevee una versión minimamente estable en 0.6 y un inicial lanzamiento en la versión 0.8.
+
 Un sistema de aplicaciones para comunicación en tiempo real para los portales del Grupo de Desarrollo de Software Calumet.
 
-**server** servidor de Node.js que permitirá crear conexiones en tiempo real con los clientes mediante sockets. Puerto distinto al 80. Pruebas en el puerto *7000*.
+Éste es el ervidor de Node.js que permitirá crear conexiones en tiempo real con los clientes mediante sockets. Puerto distinto al 80. Pruebas en el puerto *7000*.
 
-**client** servidor simulando ser el de JSP que funciona en el puerto 80. Se hacen pruebas con este servidor creado en Node.js haciendose pasar como un cliente del servidor de Node.js. Las pruebas se hacen con el puerto *7200*.
-
-**resources** scripts, pruebas de desarrollo, testeo y snippets.
+En **tests** se encuentran pruebas de desarrollo, testeo y snippets.
 
 ## Instalación y configuración
 
@@ -14,35 +14,33 @@ Un sistema de aplicaciones para comunicación en tiempo real para los portales d
 
 Para instalar el servidor de sockets se necesita instalar **Node.js 0.10.x** y **MongoDB 2.6.x**. Las instrucciones de instalación no están documentadas.
 
-Sigue las instrucciones de configuración de MongoDB que se encuentran en [/server/admin/](https://github.com/calumet/realtime/tree/master/server/admin).
+Sigue las instrucciones de configuración de MongoDB que se encuentran en [/admin/](https://github.com/calumet/realtime/tree/master/admin).
 
-Node.js no es necesario configurarlo, sólo se necesitan instalar los paquetes de cada servidor (client y server). Entra en cada carpeta por terminal y ejecuta el siguiente comando:
+Node.js no es necesario configurarlo, sólo se necesitan instalar los paquetes necesarios para el servidor.
 
 ```bash
 $ npm install
 ```
 
-Esto instalará todos los paquetes de node que sean necesarios para el funcionamiento del proyecto.
+Esto instalará todos los paquetes de node.js que sean necesarios para el funcionamiento del proyecto.
 
 ## Ejecución
 
-El servidor de MongoDB inicia automáticamente. En caso de querer una instancia diferente, se puede utilizar el archivo de configuración para crearla:
+Se debe asegurar de que el servidor de MongoDB esté ejecutándose con la configuración para el proyecto. La información de encuentra en *admin*.
 
-```bash
-$ mongod --config ./mongod.conf
-```
-
-Luego, activando los mensajes de *debug* de la funcionalidad del proyecto, el servidor de sockets en la carpeta *server*:
+Luego, corriendo el servidor de node.js:
 
 ```bash
 $ DEBUG=server,sockets,socket:*,routes,routes:*,dbs,dbs:*,libs:* node server.js
 ```
 
-Una vez iniciados, ya se pueden crear conexiones con el servidor de sockets. Se hacen pruebas con el servidor *client*.
+En modo desarrollo con los mensajes de *debug* de las funcionalidades del proyecto:
 
-## Notas
+```bash
+$ node server.js
+```
 
-Todavía inestable, en etapa de desarrollo. Se prevee una versión minimamente estable en 0.6 y un inicial release en la versión 0.8.
+Una vez iniciados, ya se pueden crear conexiones con este servidor de sockets. Se hacen pruebas con el servidor **[realtime-client](https://github.com/calumet/realtime-client)**.
 
 ## Licencia
 
