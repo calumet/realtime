@@ -1,8 +1,9 @@
 /*!
+ * Universidad Industrial de Santander
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Libraries | Diamante
  * Romel Pérez, prhone.blogspot.com
- * 2014
+ * 2015
  **/
 
 var diamante = require('mysql');
@@ -13,13 +14,13 @@ var config = require('../config');
 // -------------------------------------------------------------------------- //
 // PROCEDURES //
 
-// Conector
+// Conector.
 var connection = diamante.createConnection({
-    host: config.mysql.host,
-    port: config.mysql.port,
-    user: config.mysql.user,
-    password: config.mysql.pass,
-    database: config.mysql.db
+  host: config.mysql.host,
+  port: config.mysql.port,
+  user: config.mysql.user,
+  password: config.mysql.pass,
+  database: config.mysql.db
 });
 
 
@@ -28,39 +29,71 @@ var connection = diamante.createConnection({
 
 var controller = {
 
-    // MySQL
-    db: diamante,
+  // MySQL.
+  db: diamante,
 
-    // Conexión
-    connection: connection,
+  // Conexión.
+  connection: connection,
+  con: connection,
 
-    // Conectarse
-    connect: function (success, error) {
+  // Conectarse.
+  connect: function (callback) {
 
-        // Conectar por medio del conector
-        connection.connect(function (err) {
-            if (err) {
-                if (error) error(err);
-                debug(err);
-            } else {
-                success(connection);
-            }
-        });
-        return this;
-    },
+    // Conectar por medio del conector.
+    connection.connect(function (err) {
+      if (err) {
+        callback(err);
+        debug(err);
+      } else {
+        callback(undefined, connection);
+      }
+    });
+    return this;
+  },
 
-    // Disconectarse
-    disconnect: function (error) {
-        connection.end(function (err) {
-            if (err) {
-                if (error) error();
-                debug(err);
-            }
-        });
-        return this;
+  // Desconectarse.
+  disconnect: function (callback) {
+    connection.end(function (err) {
+      if (err) {
+        if (callback) callback(err);
+        debug(err);
+      } else {
+        if (callback) callback();
+      }
+    });
+    return this;
+  },
+
+  // Multiples queries anidados.
+  // @queries   [String]   Cada query a procesar.
+  // @callback  Function   Callback con cada respuesta de cada query.
+  queryMulti: function (queries, callback) {
+    var results = [undefined];
+
+    if ((typeof queries !== 'object' && queries.length)
+      || typeof callback !== 'function') {
+      throw new Error('Debe haber un array de queries y un callback que '
+        +'reciba los resultados.');
     }
+    
+    for (var c = 0; c < queries.length; c += 1) {
+      (function (c) {
+        connection.query(queries[c], function (err, result) {
+          if (err) {
+            callback(err);
+            c = queries.length;
+            return;
+          }
+          results.push(result);
+          if (c === queries.length - 1) {
+            callback.apply(this, results);
+          }
+        });
+      })(c);
+    }
+  }
 
 };
 
-// Hacer controlador públic
+// Hacer controlador público.
 module.exports = exports = controller;
