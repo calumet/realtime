@@ -75,9 +75,17 @@ var AC_ClassesModel = rubi.model('ac_classes', AC_ClassesSchema);
 // puede ser actualizada o en el peor caso, agregada una nueva.
 var AC_RoomsSchema = rubi.Schema({
   _id: String,  // nombre de la sala: MATERIA_GRUPO(_SUBGRUPO)
-  avail: Boolean,  // si se puede chatear o no (en caso de exámen o quiz)
-  teacher: String,  // si hay profesor en la sala (en caso contrario, string vacío: "")
-  students: [String],  // los estudiantes de la sala
+  available: Boolean,  // si se puede chatear o no (en caso de exámen o quiz)
+  teacher: {  // si hay profesor en la sala (en caso contrario, strings vacíos)
+    _id: String,
+    socket: String,  // identificador del socket de conexión
+    state: String  // el estado: available | offline
+  },
+  students: [{  // los estudiantes de la sala
+    _id: String,
+    socket: String,  // identificador del socket de conexión
+    state: String  // el estado: available | offline
+  }],
   messages: [{
     posted: Date,  // datetime de publicación
     user: String,

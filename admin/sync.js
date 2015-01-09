@@ -202,9 +202,15 @@ Processes.aula.data = function (data) {
       rubi.ac_rooms.update({
         _id: d.subject +'_'+ d.group,
       }, {
-        avail: true,
-        teacher: d.teacher,
-        students: d.students
+        available: true,
+        teacher: {
+          _id: d.teacher,
+          socket: '',
+          state: 'offline'
+        },
+        students: _.map(d.students, function (st) {
+          return {_id: st, socket: '', state: 'offline'};
+        })
       }, {
         upsert: true
       }, function (err, room) {
@@ -217,9 +223,19 @@ Processes.aula.data = function (data) {
           rubi.ac_rooms.update({
             _id: d.subject +'_'+ d.group +'_'+ sg._id
           }, {
-            avail: true,
-            teacher: '',
-            students: sg.students
+            available: true,
+            teacher: {
+              _id: '',
+              socket: '',
+              state: 'offline'
+            },
+            students: _.map(sg.students, function (st) {
+              return {
+                _id: st,
+                socket: '',
+                state: 'offline'
+              };
+            })
           }, {
             upsert: true
           }, function (err, room) {
