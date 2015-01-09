@@ -1,42 +1,16 @@
-/*!
+ /*!
+ * Universidad Industrial de Santander
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Routes | Aula
  * Romel Pérez, prhone.blogspot.com
- * 2014
+ * 2015
  **/
 
-// IMPORTANT: INESTABLE!
-
-var _ = require('underscore');
-var mysql = require('../databases/dbs.aula');
-
 // -------------------------------------------------------------------------- //
-// API //
+// AULA | ROUTES //
 
-module.exports = function (app) {
+module.exports = exports = function () {
 
-    // Retornar datos de usuario por su código
-    app.post('/api/getUserByCode', function (req, res) {
-        var code = req.body.code;
-        res.json({
-            user: db.userByCode(code)
-        });
-    });
-
-    // Retornar datos de usuario por su id
-    app.post('/api/getUserById', function (req, res) {
-        var id = req.body.id;
-        res.json({
-            user: db.userById(id)
-        });
-    });
-
-    // Retornar datos de usuarios de una clase
-    app.post('/api/getUsersByClass', function (req, res) {
-        var clase = req.body.clase;
-        res.json({
-            users: db.usersByClass(clase)
-        });
-    });
+  // No se han creado rutas para esta aplicación hasta el momento.
 
 };
