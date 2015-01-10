@@ -1,45 +1,38 @@
 /*!
+ * Universidad Industrial de Santander
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Databases | Portal
  * Romel Pérez, prhone.blogspot.com
- * 2014
+ * 2015
  **/
 
-var config = require('../config');
 var _ = require('underscore');
 var rubi = require('../libs/rubi');
-var diamante = require('../libs/diamante');
+var config = require('../config');
 var debug = require('debug')('dbs:portal');
 
 
 // -------------------------------------------------------------------------- //
 // PROCEDURES //
 
-// Referencias a los controladores de las bases de datos.
-module.exports.rubi = exports.rubi = rubi;
-module.exports.diamante = exports.diamante = diamante;
-
-
 /**
- * Inicialización de procesos con las bases de datos.
- * @param  {function} success Al haberse conectado
- * @param  {function} error   Cuando ocurra un error
+ * Referencias a los controladores de las bases de datos utilizadas.
  */
-module.exports.init = exports.init = rubi.connect;
+exports.rubi = rubi;
 
 
 /**
  * Resetear todas las instancias de conexión de usuarios.
  * @param  {Function} callback function(err,result){}
  */
-module.exports.reset = exports.reset = function (callback) {
-    rubi.users.update({}, {
-        $set: {
-            devices: []
-        }
-    }, {
-        multi: true
-    }, callback);
+exports.reset = function (callback) {
+  rubi.users.update({}, {
+    $set: {
+      devices: []
+    }
+  }, {
+    multi: true
+  }, callback);
 };
 
 
@@ -49,21 +42,21 @@ module.exports.reset = exports.reset = function (callback) {
  * @param {Object}   socket
  * @param {Function} callback function(err,result){}
  */
-module.exports.addInstance = exports.addInstance = function (user, socket, callback) {
-    rubi.users.findOneAndUpdate({
-        _id: user.id
-    }, {
-        $set: {
-            time: new Date(user.time),
-            ip: user.ip
-        },
-        $push: {
-            devices: {
-                _id: socket,
-                agent: user.agent
-            }
-        }
-    }, callback);
+exports.addInstance = function (user, socket, callback) {
+  rubi.users.findOneAndUpdate({
+    _id: user.id
+  }, {
+    $set: {
+      time: new Date(user.time),
+      ip: user.ip
+    },
+    $push: {
+      devices: {
+        _id: socket,
+        agent: user.agent
+      }
+    }
+  }, callback);
 };
 
 
@@ -73,49 +66,65 @@ module.exports.addInstance = exports.addInstance = function (user, socket, callb
  * @param  {Object}   socket
  * @param  {Function} callback function(err,result){}
  */
-module.exports.rmInstance = exports.rmInstance = function (user, socket, callback) {
+exports.rmInstance = function (user, socket, callback) {
+  rubi.users.findOne({
+    _id: user.id
+  }, function (err, doc) {
+    if (err) {
+      callback.apply(this, arguments);
+      return;
+    }
 
-    rubi.users.findOne({
-        _id: user.id
-    }, function (err, doc) {
-        if (err) {
-            callback.apply(this, arguments);
-            return;
-        }
-
-        doc.devices = _.reject(doc.devices, function (el) {
-            return socket ===  el._id;
-        });
-
-        doc.save(callback);
+    // Remover la instancia del socket.
+    doc.devices = _.reject(doc.devices, function (el) {
+      return socket ===  el._id;
     });
+
+    doc.save(callback);
+  });
 };
 
 
 /**
- * Verificar si un usuario es administrador.
- * @param  {String}   id       Identificador del usuario
- * @param  {Function} callback function(esAdmin){}
- */
-module.exports.isAdmin = exports.isAdmin = function (id, callback) {
-    rubi.users.findOne({
-        _id: id
-    }, function (err, user) {
-        if (err) {
-            callback(false);
-            return;
-        }
-        user.admin ? callback(true) : callback(false);
-    });
-};
-
-
-/**
- * Conseguir cantidad de conectados.
+ * Conseguir datos de tiempo real.
  * @param  {Function} callback function(err,results){}
  */
-module.exports.count = exports.stats = function (callback) {
-    rubi.users.count({
-        $where: 'this.devices.length > 0'
-    }, callback);
+exports.stats = function (callback) {
+  rubi.users.count({
+    $where: 'this.devices.length > 0'
+  }, function (err, count) {
+    callback(err, {
+      count: count
+      //,otras estadísticas (en un futuro): ...
+    });
+  });
+};
+
+
+/**
+ * Agregar mensaje de administración al público.
+ * @param  {Object}   options  {startDate,endDate,message,type}
+ * @param  {Function} callback function(err,result){}
+ */
+exports.addMessage = function (options, callback) {
+  rubi.messages.create({
+    type: options.type,
+    publishedBy: options.publishedBy,
+    startDate: options.startDate,
+    endDate: options.endDate,
+    message: options.message
+  }, callback);
+};
+
+
+/**
+ * Remover mensaje que ha sido publicado en la administración para el público.
+ * @param  {String}   id       Identificador del mensaje
+ * @param  {Function} callback function(err,result){}
+ */
+exports.rmMessage = function (id, callback) {
+  rubi.messages.findById(id, function (err, msg) {
+    if (err) callback.apply(this, arguments);
+    else msg.remove(callback);
+  });
 };
