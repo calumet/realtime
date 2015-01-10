@@ -1,34 +1,39 @@
 /*!
+ * Universidad Industrial de Santander
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Server
  * Romel Pérez, prhone.blogspot.com
- * 2014
+ * 2015
  **/
 
-// Módulos
+// Módulos.
 var http = require('http');
 var express = require('express');
 var socketio = require('socket.io');
 var debug = require('debug')('server');
 var config = require('./config');
 
-
-// Instanciar
+// Instanciar el servidor web y el servidor de sockets.
 var app = express();
 var server = http.Server(app);
 var io = socketio(server);
 
+// Inicializando los componentes funcionales.
+var context = {
+  express: app,
+  io: io
+};
+require('./databases').call(context, function () {
 
-// Componentes funcionales
-var context = {express: app, io: io};
-require('./sockets').apply(context);
-require('./routes').apply(context);
-require('./databases').apply(context);
+  // Cuando las bases de datos estén listas.
+  require('./routes').apply(context);
+  require('./sockets').apply(context);
+});
 
-
-// Iniciar
+// Iniciar.
 server.listen(config.port, function (err) {
-    if (err) debug(err);
-    debug('modo ' + app.get('env'));
-    debug('escuchando en el puerto ' + config.port);
+  if (err) debug(err);
+  
+  debug('modo '+ app.get('env'));
+  debug('escuchando en el puerto '+ config.port);
 });
