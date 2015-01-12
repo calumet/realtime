@@ -21,16 +21,17 @@
     "url": "https://github.com/calumet/realtime.git"
   },
   "dependencies": {
-    "socket.io": "1.x",
+    "async": "0.x",
+    "body-parser": "1.x",
+    "cookie": "0.x",
+    "cookie-parser": "1.x",
+    "debug": "0.x",
+    "express": "4.x",
+    "moment": "2.x",
     "mongoose": "3.x",
     "mysql": "2.x",
-    "express": "4.x",
-    "underscore": "1.x",
-    "body-parser": "1.x",
-    "cookie-parser": "1.x",
-    "cookie": "0.x",
+    "socket.io": "1.x",
     "swig": "1.x",
-    "async": "0.x",
-    "debug": "0.x"
+    "underscore": "1.x"
   }
 }
