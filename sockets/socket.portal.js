@@ -1,145 +1,104 @@
 /*!
+ * Universidad Industrial de Santander
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Sockets | Portal
  * Romel Pérez, prhone.blogspot.com
- * 2014
+ * 2015
  **/
 
 var _ = require('underscore');
-var cookie = require('cookie');
-var debug = require('debug')('socket:portal');
-var config = require('../config');
-var security = require('../security');
 var db = require('../databases/dbs.portal');
+var debug = require('debug')('socket:portal');
 
 
 // -------------------------------------------------------------------------- //
-// PORTAL | SOCKET //
+// PORTAL APPLICATION //
 
-var app = {
+var portal = {
 
-    io: null,
-    express: null,
-
-    /**
-     * Proceso de validación de conexión de socket portal con usuario
-     * @param  socket  Es la conexión del socket estableciéndose
-     * @param  accept  Callback a ejecutar con el mensaje de conexión
-     * Las posibles respuestas al usuario por la conexión son:
-     * > ERROR       Error en el proceso de conexión
-     * > ERROR_DATA  Datos erroneos
-     * > NOT_AUTH    Usuario no autenticado
-     * > NOT_FOUND   Usuario no encontrado
-     * > DUPLICATE   Segunda conexión por computadora
-     * > undefined   Usuario aceptado
-     */
-    handshake: function (socket, authorize) {
-
-        // Función de registrar respuesta de conexión.
-        var accept = function (state) {
-            if (state) debug(socket.handshake.address + ' ' + state);
-            authorize(state ? {data: state} : undefined);
-        };
-
-        // Recoger datos y guardarlos con referencias.
-        var user = socket.user = {
-            ip: socket.handshake.address,
-            agent: socket.handshake.headers['user-agent'],
-            time: socket.handshake.time,
-            id: socket.handshake.query.userid  // Identificador del usuario
-        };
-
-        // Verificar datos válidos.
-        if (!user.id) {
-            accept('ERROR_DATA');
-            return;
-        }
-
-        // Verificar que tenga la cookie de seguridad y que sea compartida.
-        // Se encripta el id del usuario con la clave privada compartida.
-        var cookies = cookie.parse(socket.handshake.headers.cookie);
-        var localKey = security.encrypt(user.id).toUpperCase();
-        var sentKey = cookies[config.security.cookie];
-        if (!sentKey || (sentKey && localKey !== String(sentKey).toUpperCase())) {
-            accept('NOT_AUTH');
-            return;
-        }
-
-        // Analizar datos de usuario en base de datos.
-        // Sólo multiples instancias del portal desde la misma IP.
-        db.users.findOne({_id: user.id}, function (err, myUser) {
-
-            // Error buscando en base de datos.
-            if (err) {
-                debug(err.name + ': ' + err.message);
-                accept('ERROR');
-                return;
-            }
-
-            // TODO: Verificar que desde la misma IP, la misma computadora,
-            // sólo haya un único usuario conectado.
-            // HINT: Probar en conexiones con proxies.
-
-            // Usuario encontrado
-            if (!!myUser) {
-
-                // Tiene session/es
-                if (myUser.devices.length) {
-                    (user.ip === myUser.ip) ? accept() : accept('DUPLICATE');
-                }
-
-                // No tiene sessiones
-                else {
-                    accept();
-                }
-            }
-
-            // No encontrado
-            else {
-                accept('NOT_FOUND');
-            }
-        });
-    },
+  io: null,
+  express: null,
+  messagesIntervalUpdate: null,
 
 
-    /**
-     * Conexión por socket con el usuario (.on('connect', connect)).
-     * @param  socket  El socket de conexión
-     */
-    connect: function (socket) {
+  /**
+   * Conexión por socket con el usuario ".on('connect', connect)".
+   * @param {Object} socket El socket de conexión con el usuario
+   */
+  connect: function (socket) {
 
-        // Usuario conectado.
-        debug(socket.user.ip + ' conectado.');
+    // Usuario conectado en el portal.
+    debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' CONNECTED.');
 
-        // Registrar instancia de conexión por ya estar conectado.
-        db.addInstance(socket.user, socket.id, function (err, doc) {
-            if (err) debug(err);
-        });
+    // Registrar instancia de conexión por ya estar conectado.
+    db.addInstance(socket.user, socket.id, function (err, doc) {
+      if (err) debug(err);
+    });
 
-        // Remover instancia de conexión al desconectarse.
-        socket.on('disconnect', function () {
-            debug(socket.user.ip + ' desconectado.');
-            db.rmInstance(socket.user, socket.id, function (err, doc) {
-                if (err) debug(err);
-            });
-        });
-    }
+    // Enviar mensajes de administración activos al público.
+    portal.sendActiveMsgs(socket);
+
+    // Remover instancia de conexión al desconectarse.
+    socket.on('disconnect', function () {
+      debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' DISCONNECTED.');
+      db.rmInstance(socket.user, socket.id, function (err, doc) {
+        if (err) debug(err);
+      });
+    });
+  },
+
+
+  /**
+   * Revisar por mensajes de administración al público activos.
+   * @param  sockets  El socket/sockets de conexión
+   * Responde con array de mensajes, sólo id, tipo y contenido.
+   */
+  sendActiveMsgs: function (sockets) {
+    var now = new Date();
+
+    // Preguntar por mensajes de ahora mismo.
+    db.rubi.messages.find({
+      startDate: {$lte: now},
+      endDate: {$gte: now}
+    }, function (err, msgs) {
+      if (err) debug(err);
+
+      // Filtrar los mensajes recibidos.
+      var messages = {
+        messages:
+          msgs.length
+          ? _.map(msgs, function (msg) {
+          return {
+            id: msg._id,
+            type: msg.type,
+            message: msg.message
+          }
+          })
+          : []
+      };
+
+      // Si hay o no mensajes para enviar.
+      if (!messages.messages.length) return;
+      else sockets.emit('portal:msg', messages);
+    });
+  }
 
 };
-
 
 
 // -------------------------------------------------------------------------- //
 // EVENTS //
 
-module.exports = function () {
+module.exports = function (authorization) {
 
-    var self = this;
-    app.io = this.io;
-    app.express = this.express;
+  portal.io = this.io;
+  portal.express = this.express;
 
-    // Cuando la conexión con la base de datos esté disponible
-    db.init(function () {
-        self.io.of('/portal', app.connect).use(app.handshake);
-    });
+  // Implementar aplicación/namespace de sockets conectándose en el portal.
+  this.io.of('/portal', portal.connect).use(authorization.handshake);
+
+  // Verificar cada 1 minuto que hayan mensajes pospuestos de administración.
+  portal.messagesIntervalUpdate = setInterval(function () {
+    portal.sendActiveMsgs(portal.io.of('/portal'));
+  }, 1000 * 60 * 1);
 };
