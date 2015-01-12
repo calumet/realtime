@@ -87,9 +87,9 @@ var AC_RoomsSchema = rubi.Schema({
     state: String  // el estado: available | offline
   }],
   messages: [{
-    posted: Date,  // datetime de publicación
+    _id: Date,  // datetime de publicación
     user: String,
-    text: String  // contenido textual de la publicación
+    content: String  // contenido de la publicación
   }]
 }, {
   collection: 'ac_rooms'
