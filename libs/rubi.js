@@ -75,6 +75,7 @@ var AC_ClassesModel = rubi.model('ac_classes', AC_ClassesSchema);
 // puede ser actualizada o en el peor caso, agregada una nueva.
 var AC_RoomsSchema = rubi.Schema({
   _id: String,  // nombre de la sala: MATERIA_GRUPO(_SUBGRUPO)
+  type: String,  // tipo de sala: class | subgroup
   available: Boolean,  // si se puede chatear o no (en caso de exámen o quiz)
   teacher: {  // si hay profesor en la sala (en caso contrario, strings vacíos)
     _id: String,
