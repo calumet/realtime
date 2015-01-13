@@ -219,6 +219,7 @@ Processes.aula.data = function (data) {
       // Crear la sala de chat de la clase.
       rubi.ac_rooms.create({
         _id: d.subject +'_'+ d.group,
+        type: 'class',
         available: true,
         teacher: {
           _id: d.teacher,
@@ -242,6 +243,7 @@ Processes.aula.data = function (data) {
           // Crear la sala de chat de cada subgrupo de cada clase.
           rubi.ac_rooms.create({
             _id: d.subject +'_'+ d.group +'_'+ sg._id,
+            type: 'subgroup',
             available: true,
             teacher: {
               _id: '',
