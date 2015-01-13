@@ -1,302 +1,342 @@
 /*!
+ * Universidad Industrial de Santander
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Sockets | Aula
  * Romel Pérez, prhone.blogspot.com
- * 2014
+ * 2015
  **/
 
-// IMPORTANT: VERY INESTABLE!
-
 var _ = require('underscore');
-var cookie = require('cookie');
-var debug = require('debug')('socket:aula');
+var async = require('async');
+var db = require('../databases/dbs.aula');
 var config = require('../config');
 var security = require('../security');
-var db = require('../databases/dbs.aula');
+var debug = require('debug')('socket:aula');
 
-
-/*
-MYSQL:
-Seleccionar todos los alumnos de una materia y grupo:
-'SELECT * FROM TR_Alumnos WHERE IdMat="22957" AND Grupo="B1";'
-*/
 
 // -------------------------------------------------------------------------- //
-// PROCESSES //
+// AULA APPLICATION //
 
-var app = {
+var aula = {
 
-    // Todas las clases con sus usuarios activos
-    classes: {
+  io: null,
+  express: null,
+  roomsIntervalUpdate: null,
 
-        // { 'class_group': { id1: {user1}, id2: {user2}, ... }, ... }
-        cache: {},
 
-        // Agregar usuario activo a clase, crear sino tiene usuarios activos
-        // data: {id, socket, state, code, clase}
-        addUser: function (data) {
-            this.cache[data.clase] = this.cache[data.clase] || {};
-            this.cache[data.clase][data.id] = {
-                socket: data.socket,  // Socket id
-                state: data.state,  // 'avail' | 'unavail'
-                info: db.userByCode(data.code)  // User data
-            };
-        },
+  /**
+   * Proceso de validación de conexión del socket con el namespace aula.
+   * Si abre más de una conexión con el aula, no se permitirá la segunda.
+   * @param {Object} socket Es la conexión del socket estableciéndose
+   * @param {Object} authorize Callback a ejecutar con la respuesta de conexión
+   * Las posibles respuestas al usuario por la conexión son:
+   * > ERROR       Error en el proceso de conexión
+   * > ERROR_DATA  Datos erroneos
+   * > DUPLICATE   Segunda conexión del aula en la misma computadora
+   * > undefined   Usuario aceptado
+   */
+  handshake: function (socket, authorize) {
 
-        // Remover un usuario de una clase por socket
-        removeUser: function (socket) {
-            _.each(this.cache, function (group, ind) {
-                _.each(group, function (user, index) {
-                    if (socket === user.socket) {
-                        delete group[index];
-                        return;
-                    }
-                });
-            });
-        },
+    var accept = function (res) {
+      debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' '
+       + (res ? res : 'AUTHORIZED'));
+      authorize(res ? {data: res} : res);
+    };
 
-        // Todos los usuarios de una clase, activos y offline
-        users: function (clase, except) {
-            var users = db.usersByClass(clase);
+    // Consiguiendo los datos de la clase.
+    var userid = socket.user.id;
+    var subject = socket.user.subject = socket.handshake.query.subject;
+    var group = socket.user.group = socket.handshake.query.group;
+    var subgroup = socket.user.subgroup = socket.handshake.query.subgroup;
 
-            // Remover usuario excepción de la lista
-            _.each(users, function (el, i) {
-                if (except === el.id) {
-                    delete users[i];
-                }
-            });
+    // Conseguir datos de sala de chat de la clase.
+    db.rubi.ac_rooms.findById(subject +'_'+ group, function (err, classRoom) {
+      if (err) {
+        accept('ERROR');
+        debug(err);
+        return;
+      }
 
-            // Colocar estados a usuarios de lista
-            _.each(users, function (user, id) {
-                users[id] = {
-                    id: id,
-                    info: user
-                };
-                if (this.cache[clase][id]) {
-                    users[id].state = this.cache[clase][id].state;
-                } else {
-                    users[id].state = 'offline';
-                }
-            }, this);
+      // No encontrado.
+      if (!classRoom) {
+        accept('ERROR_DATA');
+        return;
+      }
 
-            // users: {info, state}
-            return users;
+      // Saber si el usuario está conectado ya, verificando en la sala de clase:
+      // rubi.ac_rooms.MATERIA_GRUPO.
+      var st = _.findWhere(classRoom.students, {_id: userid});
+      var f = (st && st.state === 'available') ||
+      (userid === classRoom.teacher._id && classRoom.teacher.state === 'available');
+
+      // Fue duplicado o está diśponible para conectarse.
+      f ? accept('DUPLICATE') : accept();
+    });
+  },
+
+
+  /**
+   * Conexión por socket con el usuario ".on('connect', connect)".
+   * @param {Object} socket El socket de conexión con el usuario
+   */
+  connect: function (socket) {
+
+    // Usuario conectado en el aula.
+    debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' CONNECTED.');
+
+    // Usuario conectado.
+    aula.events.online.apply(socket);
+
+    // Usuario desconectado (manualmente o automáticamente).
+    socket.on('offline', function () {
+      socket.disconnect(true);
+    });
+    socket.on('disconnect', function () {
+      aula.events.offline.apply(socket, arguments);
+      debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' DISCONNECTED.');
+    });
+
+    // Mensaje de usuario.
+    socket.on('msg', function () {
+      aula.events.msg.apply(socket, arguments);
+    });
+
+  },
+
+
+  /**
+   * Eventos recibidos de un socket.
+   * Emits posibles desde este evento de socket:
+   * > serverError - El servidor tuvo un error procesando un evento de un usuario.
+   */
+  events: {
+
+    /**
+     * El usuario envió los datos para conectarse en el chat de clase, ya estándo
+     * conectado con el socket.
+     * Emits posibles desde este evento de socket:
+     * > online - Se le envía al mismo usuario respondiendo que está online exitosamente.
+     * > userOnline - Se le envía a todos los demás usuarios conectados en la sala.
+     */
+    online: function () {
+      var socket = this;
+
+      // Agregar a rubi como conectado.
+      db.userConnected(socket, function (err, rooms, users) {
+        if (err) {
+          debug(err);
+          return socket.emit('serverError', {ev: 'online'});
         }
+
+        // Filtrar datos de salas de chat en las que se encuentra.
+        var roomsFiltered = _.map(rooms, function (room) {
+          return {
+            id: room._id,
+            available: room.available,
+            teacher: {
+              id: room.teacher._id,
+              state: room.teacher.state
+            },
+            students: _.map(room.students, function (student) {
+              return {
+                id: student._id,
+                state: student.state
+              };
+            }),
+            messages: _.map(room.messages, function (msg) {
+              return {
+                id: msg._id,
+                user: msg.user,
+                content: msg.content
+              };
+            })
+          };
+        });
+
+        // Filtrar datos de usuarios de cada sala de chat en la que se encuentra.
+        var usersFiltered = _.map(users, function (user) {
+          return {
+            id: user._id,
+            photo: user.photo,
+            name: user.name
+          };
+        });
+
+        // Enviarle la confirmación de que ya está conectado, con los datos de
+        // las salas en las que se encuentra y los datos de todos sus usuarios.
+        socket.emit('online', {
+          rooms: roomsFiltered,
+          users: usersFiltered
+        });
+
+        // Por cada sala de chat.
+        _.each(rooms, function (room) {
+          
+          // Unirse a la sala.
+          socket.join(room._id, function (err) {
+            if (err) {
+              debug(err);
+              return socket.emit('serverError', {ev: 'online'});
+            }
+
+            // Cuando se una, informarle a los demás que está conectado.
+            socket.to(room._id).emit('userOnline', {
+              id: socket.user.id,
+              room: room._id
+            });
+          });
+        });
+      });
+    },
+
+
+    /**
+     * El usuario en cuestión se ha desconectado (manual/automáticamente).
+     * Emits posibles desde este evento de socket:
+     * > userOffline - Otro usuario se ha desconectado
+     */
+    offline: function () {
+      var socket = this;
+
+      // Colocar en rubi como desconectado.
+      db.userDisconnected(socket, function (err, rooms) {
+        if (err) {
+          debug(err);
+          return socket.emit('serverError', {ev: 'offline'});
+        }
+
+        // NOTE: No es necesario enviarle nada al usuario desconectado.
+        
+        // NOTE: El usuario deja la salas de chat cuando se desconecta
+        // automáticamente.
+
+        // Enviar a los de las salas, que se ha desconectado.
+        _.each(rooms, function (room) {
+          socket.to(room._id).emit('userOffline', {
+            id: socket.user.id,
+            room: room._id
+          });
+        });
+      });
 
     },
 
 
-    // Todas las salas personalizadas
-    rooms: {
+    /**
+     * Mensaje enviado por el usuario a una sala de chat.
+     * @param {Object} msg {room:String, content:String}
+     * Emits posibles desde este evento de socket:
+     * > userMsg - Un usuario ha enviado un mensaje a una sala (clase/subgrupo),
+     *   el cual puede ser el mismo usuario u otro en la sala.
+     * > roomState - Una sala cambia de estado de actividad. Ex: Pasa de disponible
+     *   a no disponible por un exámen.
+     */
+    msg: function (msg) {
+      var socket = this;
 
-        // { id: {type, name, clase, users[ids]}, ... }
-        cache: {},
+      // El momento de ocurrido el mensaje se consigue en el servidor.
+      var now = new Date().getTime();
 
-        // Agregar una nueva sala personalizada
-        // data: {type, name, clase, users[ids]}
-        add: function (data) {
-            var id = data.clase + '_' + (new Date()).getTime();
-            this.cache[id] = {
-                type: data.type,
-                name: data.name,
-                clase: data.clase,
-                users: data.users
-            };
-            // Retornar el id de sala
-            return id;
-        },
+      // Utilizar el contenido de llegada y enviarlo como llegó.
+      // FIXIT: comprobar que funciona correctamente desde Western (ISO 8859-1)
+      // al encoding del servidor que es UTF-8.
+      var content = msg.content;
 
-        remove: function (id) {
-            delete this.cache[id];
-        },
+      // TODO: mantener los mensajes de la sala a menos de Number(X), eliminando
+      // los mensajes más antiguos.
 
-        // Si un usuario se ha salido de una sala personalizada
-        getout: function (id, userid) {
-            this.cache[id].users = _.without(this.cache[id].users, userid);
-            if (this.cache[id].users.length === 0) {
-                this.remove(id);
-            }
+      // Buscar disponibilidad de sala.
+      db.rubi.ac_rooms.findOne({_id: msg.room}, function (err, room) {
+        if (err) {
+          debug(err);
+          return socket.emit('serverError', {ev: 'msg'});
         }
 
-    },
-
-
-    // Eventos de Sockets
-    events: {
-
-        // Un usuario se vuelve online
-        // data: {clase, id}
-        online: function (data) {
-            var io = this.io;
-            var socket = this.socket;
-            var info = db.userById(data.id);
-
-            // Agregar a la lista de usuarios activos de una clase
-            app.classes.addUser({
-                id: data.id,
-                socket: socket.id,
-                state: 'avail',
-                code: info.code,
-                clase: data.clase
-            });
-
-            // Agregarlo a la sala
-            socket.join(data.clase);
-
-            // Comunicar que ya está online y enviarle datos
-            socket.emit('onlined', {
-                // Enviar todos los usuarios de la clase
-                users: app.classes.users(data.clase, data.id),
-                // Enviar las salas y sus mensajes a las que pertenece
-                rooms: {}  // id: {name, type, users[ids], msgs: []}
-            });
-
-            // Comunicar a todos los demás usuarios conectados
-            socket.broadcast.to(data.clase).emit('userOnline', data.id);
-        },
-
-        // Un usuario se vuelve offline
-        offline: function () {
-            var i, j, id, clase;
-            var io = this.io;
-            var socket = this.socket;
-
-            // Encontrar id de usuario y clase por su socket
-            for (i in app.classes.cache) {
-                for (j in app.classes.cache[i]) {
-                    if (socket.id === app.classes.cache[i][j].socket) {
-                        id = j;
-                        clase = i;
-                        break;
-                    }
-                }
-                if (id) {
-                    break;
-                }
-            }
-
-            // Remover de la lista de usuarios activos de la clase
-            app.classes.removeUser(socket.id);
-
-            // No es necesario enviar nada al usuario desconectado
-
-            // Actualizar a todos los demás usuarios de la misma clase
-            socket.broadcast.to(clase).emit('userOffline', id);
-        },
-
-        // Un usuario ha enviado un mensaje
-        // data: {id, room, content, params}
-        msg: function (data) {
-            var io = this.io;
-            var socket = this.socket;
-
-            io.sockets['in'](data.room).emit('userMsged', data);
-        },
-
-        // Un usuario ha creado una nueva sala
-        // data: {*id, type, name, clase, *users[ids]} // *id: id de usuario, *users: usuarios excepto él mismo
-        roomNew: function (data) {
-            var room, newData;
-            var uSockets = [];
-            var io = this.io;
-            var socket = this.socket;
-
-            data.users.unshift(data.id);  // Agregar él mismo a la lista
-            room = app.rooms.add(data);  // Crear sala
-
-            _.each(data.users, function (id, i) {
-                if (app.classes.cache[data.clase] && app.classes.cache[data.clase][id]) {
-                    // El usuario está activo ('avail' || 'unavail')
-                    uSockets.push(app.classes.cache[data.clase][id].socket);
-                }
-            });
-
-            // Enviar a cada usuario de la sala, incluyendolo a él mismo
-            newData = {
-                room: room,  // El nuevo identificador
-                type: data.type,
-                name: data.name,
-                users: data.users
-            };
-            _.each(uSockets, function (sk, i) {
-                io.sockets.socket(sk).join(room);
-                io.sockets.socket(sk).emit('roomNewed', newData);
-            });
-        },
-
-        // El usuario ha salido de una sala
-        // data: {id, room}
-        roomGetout: function (data) {
-            var io = this.io;
-            var socket = this.socket;
-
-            // Si pertenece a una sala personalizada
-            if (app.rooms.cache[data.room]) {
-                app.rooms.getout(data.room, data.id);
-                io.sockets['in'](data.room).emit('roomGotout', {
-                    id: data.id,
-                    room: data.room
-                });
-            }
+        // Sala no disponible. Enviar al usuario un mensaje indicandolo.
+        if (!room.available) {
+          return socket.emit('roomState', {
+            room: msg.room,
+            available: false
+          });
         }
+
+        // Guadar copia del mensaje en la sala de rubi.ac_rooms.
+        db.addMessage(msg.room, {
+          _id: now,
+          user: socket.user.id,
+          content: content
+        }, function (err) {
+          if (err) {
+            debug(err);
+            return socket.emit('serverError', {ev: 'msg'});
+          }
+
+          // Enviar a todos los usuarios del namespace/sala el mensaje.
+          aula.io.of('/aula').to(msg.room).emit('userMsg', {
+            id: now,
+            user: socket.user.id,
+            content: content
+          });
+        });        
+      });
 
     }
 
-};
+  },
 
+
+  /**
+   * Actualizar disponibilidad de las salas de clase y subgroupos de clase.
+   */
+  updateRoomsAvailability: function () {
+
+    // Conseguir todas las salas tipo clase.
+    db.rubi.ac_rooms.find({
+      type: 'class'
+    }, function (err, classes) {
+      if (err) debug(err);
+
+      // Recorrer cada clase (en serie para dividir trabajo).
+      async.eachSeries(classes, function (clss, next) {
+
+        // Materia y grupo.
+        if (clss._id.indexOf('_') === -1) return next();
+        var s = clss._id.substring(0, clss._id.indexOf('_'));
+        var g = clss._id.substring(clss._id.indexOf('_') + 1);
+        
+        // Comprobar la disponibilidad de la clase.
+        db.classInExam(s, g, function (err, inExam) {
+          if (err) debug(err);
+
+          // Actualizar de acuerdo al estado de la clase.
+          db.rubi.ac_rooms.update({
+            _id: new RegExp('^'+ s +'_'+ g)
+          }, {
+            available: !inExam
+          }, next);
+        });
+      }, function (err) {
+        if (err) debug(err);
+      });
+    });
+  }
+
+};
 
 
 // -------------------------------------------------------------------------- //
 // EVENTS //
 
-module.exports = function () {
+module.exports = function (authorization) {
 
-    var express = this.express;
-    var io = this.io;
+  aula.io = this.io;
+  aula.express = this.express;
 
-    // Authorization
-    io.of('/aulachat').authorization(function (handshake, connection) {
+  // Implementar aplicación/namespace de sockets conectándose al aula.
+  aula.io.of('/aula', aula.connect)
+  .use(authorization.handshake)
+  .use(aula.handshake);
 
-        var errors = null;
-        var authorized = true;
-
-        connection(errors, authorized);
-
-    })
-
-    // Connection
-    .on('connection', function (socket) {
-
-        var context = {io: io, socket: socket};
-
-        // Usuario Online
-        socket.on('online', function () {
-            app.events.online.apply(context, arguments);
-        });
-
-        // Usuario Offline
-        socket.on('offline', function () {
-            app.events.offline.apply(context, arguments);
-        });
-        socket.on('disconnect', function () {
-            app.events.offline.apply(context, arguments);
-        });
-
-        // Usuario Mensaje
-        socket.on('msg', function () {
-            app.events.msg.apply(context, arguments);
-        });
-
-        // Sala Nueva
-        socket.on('roomNew', function () {
-            app.events.roomNew.apply(context, arguments);
-        });
-
-        // Sala Usuario que ha Salido
-        socket.on('roomGetout', function () {
-            app.events.roomGetout.apply(context, arguments);
-        });
-
-    });
-
+  // Actualizar estado de las salas cada 1 minuto. Ex: Salas en exámen.
+  aula.roomsIntervalUpdate = setInterval(aula.updateRoomsAvailability, 60000);
 };
