@@ -159,6 +159,33 @@ exports.diamante = diamante;
 
 
 /**
+ * Resetear todas las instancias de usuarios conectados en rubi.ac_rooms.
+ * @param  {Function} callback function(err){}
+ */
+exports.reset = function (callback) {
+  rubi.ac_rooms.find({}, function (err, rooms) {
+    async.each(rooms, function (room, next) {
+      
+      // Colocar los profesores como desconectados.
+      room.teacher.state = 'offline';
+      room.teacher.socket = '';
+
+      // Colocar cada alumno como desconectado.
+      _.each(room.students, function (student) {
+        student.state = 'offline';
+        student.socket = '';
+      });
+
+      // Guardar cambios.
+      room.save(next);
+    }, function (err) {
+      callback(err);
+    });
+  });
+};
+
+
+/**
  * Colocar un usuario como conectado en las salas de chat a las que pertenece.
  * @param {Object} socket El socket de conexión con el usuario.
  * @param {Function} callback function(err,rooms,users){}.
@@ -271,7 +298,7 @@ exports.classInExam = function (subject, group, callback) {
  * @param {Object} message El objeto mensaje {_id:Date, user:String, content:String}.
  * @param {Function} callback function(err){}.
  */
-exports.chatAddMessage = function (room, message, callback) {
+exports.addMessage = function (room, message, callback) {
   rubi.ac_rooms.update({
     _id: room
   }, {
@@ -294,6 +321,6 @@ exports.chatAddMessage = function (room, message, callback) {
  * rango dado. Si está 'from' y 'to', limitará en los más recientes.
  * @param {Function} callback function(err,messages){}.
  */
-exports.chatGetMessages = function (room, from, to, limit, callback) {
+exports.getMessages = function (room, from, to, limit, callback) {
   // TODO: this.
 };
