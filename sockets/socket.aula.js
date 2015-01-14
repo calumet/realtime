@@ -274,6 +274,7 @@ var aula = {
           // Enviar a todos los usuarios del namespace/sala el mensaje.
           aula.io.of('/aula').to(msg.room).emit('userMsg', {
             id: now,
+            room: msg.room,
             user: socket.user.id,
             content: content
           });
