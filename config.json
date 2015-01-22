@@ -3,7 +3,7 @@
 	"port": 7000,
 	"mongodb": {
 		"host": "127.0.0.1",
-		"port": 2000,
+		"port": 27017,
 		"user": "programmer",
 		"pass": "abc123",
 		"db": "rubi"
