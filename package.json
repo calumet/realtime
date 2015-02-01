@@ -1,6 +1,6 @@
 {
-  "name": "realtime",
-  "version": "0.3.5",
+  "name": "calumet-realtime",
+  "version": "0.3.6-beta",
   "description": "Sistema de comunicación en tiempo real para los portales de Calumet.",
   "private": false,
   "author": {

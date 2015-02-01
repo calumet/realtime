@@ -5,13 +5,13 @@
 		"host": "127.0.0.1",
 		"port": 27017,
 		"user": "programmer",
-		"pass": "abc123",
+		"pass": "admin",
 		"db": "rubi"
 	},
 	"mysql": {
 		"host": "127.0.0.1",
 		"port": 3306,
-		"user": "root",
+		"user": "programmer",
 		"pass": "admin",
 		"db": "diamante"
 	},
@@ -19,5 +19,8 @@
 		"user": "PORTAL_USER",
 		"door": "PORTAL_DOOR",
 		"key": "ABCD1234"
+	},
+	"aula": {
+		"maxMessagesPerRoom": 200
 	}
 }
