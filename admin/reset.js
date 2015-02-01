@@ -3,7 +3,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Admin | Reset
  * Romel Pérez, prhone.blogspot.com
- * 2015
+ * Enero, 2015
  **/
 
 /**
@@ -91,10 +91,8 @@ Processes.users = function () {
         codProf: (isNumber(user.CodProf) ? user.CodProf : 0),
         active: (user.Estado === 'Activo' || user.Estado === 'Manual' ? true : false),
         admin: (user.IdPerfil === 'PE1' || user.IdPerfil === 'PE17' ? true : false),
-        name: user.PrimNomUsr + ' ' + user.PrimApeUsr,
+        name: user.PrimNomUsr +' '+ user.PrimApeUsr,
         photo: user.Foto,
-        ip: null,
-        time: null,
         devices: []
       }, function (err, doc) {
         if (err) throw err;
@@ -114,17 +112,18 @@ Processes.users = function () {
 
 // Conseguir datos de la base de datos.
 Processes.aula = function () {
-
   var data = [];
 
   // Remover las clases existentes.
   rubi.ac_classes.remove({}, function (err) {
     if (err) throw err;
+    process.stdout.write('.');
   });
 
   // Remover las salas de chat existentes.
   rubi.ac_rooms.remove({}, function (err) {
     if (err) throw err;
+    process.stdout.write('.');
   });
 
   // Conseguir los guiones totales (no)disponibles y sus profesores.
@@ -155,6 +154,7 @@ Processes.aula = function () {
       +' WHERE IdMat="'+ c.IdMat +'" AND Grupo="'+ c.Grupo +'";', function (err, students) {
         if (err) throw err;
 
+        // Filtrarles a los estudiantes el id.
         reg.students = _.pluck(students, 'IdUsr');
 
         // Conseguir los subgrupos de cada clase.
@@ -179,7 +179,6 @@ Processes.aula = function () {
                 callback();
               }
             });
-            process.stdout.write('.');
           }, function (err) {
             if (err) throw err;
 
@@ -189,53 +188,54 @@ Processes.aula = function () {
 
             // Cuando se hayan conseguido todos los datos de clases.
             if (ci === classes.length - 1) {
-              Processes.aula.data(data);
+
+              // Pasar a la siguiente fase del proceso, salas de clases y subgrupos.
+              Processes.aula.clssAndSubs(data);
             }
           });  // end: subgruops
-          process.stdout.write('.');
         });
-        process.stdout.write('.');
       });
-      process.stdout.write('.');
     });  // end: each(classes)
-    process.stdout.write('.');
   });
-
 };
 
 
-// Guardar datos obtenidos en la base de datos.
-Processes.aula.data = function (data) {
-
+// Guardar datos de clases y subgrupos de clase en base de datos.
+Processes.aula.clssAndSubs = function (data) {
   var classesCount = 0;
 
   // Por cada clase.
   _.each(data, function (d, i) {
+    var users;
 
     // Crear la clase.
     rubi.ac_classes.create(d, function (err, tClass) {
       if (err) throw err;
+      process.stdout.write('.');
+
+      // Usuarios de clase.
+      users = _.map(d.students, function (st) {
+        return {
+          _id: st,
+          state: 'offline'
+        };
+      });
+      users.unshift({
+        _id: d.teacher,
+        state: 'offline'
+      });
 
       // Crear la sala de chat de la clase.
       rubi.ac_rooms.create({
         _id: d.subject +'_'+ d.group,
         type: 'class',
         available: true,
-        teacher: {
-          _id: d.teacher,
-          socket: '',
-          state: 'offline'
-        },
-        students: _.map(d.students, function (st) {
-          return {
-            _id: st,
-            socket: '',
-            state: 'offline'
-          };
-        }),
+        teacher: d.teacher,
+        users: users,
         messages: []
       }, function (err, room) {
         if (err) throw err;
+        process.stdout.write('.');
 
         // Por cada subgrupo de la clase.
         async.each(d.subgroups, function (sg, callback) {
@@ -245,15 +245,9 @@ Processes.aula.data = function (data) {
             _id: d.subject +'_'+ d.group +'_'+ sg._id,
             type: 'subgroup',
             available: true,
-            teacher: {
-              _id: '',
-              socket: '',
-              state: 'offline'
-            },
-            students: _.map(sg.students, function (st) {
+            users: _.map(sg.students, function (st) {
               return {
                 _id: st,
-                socket: '',
                 state: 'offline'
               };
             }),
@@ -272,15 +266,75 @@ Processes.aula.data = function (data) {
 
           classesCount++;
 
-          // Cuando se haya completado todo.
+          // Cuando se hayan creado las salas de clase y subgrupo.
           if (classesCount === data.length) {
-            Processes.done();
+
+            // Parar a la siguiente fase, guiones.
+            Processes.aula.guiones(data);
           }
         });
-        process.stdout.write('.');
       });
-      process.stdout.write('.');
-    });
+    });  // end: class create
+  });
+};
+
+
+// Guardar salas de guiones en la base de datos.
+Processes.aula.guiones = function (data) {
+  var users;
+  var guiones = {};
+
+  // Filtrar los guiones que sólo tienen una clase.
+  _.each(data, function (dt) {
+    if (_.where(data, {guion: dt.guion}).length > 1) {
+
+      // Usuarios de la clase en cuestión.
+      users = _.map(dt.students, function (st) {
+        return {
+          _id: st,
+          state: 'offline'
+        };
+      });
+
+      // Filtrar los usuarios compartidos entre salas.
+      if (!guiones[dt.guion]) {
+
+        // Agregar profesor al inicio.
+        users.unshift({
+          _id: dt.teacher,
+          state: 'offline'
+        });
+
+        // Creando guion.        
+        guiones[dt.guion] = {
+          _id: dt.subject +'_'+ dt.guion,
+          type: 'guion',
+          available: true,
+          teacher: dt.teacher,
+          users: users,
+          messages: []
+        };
+      } else {
+
+        // Haciendo "unión" de usuarios de todas las clases del guion.
+        guiones[dt.guion].users = guiones[dt.guion].users.concat(users);
+        guiones[dt.guion].users = _.uniq(guiones[dt.guion].users, function (u) {
+          return u._id;
+        });
+      }
+    }
+  });
+
+  // Por cada guion.
+  async.each(_.toArray(guiones), function (guion, next) {
+
+    // Crear sala de guion.
+    rubi.ac_rooms.create(guion, next);
+  }, function (err) {
+    if (err) throw err;
+
+    // Completar el proceso del aula.
+    Processes.done();
   });
 };
 
@@ -291,7 +345,6 @@ Processes.aula.data = function (data) {
 var auth = false;
 
 _.each(process.argv, function (arg) {
-
   if (arg === '--auth=true') {
     console.log('Migrando datos de usuarios de "diamante" a "rubi".');
     console.log('Iniciando procesos...');
@@ -307,5 +360,5 @@ _.each(process.argv, function (arg) {
 });
 
 if (!auth) {
-  console.log('Operación no autorizada. Lea la documentación.');
+  console.log('Operación no autorizada. Leer la documentación.');
 }

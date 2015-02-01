@@ -9,7 +9,7 @@
 var _ = require('underscore');
 var db = require('../databases/dbs.portal');
 var config = require('../config');
-var debug = require('debug')('routes:portal');
+var log = require('../libs/log')('routes:portal');
 
 
 // -------------------------------------------------------------------------- //
@@ -25,10 +25,12 @@ module.exports = exports = function () {
   express.get('/app/portal/stats', function (req, res) {
     var userId = req.cookies[config.security.user];
 
+    log.debug('HTTP /app/portal/stats GET '+ req.ipFiltered);
+
     // Buscar el usuario.
     db.rubi.users.findById(userId, function (err, user) {
       if (err) {
-        debug('error en /app/portal/stats find user', err);
+        log.error('consiguiendo usuario en /app/portal/stats:', err);
         res.json({error: 'NOT_FOUND'});
         return;
       }
@@ -37,7 +39,7 @@ module.exports = exports = function () {
       if (user.admin) {
         db.stats(function (err, stats) {
           if (err) {
-            debug(err);
+            log.error('consiguiendo los datos estadísticos:', err);
             res.json({error: 'ERROR'});
           } else {
             res.json(stats);
@@ -61,10 +63,12 @@ module.exports = exports = function () {
       message: req.body.message
     };
 
+    log.info('HTTP POST /app/portal/message '+ req.ipFiltered);
+
     // Buscar el usuario.
     db.rubi.users.findById(userId, function (err, user) {
       if (err) {
-        debug('error en /app/portal/message find user', err);
+        log.error('consiguiendo usuario en /app/portal/message:', err);
         res.json({error: true});
         return;
       }
@@ -73,7 +77,7 @@ module.exports = exports = function () {
       if (user.admin) {
         db.addMessage(message, function (err, msg) {
           if (err) {
-            debug('error en /app/portal/message db.addMessage()', err);
+            log.error('db.addMessage() en /app/portal/message:', err);
             res.json({error: true});
           } else {
             res.json({ok: true});

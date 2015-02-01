@@ -9,7 +9,7 @@
 var _ = require('underscore');
 var rubi = require('../libs/rubi');
 var config = require('../config');
-var debug = require('debug')('dbs:portal');
+var log = require('../libs/log')('dbs:portal');
 
 
 // -------------------------------------------------------------------------- //
@@ -47,7 +47,7 @@ exports.addInstance = function (user, socket, callback) {
     _id: user.id
   }, {
     $set: {
-      time: new Date(user.time),
+      timeLastIn: new Date(user.time),
       ip: user.ip
     },
     $push: {
@@ -70,16 +70,17 @@ exports.rmInstance = function (user, socket, callback) {
   rubi.users.findOne({
     _id: user.id
   }, function (err, doc) {
-    if (err) {
-      callback.apply(this, arguments);
-      return;
-    }
+    if (err) return callback.apply(this, arguments);
+
+    // Actualizar el momento de desconexión.
+    doc.timeLastOut = new Date();
 
     // Remover la instancia del socket.
     doc.devices = _.reject(doc.devices, function (el) {
-      return socket ===  el._id;
+      return socket === el._id;
     });
 
+    // Guardar.
     doc.save(callback);
   });
 };

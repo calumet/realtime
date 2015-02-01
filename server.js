@@ -10,7 +10,7 @@
 var http = require('http');
 var express = require('express');
 var socketio = require('socket.io');
-var debug = require('debug')('server');
+var log = require('./libs/log')('server');
 var config = require('./config');
 
 // Instanciar el servidor web y el servidor de sockets.
@@ -32,8 +32,8 @@ require('./databases').call(context, function () {
 
 // Iniciar.
 server.listen(config.port, function (err) {
-  if (err) debug(err);
+  if (err) log.error(err);
   
-  debug('modo '+ app.get('env'));
-  debug('escuchando en el puerto '+ config.port);
+  log.info('modo '+ app.get('env'));
+  log.info('escuchando en el puerto '+ config.port);
 });

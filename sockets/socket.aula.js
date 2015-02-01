@@ -3,7 +3,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Sockets | Aula
  * Romel Pérez, prhone.blogspot.com
- * 2015
+ * Enero, 2015
  **/
 
 var _ = require('underscore');
@@ -11,7 +11,7 @@ var async = require('async');
 var db = require('../databases/dbs.aula');
 var config = require('../config');
 var security = require('../security');
-var debug = require('debug')('socket:aula');
+var log = require('../libs/log')('socket:aula');
 
 
 // -------------------------------------------------------------------------- //
@@ -22,6 +22,7 @@ var aula = {
   io: null,
   express: null,
   roomsIntervalUpdate: null,
+  maxMessagesPerRoom: config.aula.maxMessagesPerRoom,
 
 
   /**
@@ -29,17 +30,20 @@ var aula = {
    * Si abre más de una conexión con el aula, no se permitirá la segunda.
    * @param {Object} socket Es la conexión del socket estableciéndose
    * @param {Object} authorize Callback a ejecutar con la respuesta de conexión
+   * 
    * Las posibles respuestas al usuario por la conexión son:
    * > ERROR       Error en el proceso de conexión
    * > ERROR_DATA  Datos erroneos
    * > DUPLICATE   Segunda conexión del aula en la misma computadora
    * > undefined   Usuario aceptado
+   *
+   * Posibles eventos en otros sockets:
+   * > userError   Informar a un usuario de un error
    */
   handshake: function (socket, authorize) {
-
     var accept = function (res) {
-      debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' '
-       + (res ? res : 'AUTHORIZED'));
+      log.info(socket.user.ip +' '+ socket.user.id +' '+ socket.id
+       +' /aula '+ (res ? res : 'AUTHORIZED'));
       authorize(res ? {data: res} : res);
     };
 
@@ -52,25 +56,28 @@ var aula = {
     // Conseguir datos de sala de chat de la clase.
     db.rubi.ac_rooms.findById(subject +'_'+ group, function (err, classRoom) {
       if (err) {
-        accept('ERROR');
-        debug(err);
-        return;
+        log.error('handshake consiguiendo clase '+ subject +'_'+ group +':', err);
+        return accept('ERROR');
       }
 
       // No encontrado.
-      if (!classRoom) {
-        accept('ERROR_DATA');
-        return;
-      }
+      if (!classRoom) return accept('ERROR_DATA');
 
       // Saber si el usuario está conectado ya, verificando en la sala de clase:
       // rubi.ac_rooms.MATERIA_GRUPO.
-      var st = _.findWhere(classRoom.students, {_id: userid});
-      var f = (st && st.state === 'available') ||
-      (userid === classRoom.teacher._id && classRoom.teacher.state === 'available');
+      var usr = _.findWhere(classRoom.users, {_id: userid});
 
       // Fue duplicado o está diśponible para conectarse.
-      f ? accept('DUPLICATE') : accept();
+      if (usr && usr.state !== 'offline') {
+        accept('DUPLICATE');
+
+        // Avisar al usuario ya conectado de duplicado.
+        _.findWhere(aula.io.of('/aula').sockets, {
+          id: usr.socket
+        }).emit('userError', 'DUPLICATE');
+      } else {
+        accept();
+      }
     });
   },
 
@@ -82,7 +89,7 @@ var aula = {
   connect: function (socket) {
 
     // Usuario conectado en el aula.
-    debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' CONNECTED.');
+    log.info(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' /aula CONNECTED.');
 
     // Usuario conectado.
     aula.events.online.apply(socket);
@@ -93,14 +100,17 @@ var aula = {
     });
     socket.on('disconnect', function () {
       aula.events.offline.apply(socket, arguments);
-      debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' DISCONNECTED.');
+      log.info(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' /aula DISCONNECTED.');
     });
 
+    // Cambio de estado de usuario.
+    socket.on('state', function () {
+      aula.events.state.apply(socket, arguments);
+    });
     // Mensaje de usuario.
     socket.on('msg', function () {
       aula.events.msg.apply(socket, arguments);
     });
-
   },
 
 
@@ -124,32 +134,32 @@ var aula = {
       // Agregar a rubi como conectado.
       db.userConnected(socket, function (err, rooms, users) {
         if (err) {
-          debug(err);
+          log.error('event online conectando usuario:', err);
           return socket.emit('serverError', {ev: 'online'});
         }
 
         // Filtrar datos de salas de chat en las que se encuentra.
         var roomsFiltered = _.map(rooms, function (room) {
+          var timeLastOut = _.findWhere(room.users, {_id: socket.user.id}).timeLastOut;
           return {
             id: room._id,
+            type: room.type,
             available: room.available,
-            teacher: {
-              id: room.teacher._id,
-              state: room.teacher.state
-            },
-            students: _.map(room.students, function (student) {
+            teacher: room.teacher,
+            users: _.map(room.users, function (user) {
               return {
-                id: student._id,
-                state: student.state
+                id: user._id,
+                state: user.state
               };
             }),
             messages: _.map(room.messages, function (msg) {
               return {
-                id: msg._id,
+                id: msg._id.getTime(),
                 user: msg.user,
                 content: msg.content
               };
-            })
+            }),
+            timeLastOut: timeLastOut ? timeLastOut.getTime() : undefined
           };
         });
 
@@ -175,7 +185,7 @@ var aula = {
           // Unirse a la sala.
           socket.join(room._id, function (err) {
             if (err) {
-              debug(err);
+              log.error('event online socket.join a la sala '+ room._id +':', err);
               return socket.emit('serverError', {ev: 'online'});
             }
 
@@ -201,7 +211,7 @@ var aula = {
       // Colocar en rubi como desconectado.
       db.userDisconnected(socket, function (err, rooms) {
         if (err) {
-          debug(err);
+          log.error('event offline desconectando usuario:', err);
           return socket.emit('serverError', {ev: 'offline'});
         }
 
@@ -218,7 +228,43 @@ var aula = {
           });
         });
       });
+    },
 
+
+    /**
+     * El usuario cambia de estado en una sala de chat (available | away).
+     * @param {Object} data {room:String, state:String}
+     * Emits posibles desde evento de socket:
+     * > userState - Un usuario cambia de estado en una sala de chat.
+     */
+    state: function (data) {
+      var socket = this;
+
+      // Buscar sala.
+      db.rubi.ac_rooms.findById(data.room, function (err, room) {
+        if (err || !room) {
+          return log.error('usuario '+ socket.user.id +', buscando sus salas:', err);
+        }
+
+        // Conseguir usuario.
+        var user = _.findWhere(room.users, {_id: socket.user.id});
+        if (!user) return log.error('events state no se encontró usuario '
+         + socket.user.id +' en la sala '+ data.room);
+        user.state = data.state;
+
+        // Guardar cambio de estado en la base de datos.
+        room.save(function (err) {
+          if (err) return log.error('events state guardando cambio de estado en rubi '
+           + socket.user.id +':', err);
+
+          // Avisar a los demás usuarios de esa sala el cambio de estado.
+          socket.to(room._id).emit('userState', {
+            room: data.room,
+            id: socket.user.id,
+            state: data.state
+          });
+        });
+      });
     },
 
 
@@ -238,21 +284,16 @@ var aula = {
       var now = new Date().getTime();
 
       // Utilizar el contenido de llegada y enviarlo como llegó.
-      // FIXIT: comprobar que funciona correctamente desde Western (ISO 8859-1)
-      // al encoding del servidor que es UTF-8.
       var content = msg.content;
-
-      // TODO: mantener los mensajes de la sala a menos de Number(X), eliminando
-      // los mensajes más antiguos.
 
       // Buscar disponibilidad de sala.
       db.rubi.ac_rooms.findOne({_id: msg.room}, function (err, room) {
         if (err) {
-          debug(err);
+          log.error('events msg consiguiendo sala '+ msg.room +':', err);
           return socket.emit('serverError', {ev: 'msg'});
         }
 
-        // Sala no disponible. Enviar al usuario un mensaje indicandolo.
+        // Sala no disponible. Enviar al usuario un mensaje indicándolo.
         if (!room.available) {
           return socket.emit('roomState', {
             room: msg.room,
@@ -260,14 +301,24 @@ var aula = {
           });
         }
 
-        // Guadar copia del mensaje en la sala de rubi.ac_rooms.
-        db.addMessage(msg.room, {
+        // Agregar mensaje a la sala.
+        room.messages.push({
           _id: now,
           user: socket.user.id,
           content: content
-        }, function (err) {
+        });
+
+        // Mantener el número de mensajes totales en menos de maxMessagesPerRoom.
+        if (room.messages.length > aula.maxMessagesPerRoom) {
+          room.messages = room.messages.slice(
+           room.messages.length - aula.maxMessagesPerRoom,
+           room.messages.length);
+        }
+
+        // Guardar cambios en rubi.ac_rooms.
+        room.save(function (err) {
           if (err) {
-            debug(err);
+            log.error('event msg guardando sala '+ msg.room +':', err);
             return socket.emit('serverError', {ev: 'msg'});
           }
 
@@ -278,9 +329,8 @@ var aula = {
             user: socket.user.id,
             content: content
           });
-        });        
+        });       
       });
-
     }
 
   },
@@ -294,8 +344,10 @@ var aula = {
     // Conseguir todas las salas tipo clase.
     db.rubi.ac_rooms.find({
       type: 'class'
+    }, {
+      _id: true
     }, function (err, classes) {
-      if (err) debug(err);
+      if (err) return log.error('updateRoomsAvailability consiguiendo clases:', err);
 
       // Recorrer cada clase (en serie para dividir trabajo).
       async.eachSeries(classes, function (clss, next) {
@@ -304,20 +356,26 @@ var aula = {
         if (clss._id.indexOf('_') === -1) return next();
         var s = clss._id.substring(0, clss._id.indexOf('_'));
         var g = clss._id.substring(clss._id.indexOf('_') + 1);
-        
+
         // Comprobar la disponibilidad de la clase.
         db.classInExam(s, g, function (err, inExam) {
-          if (err) debug(err);
+          if (err) return log.error('updateRoomsAvailability consiguiendo estado de'
+           +' clase:', err);
 
-          // Actualizar de acuerdo al estado de la clase.
+          log.debug('actualizando disponibilidad de salas /^'+ s +'_'+ g +'_/: '+ !inExam);
+
+          // Actualizar los subgrupos de clase.
           db.rubi.ac_rooms.update({
-            _id: new RegExp('^'+ s +'_'+ g)
+            _id: new RegExp('^'+ s +'_'+ g),
+            type: 'subgroup'
           }, {
             available: !inExam
+          }, {
+            multi: true
           }, next);
         });
       }, function (err) {
-        if (err) debug(err);
+        if (err) log.error('updateRoomsAvailability actualizando clases:', err);
       });
     });
   }

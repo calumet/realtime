@@ -7,8 +7,8 @@
  **/
 
 var diamante = require('mysql');
-var debug = require('debug')('libs:diamante');
 var config = require('../config');
+var log = require('../libs/log')('libs:diamante');
 
 
 // -------------------------------------------------------------------------- //
@@ -43,7 +43,7 @@ var controller = {
     connection.connect(function (err) {
       if (err) {
         callback(err);
-        debug(err);
+        log.error('conectándose con diamante:', err);
       } else {
         callback(undefined, connection);
       }
@@ -56,7 +56,7 @@ var controller = {
     connection.end(function (err) {
       if (err) {
         if (callback) callback(err);
-        debug(err);
+        log.error('desconectándose de diamante:', err);
       } else {
         if (callback) callback();
       }

@@ -3,12 +3,12 @@
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Libraries | Rubi
  * Romel Pérez, prhone.blogspot.com
- * 2015
+ * Enero, 2015
  **/
 
 var rubi = require('mongoose');
-var debug = require('debug')('libs:rubi');
 var config = require('../config');
+var log = require('./log')('libs:rubi');
 
 
 // -------------------------------------------------------------------------- //
@@ -25,7 +25,8 @@ var UsersSchema = rubi.Schema({
   name: String,
   photo: String,
   ip: String,  // última ip conectada
-  time: Date,  // último login
+  timeLastIn: Date,  // último login, momento de entrar
+  timeLastOut: Date,  // último login, momento de salir
   devices: [{
     _id: String,  // socket
     agent: String  // el user-agent del navegador
@@ -70,22 +71,17 @@ var AC_ClassesModel = rubi.model('ac_classes', AC_ClassesSchema);
 
 
 // Rooms.
-// NOTE: En el desarrollo de una versión futura, se tendrá la opción de crear
-// salas de chat con otros usuarios de un aula, por lo tanto, esta estructura
-// puede ser actualizada o en el peor caso, agregada una nueva.
 var AC_RoomsSchema = rubi.Schema({
   _id: String,  // nombre de la sala: MATERIA_GRUPO(_SUBGRUPO)
-  type: String,  // tipo de sala: class | subgroup
+  type: String,  // tipo de sala: class | subgroup | guion
   available: Boolean,  // si se puede chatear o no (en caso de exámen o quiz)
-  teacher: {  // si hay profesor en la sala (en caso contrario, strings vacíos)
+  teacher: String,  // id de profesor si lo hay en la sala
+  users: [{  // estudiantes y profesor si lo hay
     _id: String,
     socket: String,  // identificador del socket de conexión
-    state: String  // el estado: available | offline
-  },
-  students: [{  // los estudiantes de la sala
-    _id: String,
-    socket: String,  // identificador del socket de conexión
-    state: String  // el estado: available | offline
+    state: String,  // el estado: available | away | offline
+    timeLastIn: Date,  // último login, momento de entrar
+    timeLastOut: Date  // último login, momento de salir
   }],
   messages: [{
     _id: Date,  // datetime de publicación
@@ -124,7 +120,7 @@ var controller = {
     // Error al conectarse.
     rubi.connection.on('error', function (err) {
       callback(err);
-      debug(err);
+      log.error('conectándose con rubi:', err);
     });
 
     // Cuando esté conectado.
@@ -132,7 +128,7 @@ var controller = {
 
     // Conectarse a la db.
     rubi.connect('mongodb://'+ config.mongodb.host +':'+ config.mongodb.port
-    + '/' + config.mongodb.db, {
+    +'/'+ config.mongodb.db, {
       user: config.mongodb.user,
       pass: config.mongodb.pass,
       server: {socketOptions: {keepAlive: 1}},
@@ -147,7 +143,7 @@ var controller = {
     rubi.disconnect(function (err) {
       if (err) {
         if (callback) callback(err);
-        debug(err);
+        log.error('desconectándose de rubi:', err);
       } else {
         if (callback) callback();
       }

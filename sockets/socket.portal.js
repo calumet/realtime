@@ -8,7 +8,7 @@
 
 var _ = require('underscore');
 var db = require('../databases/dbs.portal');
-var debug = require('debug')('socket:portal');
+var log = require('../libs/log')('socket:portal');
 
 
 // -------------------------------------------------------------------------- //
@@ -28,11 +28,11 @@ var portal = {
   connect: function (socket) {
 
     // Usuario conectado en el portal.
-    debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' CONNECTED.');
+    log.info(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' CONNECTED.');
 
     // Registrar instancia de conexión por ya estar conectado.
     db.addInstance(socket.user, socket.id, function (err, doc) {
-      if (err) debug(err);
+      if (err) log.error('connect agregando instancia:', err);
     });
 
     // Enviar mensajes de administración activos al público.
@@ -40,9 +40,9 @@ var portal = {
 
     // Remover instancia de conexión al desconectarse.
     socket.on('disconnect', function () {
-      debug(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' DISCONNECTED.');
+      log.info(socket.user.ip +' '+ socket.user.id +' '+ socket.id +' DISCONNECTED.');
       db.rmInstance(socket.user, socket.id, function (err, doc) {
-        if (err) debug(err);
+        if (err) log.error('connect removiendo instancia:', err);
       });
     });
   },
@@ -61,7 +61,7 @@ var portal = {
       startDate: {$lte: now},
       endDate: {$gte: now}
     }, function (err, msgs) {
-      if (err) debug(err);
+      if (err) log.error('sendActiveMsgs buscando mensajes:', err);
 
       // Filtrar los mensajes recibidos.
       var messages = {
@@ -78,8 +78,17 @@ var portal = {
       };
 
       // Si hay o no mensajes para enviar.
-      if (!messages.messages.length) return;
-      else sockets.emit('portal:msg', messages);
+      if (!messages.messages.length) {
+        return;
+      } else {
+        log.debug('enviando mensajes de /portal a sockets', {
+          socket: sockets.sockets ? '/portal' : sockets.id,
+          messages: _.map(messages.messages, function (msg) {
+            return msg.id
+          })
+        });
+        sockets.emit('msg', messages);
+      }
     });
   }
 

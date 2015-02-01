@@ -19,9 +19,14 @@ var diamante = require('../libs/diamante');
 
 var Processes = {
 
-  order: ['users', 'aula'],  // Processes[Processes.order[i]]().
-  completados: 0,
-  completar: 2,
+  order: [{
+    name: 'Usuarios',
+    main: 'users'
+  }, {
+    name: 'Aula',
+    main: 'aula',
+    subprocesses: ['clases', 'subgroups', 'guiones']
+  }],
 
   // Iniciar el primer proceso.
   start: function () {
@@ -32,17 +37,45 @@ var Processes = {
 
   // Continuar el siguiente proceso.
   next: function () {
-    var component = this.order[this.completados];
+    var component = this.order[this.completados].name;
     console.log('> Proceso "'+ component +'" iniciado...');
-    this[this.order[this.completados]]();
+    if (this.order[this.completados].subprocesses) {
+      this.order[this.completados].completados = 0;
+      this.order[this.completados].completar = this.order[this.completados].subprocesses.length;
+    }
+    this[this.order[this.completados].main]();
+  },
+
+  // Continuar con el siguiente subproceso.
+  // Éste se debe colocar dentro del "main" del proceso.
+  subNext: function () {
+    var idp = this.order[this.completados].completados;
+    var sp = this.order[this.completados].subprocesses[idp];
+    this[this.order[this.completados].main][sp]();
+  },
+
+  // Terminar el subproceso.
+  // Éste se debe colocar al terminar los cada subproceso.
+  subDone: function () {
+    this.order[this.completados].completados++;
+
+    // Si todos los subprocesos del actual proceso están completados, sino siguiente.
+    if (this.order[this.completados].completados / this.order[this.completados].completar === 1) {
+      this.done();
+    } else {
+      this.subNext();
+    }
   },
 
   // Complicar el proceso actual y vericicar si es el final.
   done: function () {
-    var component = this.order[this.completados];
+    var component = this.order[this.completados].name;
     this.completados++;
+
     console.log('\nProceso "'+ component +'" completado ('+ this.completados
     +'/'+ this.completar +').');
+
+    // Todo completado, sino siguiente.
     if (this.completados / this.completar === 1) {
       console.log('Re-seteo finalizado correctamente.');
       diamante.disconnect();
@@ -59,7 +92,6 @@ var Processes = {
 // DATOS DE USUARIOS //
 
 Processes.users = function () {
-
   var diamanteConn = diamante.connection;
   var users = rubi.users;
 
@@ -83,14 +115,10 @@ Processes.users = function () {
         photo: user.Foto
       }, function (err, affected) {
         if (err) throw err;
-        if (affected === 1) {
-          process.stdout.write('.');
-          ct++;
-          if (ct === usersList.length) {
-            Processes.done();
-          }
-        } else {
-          throw new Error('Error procesando: '+ user.IdUsr);
+        process.stdout.write('.');
+        ct++;
+        if (ct === usersList.length) {
+          Processes.done();
         }
       });
     }
@@ -102,8 +130,7 @@ Processes.users = function () {
 // DATOS DE AULA //
 
 Processes.aula = function () {
-
-  var data = [];
+  var data = Processes.aula._data = [];
 
   // Conseguir los guiones totales (no)disponibles y sus profesores.
   // Conseguir las clases (materias/grupos).
@@ -133,6 +160,7 @@ Processes.aula = function () {
       +' WHERE IdMat="'+ c.IdMat +'" AND Grupo="'+ c.Grupo +'";', function (err, students) {
         if (err) throw err;
 
+        // Filtrarles a los estudiantes el id.
         reg.students = _.pluck(students, 'IdUsr');
 
         // Conseguir los subgrupos de cada clase.
@@ -157,7 +185,6 @@ Processes.aula = function () {
                 callback();
               }
             });
-            process.stdout.write('.');
           }, function (err) {
             if (err) throw err;
 
@@ -167,29 +194,27 @@ Processes.aula = function () {
 
             // Cuando se hayan conseguido todos los datos de clases.
             if (ci === classes.length - 1) {
-              Processes.aula.data(data);
+
+              // Pasar a la siguiente fase del proceso.
+              Processes.subNext();
             }
           });  // end: subgruops
-          process.stdout.write('.');
         });
-        process.stdout.write('.');
       });
-      process.stdout.write('.');
     });  // end: each(classes)
-    process.stdout.write('.');
   });
 };
 
 
-// Procesar los datos obtenidos para actualizar rubi.
-Processes.aula.data = function (data) {
-
-  var classesCount = 0;
+// Actualizar datos de clases y subgrupos de clase en base de datos.
+Processes.aula.clases = function () {
+  var data = Processes.aula._data;
 
   // Por cada clase.
-  _.each(data, function (d, i) {
+  async.each(data, function (d, next) {
+    var users;
 
-    // Actualizar/crear la clase.
+    // Buscar sala de clase y actualizar.
     rubi.ac_classes.update({
       subject: d.subject,
       group: d.group,
@@ -197,70 +222,248 @@ Processes.aula.data = function (data) {
       upsert: true
     }, function (err, tClass) {
       if (err) throw err;
+      process.stdout.write('.');
 
-      // Crear la sala de chat de la clase.
-      rubi.ac_rooms.update({
-        _id: d.subject +'_'+ d.group,
-      }, {
-        available: true,
-        teacher: {
-          _id: d.teacher,
-          socket: '',
+      // Usuarios de clase.
+      users = _.map(d.students, function (st) {
+        return {
+          _id: st,
           state: 'offline'
-        },
-        students: _.map(d.students, function (st) {
-          return {_id: st, socket: '', state: 'offline'};
-        })
-      }, {
-        upsert: true
-      }, function (err, room) {
+        };
+      });
+      users.unshift({
+        _id: d.teacher,
+        state: 'offline'
+      });
+
+      // Buscar sala de chat de clase.
+      rubi.ac_rooms.findById(d.subject +'_'+ d.group, function (err, room) {
         if (err) throw err;
 
-        // Por cada subgrupo de la clase.
-        async.each(d.subgroups, function (sg, callback) {
+        // Tomar datos ya definidos.
+        var ue;
+        if (room.users && room.users.length) {
+          users = _.map(users, function (u) {
+            ue = _.findWhere(room.users, {_id: u._id});
+            if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
+            if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
+            if (ue.state !== 'offline') {
+              u.state = ue.state;
+              u.socket = ue.socket;
+            }
+            return u;
+          });
+        }
 
-          // Crear la sala de chat de cada subgrupo de cada clase.
+        // Crear sala sino estaba creada.
+        if (!room) {
+          rubi.ac_rooms.create({
+            _id: d.subject +'_'+ d.group,
+            type: 'class',
+            available: true,
+            teacher: d.teacher,
+            users: users,
+            messages: []
+          }, function (err) {
+            next(err);
+            process.stdout.write('.');
+          });
+        }
+
+        // Actualizar sala si ya estaba creada.
+        else {
+          rubi.ac_rooms.update({
+            _id: d.subject +'_'+ d.group
+          }, {
+            teacher: d.teacher,
+            users: users
+          }, function (err) {
+            next(err);
+            process.stdout.write('.');
+          });
+        }
+      });
+    });
+  }, function (err) {
+    if (err) throw err;
+
+    // Pasar a la siguiente fase del proceso.
+    Processes.subDone();
+  });
+};
+
+
+// Actualizar subgrupos de clases en la base de datos.
+Processes.aula.subgroups = function (data) {
+  var data = Processes.aula._data;
+
+  // Por cada clase.
+  async.each(data, function (d, next) {
+
+    // Por cada subgrupo de la clase.
+    async.each(d.subgroups, function (sg, callback) {
+      var users, ue;
+
+      // Filtrar datos de usuarios.
+      users = _.map(sg.students, function (st) {
+        return {
+          _id: st,
+          state: 'offline'
+        };
+      });
+
+      // Buscar sala de subgrupo.
+      rubi.ac_rooms.findById(d.subject +'_'+ d.group +'_'+ sg._id, function (err, room) {
+        if (err) throw err;err
+
+        // Crearla sino está creada, sino actualizarla.
+        if (!room) {
+
+          // Crear sala.
+          rubi.ac_rooms.create({
+            _id: d.subject +'_'+ d.group +'_'+ sg._id
+          }, {
+            _id: d.subject +'_'+ d.group +'_'+ sg._id,
+            type: 'subgroup',
+            available: true,
+            users: users,
+            messages: []
+          }, function (err, room) {
+            callback(err);
+            process.stdout.write('.');
+          });
+        } else {
+
+          // Tomar datos ya definidos.
+          if (room.users && room.users.length) {
+            users = _.map(users, function (u) {
+              ue = _.findWhere(room.users, {_id: u._id});
+              if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
+              if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
+              if (ue.state !== 'offline') {
+                u.state = ue.state;
+                u.socket = ue.socket;
+              }
+              return u;
+            });
+          }
+
+          // Actualizar la sala.
           rubi.ac_rooms.update({
             _id: d.subject +'_'+ d.group +'_'+ sg._id
           }, {
-            available: true,
-            teacher: {
-              _id: '',
-              socket: '',
-              state: 'offline'
-            },
-            students: _.map(sg.students, function (st) {
-              return {
-                _id: st,
-                socket: '',
-                state: 'offline'
-              };
-            })
-          }, {
-            upsert: true
+            users: users
           }, function (err, room) {
-            if (err) {
-              callback(err);
-            } else {
-              process.stdout.write('.');
-              callback();
-            }
+            callback(err);
+            process.stdout.write('.');
           });
-        }, function (err) {
-          if (err) throw err;
-          
-          classesCount++;
-
-          // Cuando se haya completado todo.
-          if (classesCount === data.length) {
-            Processes.done();
-          }
-        });
-        process.stdout.write('.');
+        }
       });
-      process.stdout.write('.');
+    }, next);
+  }, function (err) {
+    if (err) throw err;
+
+    // Pasar a la siguiente fase del proceso, guiones.
+    Processes.subDone();
+  });
+};
+
+
+// Actualizar salas de guiones en la base de datos.
+Processes.aula.guiones = function () {
+  var guiones = [];
+  var data = Processes.aula._data;
+
+  // Filtrar los guiones que sólo tienen una clase.
+  _.each(data, function (dt) {
+    var guion, users;
+
+    if (_.where(data, {guion: dt.guion}).length > 1) {
+
+      // Usuarios de la clase en cuestión.
+      users = _.map(dt.students, function (st) {
+        return {
+          _id: st,
+          state: 'offline'
+        };
+      });
+
+      // Crear guión sino lo está, sino actualizarlo.
+      guion = _.findWhere(guiones, {_id: dt.subject +'_'+ dt.guion});
+      if (!guion) {
+
+        // Agregar profesor al inicio.
+        users.unshift({
+          _id: dt.teacher,
+          state: 'offline'
+        });
+
+        // Creando guion.        
+        guiones.push({
+          _id: dt.subject +'_'+ dt.guion,
+          type: 'guion',
+          available: true,
+          teacher: dt.teacher,
+          users: users,
+          messages: []
+        });
+      } else {
+
+        // Haciendo "unión" de usuarios de todas las clases del guion.
+        guion.users = guion.users.concat(users);
+        guion.users = _.uniq(guion.users, function (u) {
+          return u._id;
+        });
+      }
+    }
+  });
+
+  // Por cada guion.
+  async.each(guiones, function (guion, next) {
+    var ue;
+
+    // Crear sala de guion.
+    rubi.ac_rooms.findById(guion._id, function (err, room) {
+      if (err) throw err;
+      var callback = function () {
+        process.stdout.write('.');
+        next();
+      };
+
+      // Crear sala no creada.
+      if (!room) {
+        rubi.ac_rooms.create(guion, callback);
+      }
+
+      // Actualizar sala creada.
+      else {
+
+        // Tomar datos ya definidos.
+        if (room.users && room.users.length) {
+          guion.users = _.map(guion.users, function (u) {
+            ue = _.findWhere(room.users, {_id: u._id});
+            if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
+            if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
+            if (ue.state !== 'offline') {
+              u.state = ue.state;
+              u.socket = ue.socket;
+            }
+            return u;
+          });
+        }
+
+        // Actualizar sala.
+        rubi.ac_rooms.update({_id: guion._id}, {
+          teacher: guion.teacher,
+          users: guion.users
+        }, callback);
+      }
     });
-    process.stdout.write('.');
+  }, function (err) {
+    if (err) throw err;
+
+    // Completar el proceso del aula.
+    Processes.subDone();
   });
 };
 

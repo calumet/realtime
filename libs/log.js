@@ -3,7 +3,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Libraries | Logger
  * Romel Pérez, prhone.blogspot.com
- * 2015
+ * Enero, 2015
  **/
 
 var _ = require('underscore');
@@ -21,10 +21,13 @@ var log = bunyan.createLogger({
   },
   streams: [  // Salidas de logs.
 
-    // Guardar logs en archivo ...realtime/log.log level >= bunyan.INFO.
+    // Guardar logs en archivo ...realtime/log.log.# level >= bunyan.INFO.
     {
+      type: 'rotating-file',
       level: 'info',
-      path: 'log.log'
+      path: 'log.log',
+      period: '1d',
+      count: 7
     },
 
     // Mostrar resultados de log en la terminal level >= bunyan.DEBUG.

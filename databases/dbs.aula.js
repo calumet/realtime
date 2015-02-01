@@ -3,7 +3,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Databases | Aula
  * Romel Pérez, prhone.blogspot.com
- * 2015
+ * Enero, 2015
  **/
 
 var _ = require('underscore');
@@ -12,7 +12,7 @@ var moment = require('moment');
 var rubi = require('../libs/rubi');
 var diamante = require('../libs/diamante');
 var config = require('../config');
-var debug = require('debug')('dbs:aula');
+var log = require('../libs/log')('dbs:aula');
 
 
 // -------------------------------------------------------------------------- //
@@ -22,81 +22,55 @@ var dbAula = {
 
   /**
    * Si un usuario se conecta en el aula, colocar el socket y estado a las salas
-   * de chat en las que se encuentra conectado.
-   * @param {String} state El nuevo estado del usuario del socket.
+   * de chat en las que se encuentra conectado. Sin embargo, que tengan relación
+   * con la materia, ya que podría tener otras aulas.
+   * @param {String} state El nuevo estado del usuario del socket (online | offline).
    * @param {Object} socket El socket de conexión.
    * @param {Function} callback function(err,rooms){}.
    * Devuelve en el callback las salas donde se encontraba el usuario.
    */
   setUserStateInRooms: function (state, socket, callback) {
-
-    var newSocket, newState;
+    var newSocket, newState, timeLastIn, timeLastOut;
     var user = socket.user;
 
     // Elegir los nuevos estados mediante el estado de entrada.
     if (state === 'online') {
       newSocket = socket.id;
-      newState = 'available';
+      newState = 'away';  // Conectado pero no viendo directamente la sala.
+      timeLastIn = new Date();
     } else {
-      newSocket = '';
       newState = 'offline';
+      timeLastOut = new Date();
     }
 
-    // Buscar las salas de chat a las que pertenece. La clase y el subgrupo.
-    // Si es un profesor, sólo tendrá la clase, no el subgrupo.
-    // TODO: sólo conseguir hasta los últimos 50 registros de messages por sala.
+    // Buscar las salas de chat donde se encuentra el usuario.
     rubi.ac_rooms.find({
-      $or: [
-        {_id: user.subject +'_'+ user.group},
-        {_id: user.subject +'_'+ user.group +'_'+ user.subgroup}
-      ]
+      'users._id': user.id,
+      _id: new RegExp('^'+ user.subject)
     }, function (err, rooms) {
 
       // Hubo un error, o no se encontró ni siquiera la clase.
       if (err || !(rooms && rooms.length >= 1)) {
-        callback(err ||
-        'Salas faltantes: '+ user.subject +' '+ user.group +' '+ user.subgroup);
+        callback(err || 'usuario '+ user.id +' no tiene salas');
       } else {
 
         // Procesar cada sala de chat.
         async.each(rooms, function (room, next) {
-          var student;
+          var usr = _.findWhere(room.users, {_id: user.id});
 
-          // Si es un profesor, o sino.
-          if (room.teacher._id === user.id) {
-
-            // Determinar el nuevo estado del profesor.
-            room.teacher.socket = newSocket;
-            room.teacher.state = newState;
-          }
-
-          // Si es estudiante, buscarlo.
-          else {
-            student = _.findWhere(room.students, {_id: user.id});
-            if (!student) {
-              next('No se encontró usuario '+ user.id +' en sala '+ room._id);
-              return;
-            }
-
-            // Determinar el nuevo estado del estudiante.
-            student.socket = newSocket;
-            student.state = newState;
+          // Determinar el nuevo estado del usuario y sus variables.
+          usr.state = newState;
+          if (state === 'offline') {
+            usr.timeLastOut = timeLastOut;
+          } else {
+            usr.socket = newSocket;
+            usr.timeLastIn = timeLastIn;
           }
 
           // Actualizar sala de clase y completar proceso.
-          room.save(function (err, newRoom) {
-            if (err) {
-              next(err);
-            } else {
-              next();
-            }
-          });
+          room.save(next);
         }, function (err) {
-          if (err) {
-            callback(err);
-            return;
-          }
-          
+          if (err) return callback(err);
           callback(null, rooms);
         });
       }
@@ -114,34 +88,25 @@ var dbAula = {
 
     // Buscar los datos de cada usuario en cada sala.
     async.eachSeries(rooms, function (room, next) {
-      
-      // Conseguir los identificadores de los usuarios.
-      ids.push(room.teacher._id);
-      _.each(room.students, function (student) {
-        ids.push(student._id);
-      });
-
+      ids = ids.concat(_.pluck(room.users, '_id'));
       next();
     }, function (err) {
-      if (err) {
-        callback(err);
-      } else {
+      if (err) return callback(err); 
 
-        // Quitar los repetidos.
-        ids = _.uniq(ids);
+      // Quitar los repetidos.
+      ids = _.uniq(ids);
 
-        // Mapearlos para poder hacer el query.
-        ids = _.map(ids, function (id) {
-          return {_id: id};
-        });
+      // Mapearlos para poder hacer el query.
+      ids = _.map(ids, function (id) {
+        return {_id: id};
+      });
 
-        // Buscar datos de todos los usuarios.
-        rubi.users.find({
-          $or: ids
-        }, function (err, users) {
-          callback(null, users);
-        });
-      }
+      // Buscar datos de todos los usuarios.
+      rubi.users.find({
+        $or: ids
+      }, function (err, users) {
+        callback(err, users);
+      });
     });
   }
 
@@ -165,15 +130,11 @@ exports.diamante = diamante;
 exports.reset = function (callback) {
   rubi.ac_rooms.find({}, function (err, rooms) {
     async.each(rooms, function (room, next) {
-      
-      // Colocar los profesores como desconectados.
-      room.teacher.state = 'offline';
-      room.teacher.socket = '';
 
       // Colocar cada alumno como desconectado.
-      _.each(room.students, function (student) {
-        student.state = 'offline';
-        student.socket = '';
+      _.each(room.users, function (user) {
+        user.state = 'offline';
+        user.socket = undefined;
       });
 
       // Guardar cambios.
@@ -192,14 +153,11 @@ exports.reset = function (callback) {
  */
 exports.userConnected = function (socket, callback) {
 
-  // Cambiar en estado del usuario en las salas donde está y conseguir tales salas.
+  // Cambiar el estado del usuario en las salas donde está y conseguir tales salas.
   dbAula.setUserStateInRooms('online', socket, function (err, rooms) {
-    if (err) {
-      callback(err);
-      return;
-    }
+    if (err) return callback(err);
 
-    // Conseguir los datos de los usuarios en las salas.
+    // Conseguir los datos de los usuarios en tales salas.
     dbAula.getUsersDataByRooms(rooms, function (err, users) {
       callback(err, rooms, users);
     });
@@ -213,39 +171,9 @@ exports.userConnected = function (socket, callback) {
  * @param {Function} callback function(err,rooms){}.
  */
 exports.userDisconnected = function (socket, callback) {
+
+  // Cambiar el estado del usuario en las salas donde está y conseguir tales salas.
   dbAula.setUserStateInRooms('offline', socket, callback);
-};
-
-
-/**
- * Todos los usuarios de un grupo de clase (estudiantes).
- * @param {String} subject Materia.
- * @param {String} group Grupo.
- * @param {String} subgroup Subgrupo.
- * @param {Function} callback function(err,class){}.
- */
-exports.studentsBySubgroup = function (subject, group, subgroup, callback) {
-
-  // Encontrar la clase (materia_grupo).
-  rubi.ac_classes.findOne({
-    subject: subject,
-    group: group
-  }, function (err, clss) {
-    if (err) {
-      callback(err);
-    } else {
-
-      // Filtrar el subgrupo en cuestión.
-      var sg = _.findWhere(clss.subgroups, {_id: subgroup});
-      
-      // Si se encontró o no.
-      if (!sg) {
-        callback('Subgrupo no encontrado: '+ subgroup);
-      } else {
-        callback(null, sg.students);
-      }
-    }
-  });
 };
 
 
@@ -257,7 +185,6 @@ exports.studentsBySubgroup = function (subject, group, subgroup, callback) {
  * @param {Function} callback function(err,inExam:Boolean){}.
  */
 exports.classInExam = function (subject, group, callback) {
-
   var now = new Date();
   var thisDate = moment(now).format('YYYY-MM-DD')
   var thisTime = moment(now).format('HH:mm:ss');
@@ -266,16 +193,10 @@ exports.classInExam = function (subject, group, callback) {
   diamante.con.query('SELECT * FROM TR_GuionExamenGrupo WHERE IdMat="'+ subject +'" '
   +'AND Grupo="'+ group +'" AND Fecha="'+ thisDate +'" AND HoraInicial<="'+ thisTime +'";',
   function (err, exams) {
-    if (err) {
-      callback(err);
-      return;
-    }
+    if (err) return callback(err);
 
     // No se encontró ningún exámen.
-    if (!exams.length) {
-      callback(null, false);
-      return;
-    }
+    if (!exams.length) return callback(null, false);
 
     // Se encontró un exámen.
     else {
@@ -292,24 +213,6 @@ exports.classInExam = function (subject, group, callback) {
 
 
 /**
- * Agregar un mensaje a una sala de chat. El mensaje debe ser más reciente que
- * cualquiera que ya tenga la sala.
- * @param {String} room El identificador de la sala de chat.
- * @param {Object} message El objeto mensaje {_id:Date, user:String, content:String}.
- * @param {Function} callback function(err){}.
- */
-exports.addMessage = function (room, message, callback) {
-  rubi.ac_rooms.update({
-    _id: room
-  }, {
-    $push: {
-      messages: message
-    }
-  }, callback);
-};
-
-
-/**
  * Conseguir los mensajes de una sala en un rango de tiempo. 'from' o 'to', al
  * menos uno debe estar definido.
  * @param {String} room Identificador de la sala de chat.
@@ -322,5 +225,5 @@ exports.addMessage = function (room, message, callback) {
  * @param {Function} callback function(err,messages){}.
  */
 exports.getMessages = function (room, from, to, limit, callback) {
-  // TODO: this.
+  callback('Funcionalidad no disponible.');
 };

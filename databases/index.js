@@ -11,7 +11,7 @@ var diamante = require('../libs/diamante');
 var portal = require('./dbs.portal');
 var aula = require('./dbs.aula');
 var async = require('async');
-var debug = require('debug')('dbs');
+var log = require('../libs/log')('dbs');
 
 
 // -------------------------------------------------------------------------- //
@@ -27,6 +27,7 @@ var debug = require('debug')('dbs');
  * que necesiten.
  *
  * > Se saldrá el servidor sino se pudo conectar con alguna de las bases de datos.
+ * Esto puede ocurrir inclusive en tiempo de ejecución.
  *
  * > Las instancias de conexiones con los sockets se reestablecen una vez
  * ĺa conexión del server se reanuda.
@@ -36,12 +37,12 @@ module.exports = exports = function (callback) {
   // Conectarse con rubi.
   rubi.connect(function (err) {
     if (err) throw err;
-    else debug('rubi está conectada.');
+    else log.info('rubi está conectada.');
 
     // Conectarse con diamante.
     diamante.connect(function (err) {
       if (err) throw err;
-      else debug('diamante está conectada.');
+      else log.info('diamante está conectada.');
 
       // Procesos iniciales.
       async.parallel([
@@ -53,7 +54,7 @@ module.exports = exports = function (callback) {
         aula.reset
 
       ], function (err) {
-        if (err) debug(err);
+        if (err) log.error('procesando uno de los resets de dbs:', err);
 
         // Iniciar todas las labores que necesiten de las bases de datos.
         callback();

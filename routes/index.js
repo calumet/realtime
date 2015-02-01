@@ -13,7 +13,7 @@ var config = require('../config');
 var security = require('../security');
 var portal = require('./routes.portal');
 var aula = require('./routes.aula');
-var debug = require('debug')('routes');
+var log = require('../libs/log')('routes');
 
 
 // -------------------------------------------------------------------------- //
@@ -42,6 +42,7 @@ module.exports = exports = function () {
 
   // Respuesta de HTTP GET /.
   this.express.get('/', function (req, res, next) {
+    log.debug('HTTP GET / '+ req.ip);
     res.set('Content-Type', 'text/html; charset=utf-8');
     res.send('<!DOCTYPE HTML><html lang="es"><head>'
       +'<meta charset="UTF-8">'
@@ -62,6 +63,7 @@ module.exports = exports = function () {
   // compartir cookies.
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
   this.express.use('/app/*', function(req, res, next) {
+    req.ipFiltered = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     res.header('Access-Control-Allow-Origin', 'http://'+ config.host);
     res.header('Access-Control-Allow-Credentials', 'true');
     next();
@@ -70,7 +72,7 @@ module.exports = exports = function () {
   // Autorizar acceso a servicios para aplicaciones sólo a usuarios logueados.
   // Para las XMLHttpRequest, se necesita enviar un flag para que se puedan
   // enviar también las cookies, sino, entonces no podrá ser autentificado:
-  // http://stackoverflow.com/questions/2870371/why-is-jquerys-ajax-method-not-sending-my-session-cookie
+  // http://stackoverflow.com/questions/2870371/
   // $.ajax({..., xhrFields: {withCredentials: true}});
   this.express.use('/app/*', function (req, res, next) {
     var cookies = req.cookies;
