@@ -3,7 +3,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Admin | Sync
  * Romel Pérez, prhone.blogspot.com
- * 2015
+ * Febrero, 2015
  **/
 
 // Proceso de sincronización de datos de "diamante" a "rubi".
@@ -245,11 +245,13 @@ Processes.aula.clases = function () {
         if (room.users && room.users.length) {
           users = _.map(users, function (u) {
             ue = _.findWhere(room.users, {_id: u._id});
-            if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
-            if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
-            if (ue.state !== 'offline') {
-              u.state = ue.state;
-              u.socket = ue.socket;
+            if (ue) {
+              if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
+              if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
+              if (ue.state !== 'offline') {
+                u.state = ue.state;
+                u.socket = ue.socket;
+              }
             }
             return u;
           });
@@ -338,11 +340,13 @@ Processes.aula.subgroups = function (data) {
           if (room.users && room.users.length) {
             users = _.map(users, function (u) {
               ue = _.findWhere(room.users, {_id: u._id});
-              if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
-              if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
-              if (ue.state !== 'offline') {
-                u.state = ue.state;
-                u.socket = ue.socket;
+              if (ue) {
+                if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
+                if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
+                if (ue.state !== 'offline') {
+                  u.state = ue.state;
+                  u.socket = ue.socket;
+                }
               }
               return u;
             });
@@ -442,11 +446,13 @@ Processes.aula.guiones = function () {
         if (room.users && room.users.length) {
           guion.users = _.map(guion.users, function (u) {
             ue = _.findWhere(room.users, {_id: u._id});
-            if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
-            if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
-            if (ue.state !== 'offline') {
-              u.state = ue.state;
-              u.socket = ue.socket;
+            if (ue) {
+              if (ue.timeLastIn) u.timeLastIn = ue.timeLastIn;
+              if (ue.timeLastOut) u.timeLastOut = ue.timeLastOut;
+              if (ue.state !== 'offline') {
+                u.state = ue.state;
+                u.socket = ue.socket;
+              }
             }
             return u;
           });
