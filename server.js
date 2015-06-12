@@ -3,7 +3,7 @@
  * Grupo de Desarrollo de Software Calumet
  * Realtime | Server
  * Romel Pérez, prhone.blogspot.com
- * 2015
+ * Febrero, 2015
  **/
 
 // Módulos.
@@ -32,7 +32,7 @@ require('./databases').call(context, function () {
 
 // Iniciar.
 server.listen(config.port, function (err) {
-  if (err) log.error(err);
+  if (err) throw err;
   
   log.info('modo '+ app.get('env'));
   log.info('escuchando en el puerto '+ config.port);

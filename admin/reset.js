@@ -169,15 +169,13 @@ Processes.aula = function () {
             // Conseguir estudiantes de los subgrupos de cada clase.
             diamante.con.query('SELECT IdUsr,IdGrupClase FROM TR_GrupClaseEst '
             +'WHERE IdGrupClase="'+ sg.IdGrupClase +'";', function (err, subgroupsStudents) {
-              if (err) {
-                callback(err);
-              } else {
-                reg.subgroups.push({
-                  _id: sg.IdGrupClase,
-                  students: _.pluck(subgroupsStudents, 'IdUsr')
-                });
-                callback();
-              }
+              if (err) return callback(err);
+
+              reg.subgroups.push({
+                _id: sg.IdGrupClase,
+                students: _.pluck(subgroupsStudents, 'IdUsr')
+              });
+              callback();
             });
           }, function (err) {
             if (err) throw err;

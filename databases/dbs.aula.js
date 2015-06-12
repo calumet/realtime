@@ -131,7 +131,7 @@ exports.reset = function (callback) {
   rubi.ac_rooms.find({}, function (err, rooms) {
     async.each(rooms, function (room, next) {
 
-      // Colocar cada alumno como desconectado.
+      // Colocar cada usuario como desconectado.
       _.each(room.users, function (user) {
         user.state = 'offline';
         user.socket = undefined;
@@ -139,9 +139,7 @@ exports.reset = function (callback) {
 
       // Guardar cambios.
       room.save(next);
-    }, function (err) {
-      callback(err);
-    });
+    }, callback);
   });
 };
 
