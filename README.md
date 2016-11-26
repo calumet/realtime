@@ -1,6 +1,6 @@
 # Calumet RealTime
 
-Proyecto de comunicación en tiempo real para el proyecto COMA del Grupo Calumet.
+Framework de comunicación en tiempo real para el proyecto COMA del Grupo Calumet.
 
 ## Licencia
 
