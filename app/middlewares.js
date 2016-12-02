@@ -1,7 +1,9 @@
 const morgan      = require('morgan');
 const compression = require('compression');
 const bodyParser  = require('body-parser');
+const session     = require('cookie-session');
 const log         = require('log');
+const settings    = require('settings');
 
 module.exports = function (server) {
 
@@ -11,6 +13,7 @@ module.exports = function (server) {
   server.use(compression());
   server.use(bodyParser.json());
   server.use(bodyParser.urlencoded({ extended: true }));
+  server.use(session(settings.session));
 
   server.use('/api/', function (req, res, next) {
 

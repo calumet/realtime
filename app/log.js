@@ -41,6 +41,15 @@ winston.loggers.add('middlewares', {
 });
 log.middlewares = winston.loggers.get('middlewares');
 
+winston.loggers.add('sockets', {
+  console: {
+    level: 'silly',
+    colorize: true,
+    label: 'Sockets'
+  }
+});
+log.sockets = winston.loggers.get('sockets');
+
 log.app.env = function () {
   log.app.info(chalk.bold.green(`Running on "${NODE_ENV}" environment.`));
 };

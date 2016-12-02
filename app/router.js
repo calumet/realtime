@@ -1,10 +1,12 @@
-const rooms = require('api/rooms');
 const users = require('api/users');
 const log   = require('log');
 
 module.exports = function (server) {
 
   log.router.info('Initializing...');
+
+  server.get('/api/users',      users.getAll);
+  server.get('/api/users/:id',  users.get);
 
   // HTTP 404
   server.use((req, res) => res.status(404).send('HTTP 404 - Page not found.'));
