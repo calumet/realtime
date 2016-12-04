@@ -2,6 +2,13 @@ const users = require('events/users');
 const rooms = require('events/rooms');
 
 const sockets = function (io) {
+
+  io.use((socket, next) => {
+    // TODO: Apply a security middleware using
+    // `socket.handshake.query` properties for validation.
+    next();
+  });
+
   io.on('connection', socket => {
 
     users.connect.call(socket, io, socket);
