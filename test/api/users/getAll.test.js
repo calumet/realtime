@@ -1,4 +1,4 @@
-const settings = require('../settings');
+const settings = require('../../settings');
 
 describe('Users', function () {
 
