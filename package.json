@@ -5,7 +5,10 @@
   "main": "app/index.js",
   "scripts": {
     "start": "NODE_PATH=app node app",
-    "test": "mocha test/mocha-setup.js 'test/api/**/*.test.js'"
+    "test": "npm run test-unit && npm run test-api && npm run test-sockets",
+    "test-unit": "NODE_ENV=test mocha test/mocha-setup.js 'app/**/*.test.js'",
+    "test-api": "NODE_ENV=test mocha test/mocha-setup.js 'test/api/**/*.test.js'",
+    "test-sockets": "NODE_ENV=test karma start karma.conf.js"
   },
   "repository": {
     "type": "git",
@@ -22,14 +25,16 @@
   },
   "homepage": "https://github.com/calumet/realtime#readme",
   "dependencies": {
-    "realtime-data": "git@github.com:calumet/realtime-data.git",
     "body-parser": "^1.15.2",
     "chalk": "^1.1.3",
     "compression": "^1.6.2",
     "cookie-session": "^2.0.0-alpha.2",
     "express": "^4.14.0",
+    "lodash": "^4.17.2",
     "morgan": "^1.7.0",
+    "realtime-data": "git@github.com:calumet/realtime-data.git",
     "socket.io": "^1.7.1",
+    "uuid": "^3.0.1",
     "winston": "^2.3.0"
   },
   "devDependencies": {
@@ -38,12 +43,16 @@
     "jquery": "^3.1.1",
     "karma": "^1.3.0",
     "karma-chai": "^0.1.0",
+    "karma-chai-sinon": "^0.1.5",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.1",
     "karma-phantomjs-launcher": "^1.0.2",
+    "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.8.0",
     "mocha": "^3.2.0",
+    "sinon": "^1.17.6",
+    "sinon-chai": "^2.8.0",
     "webpack": "^1.13.3"
   }
 }
