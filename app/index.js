@@ -19,33 +19,38 @@ log.app.info(chalk.bold.green(`
 >>> Running on "${settings.env}" environment.
 >>>`));
 
-log.db.info('Establishing connection...');
-storage.data = new Data(settings);
-storage.data.db.
-  authenticate().
-  then(() => {
-    log.db.info('Connection has been established successfully.');
-  }).
-  catch((err) => {
-    log.db.error('Unable to connect to the database:', err);
-  });
-
 const server = express();
 const httpServer = http.createServer(server);
 const io = socketio(httpServer);
 
-middlewares(server);
-router(server);
-sockets(io);
+log.db.info('Connecting...');
 
-// Cuando la aplicación se encuentre disponible.
-httpServer.listen(settings.port, settings.host, (err) => {
-  if (err) throw err;
-  log.app.info(`Running at http://${settings.host}:${settings.port}.`);
+storage.data = new Data(settings);
+storage.data.init(err => {
+  if (err) {
+    log.db.error(err);
+    process.exit(1);
+  }
+
+  log.db.info('Connection established.');
+
+  middlewares(server, io);
+  router(server, io);
+  sockets(server, io);
+
+  // Cuando la aplicación se encuentre disponible.
+  httpServer.listen(settings.port, settings.host, (err) => {
+    if (err) {
+      log.app.error(err);
+      process.exit(1);
+    }
+    log.app.info(`Running at http://${settings.host}:${settings.port}.`);
+  });
 });
 
 // Cuando la aplicación va a terminar.
 process.on('SIGINT', () => {
   log.app.info('Closed.');
+  storage.data.db.teardown();
   process.exit(0);
 });

@@ -1,7 +1,7 @@
 const users = require('events/users');
 const rooms = require('events/rooms');
 
-const sockets = function (io) {
+const sockets = function (server, io) {
 
   io.use((socket, next) => {
     // TODO: Apply a security middleware using

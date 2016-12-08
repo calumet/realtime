@@ -2,29 +2,28 @@ const log = require('log');
 const storage = require('storage');
 
 const getAll = function (req, res, next) {
-  storage.data.User.
-    findAll().
-    then((result) => {
-      const users = result.map(item => item.dataValues);
-      res.json(users);
-    }).
+  storage.data.models.user.
+    find().
+    then(users => res.json(users)).
     catch((err) => {
       log.router.error(err);
-      res.status(500).json({});
+      res.status(500).end();
     });
 };
 
 const get = function (req, res, next) {
 
   const { id } = req.params;
-  const query = { where: { id } };
 
-  storage.data.User.
-    findOne(query).
-    then(({ dataValues : user }) => res.json(user)).
+  storage.data.models.user.
+    findOne({ id }).
+    then(user => {
+      if (!user) return res.status(404).end();
+      res.json(user);
+    }).
     catch((err) => {
       log.router.error(err);
-      res.status(404).json({});
+      res.status(500).end();
     });
 };
 
