@@ -1,7 +1,10 @@
 const users = require('api/users');
-const log   = require('log');
+const log = require('log');
+const resources = require('resources');
 
-module.exports = function (server) {
+module.exports = function () {
+
+  const { server } = resources;
 
   log.router.info('Initializing...');
 

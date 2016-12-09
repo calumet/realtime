@@ -1,8 +1,8 @@
 const log = require('log');
-const storage = require('storage');
+const resources = require('resources');
 
 const getAll = function (req, res, next) {
-  storage.data.models.user.
+  resources.data.models.user.
     find().
     then(users => res.json(users)).
     catch((err) => {
@@ -15,7 +15,7 @@ const get = function (req, res, next) {
 
   const { id } = req.params;
 
-  storage.data.models.user.
+  resources.data.models.user.
     findOne({ id }).
     then(user => {
       if (!user) return res.status(404).end();

@@ -4,8 +4,11 @@ const bodyParser  = require('body-parser');
 const session     = require('cookie-session');
 const log         = require('log');
 const settings    = require('settings');
+const resources   = require('resources');
 
-module.exports = function (server) {
+module.exports = function () {
+
+  const { server } = resources;
 
   log.middlewares.info('Initializing...');
 

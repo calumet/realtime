@@ -8,7 +8,7 @@ const Data        = require('realtime-data');
 const pkg         = require('../package');
 const settings    = require('settings');
 const log         = require('log');
-const storage     = require('storage');
+const resources   = require('resources');
 const middlewares = require('middlewares');
 const router      = require('router');
 const sockets     = require('sockets');
@@ -23,10 +23,11 @@ const server = express();
 const httpServer = http.createServer(server);
 const io = socketio(httpServer);
 
-log.db.info('Connecting...');
+resources.server = server;
+resources.io = io;
 
-storage.data = new Data(settings);
-storage.data.init(err => {
+resources.data = new Data(settings);
+resources.data.init(err => {
   if (err) {
     log.db.error(err);
     process.exit(1);
@@ -34,9 +35,9 @@ storage.data.init(err => {
 
   log.db.info('Connection established.');
 
-  middlewares(server, io);
-  router(server, io);
-  sockets(server, io);
+  middlewares();
+  router();
+  sockets();
 
   // Cuando la aplicación se encuentre disponible.
   httpServer.listen(settings.port, settings.host, (err) => {
@@ -51,6 +52,6 @@ storage.data.init(err => {
 // Cuando la aplicación va a terminar.
 process.on('SIGINT', () => {
   log.app.info('Closed.');
-  storage.data.db.teardown();
+  resources.data.db.teardown();
   process.exit(0);
 });
