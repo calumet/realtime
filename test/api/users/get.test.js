@@ -7,7 +7,7 @@ describe('Users', function () {
     it('Get a normal user', function () {
       return chai.
         request(settings.server).
-        get(`/api/users/${settings.mock.user}`).
+        get(`/api/users/${settings.mock.case1.user}`).
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('object');
@@ -23,7 +23,7 @@ describe('Users', function () {
         request(settings.server).
         get('/api/users/nonexistentuser').
         then(function (res) {
-          throw new Error('Should get a non-success response');
+          throw new Error('Expected an error response');
         }).
         catch(function (err) {
           expect(err).to.have.status(404);
