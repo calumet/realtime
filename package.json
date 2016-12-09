@@ -5,6 +5,8 @@
   "main": "app/index.js",
   "scripts": {
     "start": "NODE_PATH=app node app",
+    "start:test": "NODE_ENV=test npm run start",
+    "start:production": "NODE_ENV=production npm run start",
     "test": "npm run test-unit && npm run test-api && npm run test-sockets",
     "test-unit": "NODE_ENV=test mocha test/mocha-setup.js 'app/**/*.test.js'",
     "test-api": "NODE_ENV=test mocha test/mocha-setup.js 'test/api/**/*.test.js'",
