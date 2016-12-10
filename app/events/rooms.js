@@ -14,7 +14,7 @@ module.exports = {
       exec(function (err, res) {
         if (err) {
           log.sockets.error(`${socket.id} ${socket.userId} message could not be send:`, err, res);
-          socket.error(err, res);
+          socket.error(err);
           return;
         }
 

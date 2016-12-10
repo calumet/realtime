@@ -1,6 +1,6 @@
 const Connections = require('./index');
 
-describe('Storage', function () {
+describe('Tools', function () {
   describe('Connections', function () {
 
     before('Create an instance', function () {

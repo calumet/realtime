@@ -5,7 +5,7 @@ module.exports = {
 
   connect (socket, details) {
 
-    const { io, data } = resources;
+    const { io, data, connections } = resources;
     const { userId, spaceCode, roomTag } = socket.handshake.query;
 
     log.sockets.debug(`${socket.id} ${socket.userId} is now connected.`);
@@ -13,8 +13,19 @@ module.exports = {
     data.models.realtime_space.
       findOne({ code: spaceCode }).
       then(space => {
-        const roomsQuery = { space: space.id };
-        if (roomTag) roomsQuery.or = [{ tag: roomTag }, { tag: null }];
+
+        let roomsQuery;
+        if (roomTag) {
+          roomsQuery = {};
+          roomsQuery.or = [
+            { space: space.id, tag: roomTag },
+            { space: space.id, tag: null }
+          ];
+        }
+        else {
+          roomsQuery = { space: space.id };
+        }
+
         return data.models.realtime_space_room.find(roomsQuery).populate('users');
       }).
       then(rooms => {
@@ -26,6 +37,13 @@ module.exports = {
 
             // Join user socket in room.
             socket.join(room.id);
+
+            // Add user-room to connections list.
+            connections.add({
+              user: socket.userId,
+              room: room.id,
+              socket: socket.id,
+            });
 
             // Inform room users about user connection.
             socket.to(room.id).emit('room:user:connect', {
@@ -44,7 +62,7 @@ module.exports = {
 
   disconnecting (socket, details) {
 
-    const { io } = resources;
+    const { io, connections } = resources;
     const { userId } = socket.handshake.query;
 
     // When user is disconnected, inform all her rooms users about the disconnection.
@@ -55,6 +73,9 @@ module.exports = {
       });
       log.sockets.debug(`${socket.id} ${socket.userId} left ${room}.`);
     });
+
+    // Remove socket from connections list.
+    connections.removeBySocket(socket.id);
   },
 
   disconnect (socket, details) {

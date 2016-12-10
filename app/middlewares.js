@@ -19,6 +19,11 @@ module.exports = function () {
   server.use(session(settings.session));
 
   server.use('/api/', function (req, res, next) {
+    // TODO: Security middleware.
+    next();
+  });
+
+  server.use('/api/', function (req, res, next) {
 
     // Enable CORS.
     res.header('Access-Control-Allow-Origin', '*');
