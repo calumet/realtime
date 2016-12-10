@@ -1,24 +1,20 @@
 const settings = require('../../settings');
 
-describe('Users', function () {
+describe('Users Categories', function () {
 
-  describe('GET /api/users', function () {
+  describe('GET /api/users-categories', function () {
 
-    it('Get normal users', function () {
+    it('Get normal categories list', function () {
       return chai.
         request(settings.server).
-        get(`/api/users`).
+        get(`/api/users-categories`).
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('array');
-
-          const body = res.body;
-
-          body.forEach(function (user) {
+          res.body.forEach(function (user) {
             expect(user).to.be.an('object');
             expect(user).to.have.property('id').to.be.a('string');
-            expect(user).to.have.property('firstName').to.be.a('string');
-            expect(user).to.have.property('lastName').to.be.a('string');
+            expect(user).to.have.property('name').to.be.a('string');
           });
         });
     });
