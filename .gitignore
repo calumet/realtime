@@ -35,3 +35,9 @@ nbproject
 Thumbs.db
 dump.rdb
 npm-debug.log
+
+##
+## PROJECT
+##
+
+app/settings/local.js
