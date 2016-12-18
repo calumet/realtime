@@ -20,16 +20,18 @@ describe('Realtime', function () {
           expect(res.body).to.have.property('rooms').to.be.an('array');
           res.body.rooms.forEach(room => {
             expect(room).to.be.an('object');
+            expect(room).to.not.have.property('users');
+            expect(room).to.not.have.property('messages');
+          });
 
-            expect(room).to.have.property('users').to.be.an('array');
-            room.users.forEach(user => {
-              expect(user).to.be.an('object');
-            });
+          expect(res.body).to.have.property('roomsUsers').to.be.an('array');
+          res.body.roomsUsers.forEach(user => {
+            expect(user).to.be.an('object');
+          });
 
-            expect(room).to.have.property('messages').to.be.an('array');
-            room.messages.forEach(message => {
-              expect(message).to.be.an('object');
-            });
+          expect(res.body).to.have.property('roomsMessages').to.be.an('array');
+          res.body.roomsMessages.forEach(message => {
+            expect(message).to.be.an('object');
           });
 
           expect(res.body).to.have.property('users').to.be.an('array');
