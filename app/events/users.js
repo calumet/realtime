@@ -39,17 +39,14 @@ module.exports = {
             socket.join(room.id);
 
             // Add user-room to connections list.
-            connections.add({
+            const con = connections.add({
               user: socket.userId,
               room: room.id,
               socket: socket.id,
             });
 
             // Inform room users about user connection.
-            socket.to(room.id).emit('room:user:connect', {
-              room: room.id,
-              user: userId,
-            });
+            socket.to(room.id).emit('room:user:connect', con);
 
             log.sockets.debug(`${socket.id} ${socket.userId} joined ${room.id}.`);
           });
@@ -67,10 +64,10 @@ module.exports = {
 
     // When user is disconnected, inform all her rooms users about the disconnection.
     Object.keys(socket.rooms).forEach(room => {
-      socket.to(room).emit('room:user:disconnect', {
-        room,
-        user: userId,
+      const con = connections.getAll().find(con => {
+        return con.socket === socket.id && con.room === room && con.user === userId;
       });
+      socket.to(room).emit('room:user:disconnect', con);
       log.sockets.debug(`${socket.id} ${socket.userId} left ${room}.`);
     });
 
