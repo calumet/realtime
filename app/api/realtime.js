@@ -34,10 +34,25 @@ const get = function (req, res, next) {
       then(rooms => {
         response.rooms = rooms;
       }).
+      then(rooms => {
+        response.roomsMessages = [];
+        response.rooms.forEach(room => {
+          response.roomsMessages = response.roomsMessages.concat(room.messages);
+        });
+      }).
+      then(rooms => {
+        response.roomsUsers = [];
+        response.rooms.forEach(room => {
+          response.roomsUsers = response.roomsUsers.concat(room.users);
+        });
+      }).
+      then(rooms => {
+        response.rooms = response.rooms.map(room => {
+          return _.omit(room, ['users', 'messages']);
+        });
+      }).
       then(() => {
-        const usersIds = _(response.rooms).
-          map(room => room.users).
-          flatMap().
+        const usersIds = _(response.roomsUsers).
           map(roomUser => roomUser.user).
           uniq().
           value();
