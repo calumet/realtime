@@ -65,7 +65,7 @@ module.exports = {
     // When user is disconnected, inform all her rooms users about the disconnection.
     Object.keys(socket.rooms).forEach(room => {
       const con = connections.getAll().find(con => {
-        return con.socket === socket.id && con.room === room && con.user === userId;
+        return con.socket === socket.id && String(con.room) === String(room) && con.user === userId;
       });
       socket.to(room).emit('room:user:disconnect', con);
       log.sockets.debug(`${socket.id} ${socket.userId} left ${room}.`);

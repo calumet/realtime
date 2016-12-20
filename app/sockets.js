@@ -8,8 +8,7 @@ module.exports = function () {
 
   const { io, data } = resources;
 
-  // TODO:
-  // Verificación de seguridad.
+  // TODO: Verificación de seguridad.
   io.use((socket, next) => {
     const { token } = socket.handshake.query;
     // ...

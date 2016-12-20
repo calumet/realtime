@@ -32,21 +32,20 @@ const get = function (req, res, next) {
       populate('users').
       populate('messages').
       then(rooms => {
-        response.rooms = rooms;
-      }).
-      then(rooms => {
+        response.rooms = rooms.filter(room => {
+          return room.users.find(user => user.user === userId && !user.inactive);
+        });
+
         response.roomsMessages = [];
         response.rooms.forEach(room => {
           response.roomsMessages = response.roomsMessages.concat(room.messages);
         });
-      }).
-      then(rooms => {
+
         response.roomsUsers = [];
         response.rooms.forEach(room => {
           response.roomsUsers = response.roomsUsers.concat(room.users);
         });
-      }).
-      then(rooms => {
+
         response.rooms = response.rooms.map(room => {
           return _.omit(room, ['users', 'messages']);
         });
