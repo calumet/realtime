@@ -102,6 +102,8 @@ describe('Rooms', function () {
       setTimeout(done, settings.pause);
     });
 
+    // TODO: Test the user got disconnected and the proper details were received.
+
     it('Socket 1 got socket 2 disconnected', function () {
       expect(this.spies.s1.userDisconnect).to.have.been.calledTwice;
     });

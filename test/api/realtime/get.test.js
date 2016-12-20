@@ -12,6 +12,9 @@ describe('Realtime', function () {
         query({ spaceCode: case1.space, userId: case1.user }).
         then(function (res) {
 
+          // TODO: Test rooms by user inside it. Should not get rooms where the
+          // user is not in activedly.
+
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('object');
 
