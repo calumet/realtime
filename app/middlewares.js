@@ -27,8 +27,8 @@ module.exports = function () {
 
     // Enable CORS.
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
 
     // Disable CACHE.
     res.header('Cache-Control', 'no-cache, no-store, must-revalidate'); // HTTP 1.1.
@@ -36,6 +36,10 @@ module.exports = function () {
     res.header('Expires', '0'); // Proxies.
 
     next();
+  });
+
+  server.options('*', function (req, res) {
+      res.status(200).end();
   });
 
   log.middlewares.info('Done.');
