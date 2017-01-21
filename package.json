@@ -27,17 +27,21 @@
   },
   "homepage": "https://github.com/calumet/realtime#readme",
   "dependencies": {
-    "body-parser": "^1.15.2",
+    "body-parser": "^1.16.0",
     "chalk": "^1.1.3",
     "compression": "^1.6.2",
     "cookie-session": "^2.0.0-alpha.2",
     "express": "^4.14.0",
-    "lodash": "^4.17.2",
+    "karma": "^1.4.0",
+    "karma-mocha-reporter": "^2.2.2",
+    "karma-webpack": "^1.8.1",
+    "lodash": "^4.17.4",
     "morgan": "^1.7.0",
-    "realtime-data": "git@github.com:calumet/realtime-data.git",
-    "socket.io": "^1.7.1",
+    "realtime-data": "git+ssh://git@github.com/calumet/realtime-data.git",
+    "sinon": "^1.17.7",
+    "socket.io": "^1.7.2",
     "uuid": "^3.0.1",
-    "winston": "^2.3.0"
+    "winston": "^2.3.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",

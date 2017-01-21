@@ -12,7 +12,7 @@ describe('Realtime Spaces', function () {
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('object');
-          expect(res.body).to.have.property('id').to.be.a('number', id);
+          expect(res.body).to.have.property('id').to.be.a('string', id);
           expect(res.body).to.have.property('name').to.be.a('string');
           expect(res.body).to.have.property('code').to.be.a('string');
         });
