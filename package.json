@@ -34,13 +34,8 @@
     "compression": "^1.6.2",
     "cookie-session": "^2.0.0-alpha.2",
     "express": "^4.14.0",
-    "karma": "^1.4.0",
-    "karma-mocha-reporter": "^2.2.2",
-    "karma-webpack": "^1.8.1",
     "lodash": "^4.17.4",
     "morgan": "^1.7.0",
-    "realtime-data": "git+ssh://git@github.com/calumet/realtime-data.git",
-    "sinon": "^1.17.7",
     "socket.io": "^1.7.2",
     "uuid": "^3.0.1",
     "winston": "^2.3.1"
