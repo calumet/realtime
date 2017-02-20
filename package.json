@@ -5,7 +5,6 @@
   "main": "app/index.js",
   "scripts": {
     "start": "NODE_PATH=app node app",
-    "start:test": "NODE_ENV=test npm run start",
     "start:production": "NODE_ENV=production npm run start",
     "test": "npm run test-unit && npm run test-api && npm run test-sockets",
     "test-unit": "NODE_ENV=test mocha test/mocha-setup.js 'app/**/*.test.js'",
@@ -27,8 +26,6 @@
   },
   "homepage": "https://github.com/calumet/realtime#readme",
   "dependencies": {
-    "sails-mysql": "^0.11.5",
-    "waterline": "^0.11.6",
     "body-parser": "^1.16.0",
     "chalk": "^1.1.3",
     "compression": "^1.6.2",
@@ -36,8 +33,10 @@
     "express": "^4.14.0",
     "lodash": "^4.17.4",
     "morgan": "^1.7.0",
+    "sails-mysql": "^0.11.5",
     "socket.io": "^1.7.2",
     "uuid": "^3.0.1",
+    "waterline": "^0.11.6",
     "winston": "^2.3.1"
   },
   "devDependencies": {
