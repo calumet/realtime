@@ -1,6 +1,5 @@
 const settings    = require('./settings');
 const production  = require('./production');
-const test        = require('./test');
 
 let local;
 try {
@@ -9,10 +8,7 @@ try {
   local = {};
 }
 
-if (settings.env === 'test') {
-  Object.assign(settings, test);
-}
-else if (settings.env === 'production') {
+if (settings.env === 'production') {
   Object.assign(settings, production);
 }
 
