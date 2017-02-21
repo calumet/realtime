@@ -1,6 +1,6 @@
 {
   "name": "realtime",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Calumet Real-Time Framework",
   "main": "app/index.js",
   "scripts": {
