@@ -1,5 +1,7 @@
 # Calumet RealTime
 
+[![calumet](https://img.shields.io/badge/calumet-project-2b3bd0.svg)](http://calumet.uis.edu.co)
+
 Framework de comunicación en tiempo real para el proyecto COMA del Grupo Calumet.
 
 ## Licencia
