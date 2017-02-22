@@ -1,6 +1,10 @@
 # Data Models
 
-## `user`
+## Persisted
+
+Modelos de datos persistidos en base de datos.
+
+### `user`
 
 | Nombre | Tipo | Descripción |
 | :------------- | :------------- | :------------- |
@@ -10,14 +14,14 @@
 | lastName | [String] | Primer apellido |
 | photo | [String] | URL de fotografía |
 
-## `user_category`
+### `user_category`
 
 | Nombre | Tipo | Descripción |
 | :------------- | :------------- | :------------- |
 | id | String | Identificador |
 | name | String | Nombre |
 
-## `realtime_space`
+### `realtime_space`
 
 | Nombre | Tipo | Descripción |
 | :------------- | :------------- | :------------- |
@@ -25,7 +29,7 @@
 | code | String | Código único |
 | name | String | Nombre |
 
-## `realtime_space_room`
+### `realtime_space_room`
 
 | Nombre | Tipo | Descripción |
 | :------------- | :------------- | :------------- |
@@ -36,7 +40,7 @@
 | createdAt | Date | Fecha de creación |
 | disabled | [Boolean] | Sala deshabilitada |
 
-## `realtime_room_user`
+### `realtime_room_user`
 
 | Nombre | Tipo | Descripción |
 | :------------- | :------------- | :------------- |
@@ -46,7 +50,7 @@
 | moderator | [Boolean] | Usuario es moderador en sala |
 | inactive | [Boolean] | Usuario está inactivo en sala |
 
-## `realtime_room_message`
+### `realtime_room_message`
 
 | Nombre | Tipo | Descripción |
 | :------------- | :------------- | :------------- |
@@ -54,4 +58,18 @@
 | room | String | Referencia a `realtime_space_room` |
 | user | String | Referencia a `user` |
 | content | String | Contenido del mensaje |
+| createdAt | Date | Fecha de creación |
+
+## In Memory
+
+Modelos de datos en memoria de aplicación.
+
+### `connection`
+
+| Nombre | Tipo | Descripción |
+| :------------- | :------------- | :------------- |
+| id | String | Identificador |
+| room | String | Referencia a `realtime_space_room` |
+| user | String | Referencia a `user` |
+| socket | String | Identificador de socket |
 | createdAt | Date | Fecha de creación |

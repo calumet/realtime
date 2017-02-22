@@ -4,6 +4,8 @@
 
 Framework de comunicación en tiempo real para el proyecto COMA del Grupo Calumet.
 
+Revisa la [documentación](./docs) por más detalles.
+
 ## Licencia
 
 [The MIT License](http://opensource.org/licenses/MIT)
