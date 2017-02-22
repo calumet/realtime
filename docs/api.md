@@ -22,7 +22,7 @@ Devuelve objeto de categoría de usuarios por identificador.
 
 Devuelve un snapshot del estado actual de conexión de un usuario en un espacio.
 
-Request body:
+Request query:
 
 `{`
 
