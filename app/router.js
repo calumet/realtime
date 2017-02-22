@@ -27,13 +27,13 @@ module.exports = function () {
   server.get('/api/realtime-spaces/:id', realtimeSpaces.get);
 
   // HTTP 404
-  server.use((req, res) => res.status(404).send('HTTP 404 - Page not found.'));
+  server.use((req, res) => res.status(404).send(''));
 
   // HTTP 5XX
   server.use((err, req, res) => {
     const status = err.status || 500;
     log.router.error(err.stack);
-    res.status(status).send(`HTTP ${status} - Server error.`);
+    res.status(status).send(``);
   });
 
   log.router.info('Done.');
