@@ -2,7 +2,7 @@
 
 ## Persisted
 
-Modelos de datos persistidos en base de datos.
+Modelos de datos persistidos en base de datos con [waterline](https://github.com/balderdashy/waterline).
 
 ### `user`
 
