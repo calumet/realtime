@@ -51,7 +51,7 @@ resources.data.init(err => {
 
 // Cuando la aplicación va a terminar.
 process.on('SIGINT', () => {
-  log.app.info('Closed.');
   resources.data.db.teardown();
+  log.app.info('Closed.');
   process.exit(0);
 });

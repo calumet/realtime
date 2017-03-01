@@ -1,6 +1,7 @@
 const consts = require('consts');
 const log = require('log');
 const resources = require('resources');
+const security = require('tools/security');
 const users = require('events/users');
 const rooms = require('events/rooms');
 
@@ -8,11 +9,23 @@ module.exports = function () {
 
   const { io, data } = resources;
 
-  // TODO: Verificación de seguridad.
+  // Verificación de seguridad.
   io.use((socket, next) => {
-    const { token } = socket.handshake.query;
-    // ...
-    next();
+
+    const { token, userId, spaceCode } = socket.handshake.query;
+    const isValid = security.isValid({ token, userId });
+
+    if (isValid) {
+      next();
+    }
+    else {
+      next({
+        data: {
+          code: consts.sockets.ERR_AUTH
+        }
+      });
+      log.sockets.debug(`${socket.id} was rejected because:`, consts.sockets.ERR_AUTH);
+    }
   });
 
   // Verificación de datos.
@@ -28,11 +41,11 @@ module.exports = function () {
         if (space) {
           return data.models.user.findOne({ id: query.userId });
         }
-        return Promise.reject(consts.sockets.ERR_NOSPACE);
+        return Promise.reject({ code: consts.sockets.ERR_NOSPACE });
       }).
       then(user => {
         if (user) return;
-        return Promise.reject(consts.sockets.ERR_NOUSR);
+        return Promise.reject({ code: consts.sockets.ERR_NOUSR });
       }).
       then(() => {
         socket.userId = query.userId;
@@ -40,11 +53,17 @@ module.exports = function () {
         next();
       }).
       catch(err => {
-        next({ message: err });
+        next({
+          data: {
+            code: err && err.code,
+            message: err && err.message
+          }
+        });
         log.sockets.debug(`${socket.id} was rejected because:`, err);
       });
   });
 
+  // Cuando un socket se ha conectado satisfactoriamente.
   io.on('connection', socket => {
 
     users.connect.call(socket, socket);

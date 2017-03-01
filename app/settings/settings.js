@@ -14,4 +14,6 @@ module.exports = {
     name: 'appsession',
     secret: '1234567890',
   },
+  signature: 'qwertyuiopasdfghjklñzxcvbnm',
+  testToken: 'realtime-testing',
 };
