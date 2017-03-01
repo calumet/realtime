@@ -21,10 +21,10 @@ module.exports = function () {
     else {
       next({
         data: {
-          code: consts.sockets.ERR_AUTH
+          code: consts.ERR_AUTH
         }
       });
-      log.sockets.debug(`${socket.id} was rejected because:`, consts.sockets.ERR_AUTH);
+      log.sockets.debug(`${socket.id} was rejected because:`, consts.ERR_AUTH);
     }
   });
 
@@ -41,11 +41,11 @@ module.exports = function () {
         if (space) {
           return data.models.user.findOne({ id: query.userId });
         }
-        return Promise.reject({ code: consts.sockets.ERR_NOSPACE });
+        return Promise.reject({ code: consts.ERR_NOSPACE });
       }).
       then(user => {
         if (user) return;
-        return Promise.reject({ code: consts.sockets.ERR_NOUSR });
+        return Promise.reject({ code: consts.ERR_NOUSR });
       }).
       then(() => {
         socket.userId = query.userId;

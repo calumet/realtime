@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const consts = require('consts');
 const log = require('log');
 const resources = require('resources');
 
@@ -7,19 +8,35 @@ const get = function (req, res, next) {
   const { data, connections } = resources;
   const { spaceCode, userId, roomTag } = req.query;
 
-  if (!spaceCode || !userId) {
-    return res.status(400).end();
+  if (!spaceCode) {
+    return res.status(400).json({
+      code: consts.ERR_NOSPACE
+    });
   }
 
-  data.models.realtime_space.
-    findOne({ code: spaceCode }).
-    then(space => {
-      if (space) return processSpace(space);
-      throw new Error('Space not found.');
+  if (!userId) {
+    return res.status(400).json({
+      code: consts.ERR_NOUSR
+    });
+  }
+
+  // Buscar el espacio y el usuario. Si alguno de los dos no existe, procesar error,
+  // sino, procesar el espacio.
+  Promise.all([
+    data.models.realtime_space.findOne({ code: spaceCode }),
+    data.models.user.findOne({ id: userId })
+  ]).
+    then(results => {
+      const [space, user] = results;
+
+      if (!space) return res.status(400).json({ code: consts.ERR_NOSPACE });
+      if (!user) return res.status(400).json({ code: consts.ERR_NOUSR })
+
+      return processSpace(space);
     }).
     catch(err => {
       log.router.error(err);
-      res.status(400).end();
+      res.status(400).json({ code: consts.ERR });
     });
 
   function processSpace (space) {
@@ -51,6 +68,9 @@ const get = function (req, res, next) {
         });
       }).
       then(() => {
+
+        // Crear una lista de todos los identificadores de los usuarios en
+        // las salas del usuario proveido y buscarlos.
         const usersIds = _(response.roomsUsers).
           map(roomUser => roomUser.user).
           uniq().
@@ -59,6 +79,14 @@ const get = function (req, res, next) {
       }).
       then(users => {
         response.users = users;
+
+        // Si el usuario existe pero no se encuentra en ninguna sala, agregelo
+        // a la lista de usuarios de todos modos.
+        if (!users.length) {
+          return data.models.user.findOne({ id: userId }).then(user => {
+            response.users = [user];
+          });
+        }
       }).
       then(() => {
         response.connections = connections.
@@ -70,7 +98,7 @@ const get = function (req, res, next) {
       }).
       catch(err => {
         log.router.error(err);
-        res.status(500).end();
+        res.status(500).json({ code: consts.ERR });
       });
   }
 

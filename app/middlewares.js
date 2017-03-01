@@ -20,21 +20,6 @@ module.exports = function () {
   server.use(bodyParser.urlencoded({ extended: true }));
   server.use(session(settings.session));
 
-  // Verificación de seguridad.
-  server.use('/api/', function (req, res, next) {
-
-    const token = req.headers['x-api-token'];
-    const userId = req.headers['x-api-userid'];
-    const isValid = security.isValid({ token, userId });
-
-    if (isValid) {
-      next();
-    }
-    else {
-      res.status(401).json({ code: consts.http.ERR_AUTH });
-    }
-  });
-
   // Habilitar CORS.
   server.use('/api/', function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -61,6 +46,26 @@ module.exports = function () {
   // Habilitar verbo HTTP OPTIONS.
   server.options('*', function (req, res) {
       res.status(200).end();
+  });
+
+  // Verificación de seguridad.
+  server.use('/api/', function (req, res, next) {
+
+    if (req.method === 'OPTIONS') {
+      next();
+      return;
+    }
+
+    const token = req.headers['x-api-token'];
+    const userId = req.headers['x-api-userid'];
+    const isValid = security.isValid({ token, userId });
+
+    if (isValid) {
+      next();
+    }
+    else {
+      res.status(401).json({ code: consts.ERR_AUTH });
+    }
   });
 
   log.middlewares.info('Done.');
