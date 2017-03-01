@@ -1,15 +1,16 @@
 {
   "name": "realtime",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Calumet Real-Time Framework",
   "main": "app/index.js",
   "scripts": {
     "start": "NODE_PATH=app node app",
+    "start:test": "NODE_ENV=test npm run start",
     "start:production": "NODE_ENV=production npm run start",
     "test": "npm run test-unit && npm run test-api && npm run test-sockets",
-    "test-unit": "NODE_ENV=test mocha test/mocha-setup.js 'app/**/*.test.js'",
-    "test-api": "NODE_ENV=test mocha test/mocha-setup.js 'test/api/**/*.test.js'",
-    "test-sockets": "NODE_ENV=test karma start karma.conf.js"
+    "test-unit": "NODE_ENV=test NODE_PATH=app mocha test/mocha-setup.js 'app/**/*.test.js'",
+    "test-api": "NODE_ENV=test NODE_PATH=app mocha test/mocha-setup.js 'test/api/**/*.test.js'",
+    "test-sockets": "NODE_ENV=test NODE_PATH=app karma start karma.conf.js"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "cookie-session": "^2.0.0-alpha.2",
     "express": "^4.14.0",
     "lodash": "^4.17.4",
+    "md5": "^2.2.1",
     "morgan": "^1.7.0",
     "sails-mysql": "^0.11.5",
     "socket.io": "^1.7.2",

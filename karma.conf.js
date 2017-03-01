@@ -1,6 +1,6 @@
 // Karma configuration
 // Generated on Sat Dec 03 2016 17:04:21 GMT-0500 (COT)
-const settings = require('./test/settings');
+const mocking = require('./test/mocking');
 
 module.exports = function(config) {
   config.set({
@@ -16,7 +16,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      `${settings.server}/socket.io/socket.io.js`,
+      `${mocking.server}/socket.io/socket.io.js`,
       'test/sockets/**/*.test.js'
     ],
 
