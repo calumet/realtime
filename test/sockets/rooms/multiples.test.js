@@ -1,4 +1,4 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Rooms', function () {
   describe('Messages with sockets in different rooms', function () {
@@ -9,10 +9,11 @@ describe('Rooms', function () {
 
     it('Connect socket 1', function (done) {
 
-      this.s1 = io(settings.server, {
+      this.s1 = io(mocking.server, {
         query: {
-          spaceCode: settings.mock.case1.space,
-          userId: settings.mock.case1.user,
+          token: mocking.token,
+          spaceCode: mocking.mock.case1.space,
+          userId: mocking.mock.case1.user,
         }
       });
 
@@ -32,14 +33,15 @@ describe('Rooms', function () {
       this.s1.on('room:user:connect', this.spies.s1.userConnect);
       this.s1.on('room:user:disconnect', this.spies.s1.userDisconnect);
 
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
     it('Connect socket 2', function (done) {
-      this.s2 = io(settings.server, {
+      this.s2 = io(mocking.server, {
         query: {
-          spaceCode: settings.mock.case2.space,
-          userId: settings.mock.case2.user,
+          token: mocking.token,
+          spaceCode: mocking.mock.case2.space,
+          userId: mocking.mock.case2.user,
         }
       });
 
@@ -59,7 +61,7 @@ describe('Rooms', function () {
       this.s2.on('room:user:connect', this.spies.s2.userConnect);
       this.s2.on('room:user:disconnect', this.spies.s2.userDisconnect);
 
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
     it('Users were connected', function () {
@@ -73,8 +75,8 @@ describe('Rooms', function () {
 
     it('User1 sent and received a message in isolated room', function (done) {
       const self = this;
-      const room = settings.mock.case1.isolatedRoom;
-      const user = settings.mock.case1.user;
+      const room = mocking.mock.case1.isolatedRoom;
+      const user = mocking.mock.case1.user;
       const content = 'a short message';
 
       this.s1.emit('room:message', {
@@ -94,12 +96,12 @@ describe('Rooms', function () {
         expect(self.spies.s2.message).to.have.not.been.called;
 
         done();
-      }, settings.pause);
+      }, mocking.pause);
     });
 
     it('Disconnect socket 2', function (done) {
       this.s2.disconnect();
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
     // TODO: Test the user got disconnected and the proper details were received.
@@ -115,7 +117,7 @@ describe('Rooms', function () {
 
     after(function (done) {
       this.s1.disconnect();
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
   });

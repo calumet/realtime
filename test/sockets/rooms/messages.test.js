@@ -1,14 +1,15 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Rooms', function () {
   describe('Connecting to rooms and sending messages', function () {
 
     before(function (done) {
 
-      this.socket = io(settings.server, {
+      this.socket = io(mocking.server, {
         query: {
-          spaceCode: settings.mock.case1.space,
-          userId: settings.mock.case1.user,
+          token: mocking.token,
+          spaceCode: mocking.mock.case1.space,
+          userId: mocking.mock.case1.user,
         }
       });
 
@@ -24,7 +25,7 @@ describe('Rooms', function () {
       this.socket.on('error', this.spies.error);
       this.socket.on('room:message', this.spies.message);
 
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
     it('User was connected', function () {
@@ -33,8 +34,8 @@ describe('Rooms', function () {
 
     it('User triggered and received message', function (done) {
       const self = this;
-      const room = settings.mock.case1.rooms[0];
-      const user = settings.mock.case1.user;
+      const room = mocking.mock.case1.rooms[0];
+      const user = mocking.mock.case1.user;
       const content = 'a short message';
 
       this.socket.emit('room:message', {
@@ -50,7 +51,7 @@ describe('Rooms', function () {
           content: content
         });
         done();
-      }, settings.pause);
+      }, mocking.pause);
     });
 
     it('User was not disconnected', function () {
@@ -63,7 +64,7 @@ describe('Rooms', function () {
 
     after(function (done) {
       this.socket.disconnect();
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
   });

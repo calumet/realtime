@@ -1,15 +1,16 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Rooms', function () {
   describe('Connect to rooms with a tag', function () {
 
     before(function (done) {
 
-      this.socket = io(settings.server, {
+      this.socket = io(mocking.server, {
         query: {
-          spaceCode: settings.mock.case3.space,
-          roomTag: settings.mock.case3.roomTag,
-          userId: settings.mock.case3.user,
+          token: mocking.token,
+          spaceCode: mocking.mock.case3.space,
+          roomTag: mocking.mock.case3.roomTag,
+          userId: mocking.mock.case3.user,
         }
       });
 
@@ -25,7 +26,7 @@ describe('Rooms', function () {
       this.socket.on('error', this.spies.error);
       this.socket.on('room:message', this.spies.message);
 
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
     it('User was connected', function () {
@@ -34,19 +35,19 @@ describe('Rooms', function () {
 
     it('User sent a message to an outside room', function (done) {
       const self = this;
-      const noTagRoom = settings.mock.case3.noTagRoom;
+      const noTagRoom = mocking.mock.case3.noTagRoom;
 
       this.socket.emit('room:message', { room: noTagRoom, content: 'content' });
 
       setTimeout(function () {
         expect(self.spies.message).to.have.not.been.calledOnce;
         done();
-      }, settings.pause);
+      }, mocking.pause);
     });
 
     it('User sent a message to an shared room', function (done) {
       const self = this;
-      const sharedRoom = settings.mock.case3.sharedRoom;
+      const sharedRoom = mocking.mock.case3.sharedRoom;
 
       this.socket.emit('room:message', { room: sharedRoom, content: 'content' });
 
@@ -54,12 +55,12 @@ describe('Rooms', function () {
         expect(self.spies.message).to.have.been.calledOnce;
         expect(self.spies.message).to.have.been.calledWithMatch({ room: sharedRoom });
         done();
-      }, settings.pause);
+      }, mocking.pause);
     });
 
     it('User sent a message to an tagged room', function (done) {
       const self = this;
-      const isolatedRoom = settings.mock.case3.isolatedRoom;
+      const isolatedRoom = mocking.mock.case3.isolatedRoom;
 
       this.socket.emit('room:message', { room: isolatedRoom, content: 'content' });
 
@@ -67,7 +68,7 @@ describe('Rooms', function () {
         expect(self.spies.message).to.have.been.calledTwice;
         expect(self.spies.message).to.have.been.calledWithMatch({ room: isolatedRoom });
         done();
-      }, settings.pause);
+      }, mocking.pause);
     });
 
     it('User was not disconnected', function () {
@@ -80,7 +81,7 @@ describe('Rooms', function () {
 
     after(function (done) {
       this.socket.disconnect();
-      setTimeout(done, settings.pause);
+      setTimeout(done, mocking.pause);
     });
 
   });

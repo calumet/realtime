@@ -1,15 +1,18 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Realtime', function () {
 
   describe('GET /api/realtime', function () {
 
     it('Get a realtime instance for an user', function () {
-      const case1 = settings.mock.case1;
       return chai.
-        request(settings.server).
+        request(mocking.server).
         get(`/api/realtime`).
-        query({ spaceCode: case1.space, userId: case1.user }).
+        set('x-api-token', mocking.token).
+        query({
+          spaceCode: mocking.mock.case1.space,
+          userId: mocking.mock.case1.user
+        }).
         then(function (res) {
 
           // TODO: Test rooms by user inside it. Should not get rooms where the
@@ -48,6 +51,24 @@ describe('Realtime', function () {
           });
         });
     });
+
+    it('Get a realtime with a non existent space', function (done) {
+      chai.
+        request(mocking.server).
+        get(`/api/realtime`).
+        set('x-api-token', mocking.token).
+        query({
+          spaceCode: 'non-existent-space',
+          userId: mocking.mock.case1.user,
+        }).
+        end(function (err, res) {
+          expect(res).to.have.status(400);
+          done();
+        });
+    });
+
+    // TODO: What about the case when an user does not have any rooms.
+    // TODO: What if the user does not exist?
 
   });
 

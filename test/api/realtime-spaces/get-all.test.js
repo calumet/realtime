@@ -1,4 +1,4 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Realtime Spaces', function () {
 
@@ -6,8 +6,9 @@ describe('Realtime Spaces', function () {
 
     it('Get normal spaces', function () {
       return chai.
-        request(settings.server).
+        request(mocking.server).
         get(`/api/realtime-spaces`).
+        set('x-api-token', mocking.token).
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('array');

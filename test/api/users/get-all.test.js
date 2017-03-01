@@ -1,4 +1,4 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Users', function () {
 
@@ -6,8 +6,9 @@ describe('Users', function () {
 
     it('Get normal users', function () {
       return chai.
-        request(settings.server).
+        request(mocking.server).
         get(`/api/users`).
+        set('x-api-token', mocking.token).
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('array');

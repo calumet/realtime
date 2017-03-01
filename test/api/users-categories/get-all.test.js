@@ -1,4 +1,4 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Users Categories', function () {
 
@@ -6,8 +6,9 @@ describe('Users Categories', function () {
 
     it('Get normal categories list', function () {
       return chai.
-        request(settings.server).
+        request(mocking.server).
         get(`/api/users-categories`).
+        set('x-api-token', mocking.token).
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('array');

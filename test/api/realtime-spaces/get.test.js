@@ -1,14 +1,15 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Realtime Spaces', function () {
 
   describe('GET /api/realtime-spaces/:id', function () {
 
     it('Get a normal space', function () {
-      const id = settings.mock.spaceId;
+      const id = mocking.mock.spaceId;
       return chai.
-        request(settings.server).
+        request(mocking.server).
         get(`/api/realtime-spaces/${id}`).
+        set('x-api-token', mocking.token).
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('object');
@@ -18,15 +19,14 @@ describe('Realtime Spaces', function () {
         });
     });
 
-    it('Get a non existent space', function () {
-      return chai.
-        request(settings.server).
-        get('/api/realtime-spaces/nonexistentuser').
-        then(function (res) {
-          throw new Error('Expected an error response');
-        }).
-        catch(function (err) {
-          expect(err).to.have.status(404);
+    it('Get a non existent space', function (done) {
+      chai.
+        request(mocking.server).
+        get('/api/realtime-spaces/non-existent-user').
+        set('x-api-token', mocking.token).
+        end(function (err, res) {
+          expect(res).to.have.status(404);
+          done();
         });
     });
 

@@ -1,5 +1,7 @@
 module.exports = {
   server: 'http://127.0.0.1:9700',
+  token: 'realtime-testing',
+  pause: 250,
   mock: {
     userCategory: 'CT1',
     spaceId: 'S1',
@@ -27,5 +29,4 @@ module.exports = {
       isolatedRoom: 'R7',
     },
   },
-  pause: 250,
 };

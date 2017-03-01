@@ -1,14 +1,15 @@
-const settings = require('../../settings');
+const mocking = require('../../mocking');
 
 describe('Users', function () {
 
   describe('GET /api/users/:id', function () {
 
     it('Get a normal user', function () {
-      const id = settings.mock.case1.user;
+      const id = mocking.mock.case1.user;
       return chai.
-        request(settings.server).
+        request(mocking.server).
         get(`/api/users/${id}`).
+        set('x-api-token', mocking.token).
         then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.have.property('body').to.be.an('object');
@@ -20,15 +21,14 @@ describe('Users', function () {
         });
     });
 
-    it('Get a non existent user', function () {
-      return chai.
-        request(settings.server).
+    it('Get a non existent user', function (done) {
+      chai.
+        request(mocking.server).
         get('/api/users/nonexistentuser').
-        then(function (res) {
-          throw new Error('Expected an error response');
-        }).
-        catch(function (err) {
-          expect(err).to.have.status(404);
+        set('x-api-token', mocking.token).
+        end(function (err, res) {
+          expect(res).to.have.status(404);
+          done();
         });
     });
 
