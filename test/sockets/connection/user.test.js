@@ -30,7 +30,7 @@ describe('Connect', function () {
 
     it('Error was received', function () {
       expect(this.spies.error).to.have.been.calledOnce;
-      expect(this.spies.error).to.have.been.calledWith({ code: 'SOCKET_ERR_NOUSR' });
+      expect(this.spies.error).to.have.been.calledWith({ code: 'ERR_NOUSR' });
     });
 
     after(function (done) {

@@ -52,6 +52,35 @@ describe('Realtime', function () {
         });
     });
 
+    it('Get a realtime with an user which does not have rooms', function (done) {
+      chai.
+        request(mocking.server).
+        get(`/api/realtime`).
+        set('x-api-token', mocking.token).
+        query({
+          spaceCode: mocking.mock.case4.space,
+          userId: mocking.mock.case4.user,
+        }).
+        end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res).to.have.property('body').to.be.an('object');
+
+          expect(res.body).to.have.property('space').to.be.an('object');
+
+          expect(res.body).to.have.property('rooms').to.be.an('array').to.have.lengthOf(0);
+          expect(res.body).to.have.property('roomsUsers').to.be.an('array').to.have.lengthOf(0);
+          expect(res.body).to.have.property('roomsMessages').to.be.an('array').to.have.lengthOf(0);
+          expect(res.body).to.have.property('connections').to.be.an('array').to.have.lengthOf(0);
+
+          expect(res.body).to.have.property('users').to.be.an('array').to.have.lengthOf(1);
+          res.body.users.forEach(user => {
+            expect(user).to.be.an('object');
+          });
+
+          done();
+        });
+    });
+
     it('Get a realtime with a non existent space', function (done) {
       chai.
         request(mocking.server).
@@ -63,12 +92,28 @@ describe('Realtime', function () {
         }).
         end(function (err, res) {
           expect(res).to.have.status(400);
+          expect(res).to.have.property('body').to.be.an('object');
+          expect(res.body).to.have.property('code', 'ERR_NOSPACE');
           done();
         });
     });
 
-    // TODO: What about the case when an user does not have any rooms.
-    // TODO: What if the user does not exist?
+    it('Get a realtime with non existent user', function (done) {
+      chai.
+        request(mocking.server).
+        get(`/api/realtime`).
+        set('x-api-token', mocking.token).
+        query({
+          spaceCode: mocking.mock.case1.space,
+          userId: 'non-existent-user',
+        }).
+        end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res).to.have.property('body').to.be.an('object');
+          expect(res.body).to.have.property('code', 'ERR_NOUSR');
+          done();
+        });
+    });
 
   });
 

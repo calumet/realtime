@@ -12,7 +12,7 @@ describe('Middlewares', function () {
         end(function (err, res) {
           expect(res).to.have.status(401);
           expect(res).to.be.an('object').to.have.property('body').to.be.an('object');
-          expect(res.body).to.have.property('code', 'HTTP_ERR_AUTH');
+          expect(res.body).to.have.property('code', 'ERR_AUTH');
           done();
         });
     });
@@ -29,7 +29,7 @@ describe('Middlewares', function () {
         end(function (err, res) {
           expect(res).to.have.status(401);
           expect(res).to.be.an('object').to.have.property('body').to.be.an('object');
-          expect(res.body).to.have.property('code', 'HTTP_ERR_AUTH');
+          expect(res.body).to.have.property('code', 'ERR_AUTH');
           done();
         });
     });
@@ -42,7 +42,7 @@ describe('Middlewares', function () {
         end(function (err, res) {
           expect(res).to.have.status(401);
           expect(res).to.be.an('object').to.have.property('body').to.be.an('object');
-          expect(res.body).to.have.property('code', 'HTTP_ERR_AUTH');
+          expect(res.body).to.have.property('code', 'ERR_AUTH');
           done();
         });
     });

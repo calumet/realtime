@@ -29,7 +29,7 @@ describe('Connect', function () {
 
     it('Error was received', function () {
       expect(this.spies.error).to.have.been.calledOnce;
-      expect(this.spies.error).to.have.been.calledWith({ code: 'SOCKET_ERR_AUTH' });
+      expect(this.spies.error).to.have.been.calledWith({ code: 'ERR_AUTH' });
     });
 
     after(function (done) {

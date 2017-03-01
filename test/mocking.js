@@ -28,5 +28,10 @@ module.exports = {
       noTagRoom: 'R3',
       isolatedRoom: 'R7',
     },
+    // Usuario sin salas en el espacio proveido.
+    case4: {
+      space: 'aulavirtual',
+      user: 'U750',
+    },
   },
 };
