@@ -6,6 +6,8 @@ Framework de comunicación en tiempo real para el proyecto COMA del Grupo Calume
 
 Revisa la [documentación](./docs) por más detalles.
 
+El framework del cliente se encuentra en [realtime-client](https://github.com/calumet/realtime-client) y el servidor de datos se encuentra en [realtime-data-public](https://github.com/calumet/realtime-data-public).
+
 ## Licencia
 
 [The MIT License](http://opensource.org/licenses/MIT)
