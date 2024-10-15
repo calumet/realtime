@@ -1,12 +1,12 @@
-const morgan      = require('morgan');
+const morgan = require('morgan');
 const compression = require('compression');
-const bodyParser  = require('body-parser');
-const session     = require('cookie-session');
-const consts      = require('consts');
-const settings    = require('settings');
-const log         = require('log');
-const resources   = require('resources');
-const security    = require('tools/security');
+const bodyParser = require('body-parser');
+const session = require('cookie-session');
+const consts = require('consts');
+const settings = require('./settings/session');
+const log = require('log');
+const resources = require('resources');
+const security = require('tools/security');
 
 module.exports = function () {
 
@@ -30,7 +30,8 @@ module.exports = function () {
       'Content-Type',
       'Accept',
       'x-api-token',
-      'x-api-userid'
+      'x-api-userid',
+      'x-api-schoolname',
     ].join(', '));
     next();
   });
@@ -45,7 +46,7 @@ module.exports = function () {
 
   // Habilitar verbo HTTP OPTIONS.
   server.options('*', function (req, res) {
-      res.status(200).end();
+    res.status(200).end();
   });
 
   // Verificación de seguridad.

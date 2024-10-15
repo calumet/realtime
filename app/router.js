@@ -1,9 +1,9 @@
-const log             = require('log');
-const resources       = require('resources');
-const users           = require('api/users');
+const log = require('log');
+const resources = require('resources');
+const users = require('api/users');
 const usersCategories = require('api/users-categories');
-const realtime        = require('api/realtime');
-const realtimeSpaces  = require('api/realtime-spaces');
+const realtime = require('api/realtime');
+const realtimeSpaces = require('api/realtime-spaces');
 
 module.exports = function () {
 
@@ -12,18 +12,18 @@ module.exports = function () {
   log.router.info('Initializing...');
 
   // Users
-  server.get('/api/users',      users.getAll);
-  server.get('/api/users/:id',  users.get);
+  server.get('/api/users', users.getAll);
+  server.get('/api/users/:id', users.get);
 
   // Categories
-  server.get('/api/users-categories',     usersCategories.getAll);
+  server.get('/api/users-categories', usersCategories.getAll);
   server.get('/api/users-categories/:id', usersCategories.get);
 
   // Realtime Spaces
   server.get('/api/realtime', realtime.get);
 
   // Spaces
-  server.get('/api/realtime-spaces',     realtimeSpaces.getAll);
+  server.get('/api/realtime-spaces', realtimeSpaces.getAll);
   server.get('/api/realtime-spaces/:id', realtimeSpaces.get);
 
   // HTTP 404
