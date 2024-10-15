@@ -1,0 +1,16 @@
+services:
+  realtime:
+    image: realtime:latest
+    container_name: realtime
+    networks:
+      - coma_network
+    env_file:
+      - ./secrets/secrets.env
+    environment:
+      - TZ=America/Bogota
+      - NODE_ENV=production
+      - PORT=41236
+networks:
+  coma_network:
+    driver: bridge
+    name: coma_network
